@@ -215,7 +215,7 @@ The requirements are grouped into the three parts of the system. For each part, 
 
 **Not covered this sprint:** payroll, attendance and time clock, time-off requests, kitchen display tickets, labour and operations analytics, marketing campaigns, announcements, weather logs, and AI insights.
 
-Note: Sensitive personal fields from the original staff model, such as national ID, bank account (IBAN), and blood type, are left out on purpose. No current requirement needs them, and storing personal data without a purpose is poor data governance.
+NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA 
 
 
 ---
@@ -237,8 +237,6 @@ Each relationship will also described with its (min, max) participation in the n
 
 The diagram has **16 entity sets** and **21 relationships**.
 ### 4.1 Staff
-
-![ERD: Staff part](erd/erd_staff.png)
 
 **Entity sets**
 
@@ -265,8 +263,6 @@ The diagram has **16 entity sets** and **21 relationships**.
 
 ### 4.2 Menu and Inventory
 
-![ERD: Menu and Inventory part](erd/erd_menu_inventory.png)
-
 **Entity sets**
 
 | Entity set | Identifier | Represents |
@@ -287,8 +283,6 @@ The diagram has **16 entity sets** and **21 relationships**.
 | Moves | A stock movement changes an inventory item | many-one |
 
 ### 4.3 Front of House
-
-![ERD: Front of House part](erd/erd_front_of_house.png)
 
 **Entity sets**
 
@@ -463,7 +457,7 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
   - B = {swap_id, shift_id, status, created_at}
 - **After (our ERD):** **SwapRequest**(swap_id, shift_id, staff_id, status, created_at). The staff is found through the **Offers** relationship; also added the **Covers** relationship (staff_id) to record who covers the shift.
 
-Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets.
+Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets as a result of being only one in the team. 
 ---
 
 
