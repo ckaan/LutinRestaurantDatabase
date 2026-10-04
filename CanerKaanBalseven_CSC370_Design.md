@@ -515,7 +515,7 @@ Note: The Limitations will be updated in the next sprints.
 
 **Generative AI.**
 
-- **Claude (Anthropic)** was used to review the original schema for anomalies, relations, and draft this document (wording, structure idea and confirming the logic) and the seed.sql and demo.sql. 
+- **Claude (Anthropic)** was used to review the original schema for anomalies, relations, and draft this document (wording, structure idea and confirming the logic) and the seed.sql and demo.sql. Additionally, asked to AI how to meet better with course rubric to match with A+.
 
 **How the team verified the work.** Because the team worked through the functional dependencies and decompositions ourselves, using AI did not replace developing the course competencies. However, I still believe there will be problems about them especially after implementing the whole data entities. I will need to confirm them with TA. Additionally, because it is my idea, technically there is no right or wrong way to do it explicitly; I might need to reestablish the relationships etc. based on what we are going to implement as a functionality to the project. I focused on what we did instead of what we are going to do in this sprint. If there is no time until Sprint 1 for functionality confirmation; I am planning to do it at least until Sprint 2. I believe ERD should not supposed to take this much time in this course but my project is data project at the end of the day so that it will get revised in any time. 
 
