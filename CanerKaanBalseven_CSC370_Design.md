@@ -322,5 +322,30 @@ For all entities, relationships, and attributes this is not the final version of
 
 ---
 
+## 5. Relational Schema
+
+The result is 18 relations. Primary keys are <ins>underlined</ins>.
+
+- Restaurant(<ins>restaurant_id</ins>: INT, name: VARCHAR(100), address: VARCHAR(255), phone: VARCHAR(20), currency: CHAR(3))
+- Role(<ins>role_id</ins>: INT, restaurant_id: INT, role_name: VARCHAR(50), department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'))
+- Staff(<ins>staff_id</ins>: INT, role_id: INT, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, pay_type: ENUM('HOURLY', 'SALARY'), hourly_rate: DECIMAL(8,2), monthly_salary: DECIMAL(10,2), is_active: BOOLEAN)
+- StaffCredential(<ins>staff_id</ins>: INT, username: VARCHAR(50), password_hash: CHAR(60), force_reset: BOOLEAN, last_login_at: DATETIME)
+- Shift(<ins>shift_id</ins>: INT, staff_id: INT, start_at: DATETIME, end_at: DATETIME, notes: VARCHAR(255))
+- SwapRequest(<ins>swap_id</ins>: INT, shift_id: INT, cover_staff_id: INT, status: ENUM('PENDING', 'APPROVED', 'DENIED'), created_at: DATETIME)
+- MenuCategory(<ins>category_id</ins>: INT, restaurant_id: INT, name: VARCHAR(50), sort_order: INT)
+- MenuItem(<ins>menu_item_id</ins>: INT, category_id: INT, name: VARCHAR(100), price: DECIMAL(8,2), is_available: BOOLEAN)
+- InventoryItem(<ins>inventory_item_id</ins>: INT, restaurant_id: INT, name: VARCHAR(100), unit: ENUM('g', 'kg', 'ml', 'l', 'unit'), par_level: DECIMAL(10,3), lead_time_days: INT)
+- RecipeLine(<ins>menu_item_id</ins>: INT, <ins>inventory_item_id</ins>: INT, qty_per_serving: DECIMAL(10,3))
+- StockMovement(<ins>movement_id</ins>: INT, inventory_item_id: INT, movement_type: ENUM('RECEIVE', 'CONSUME', 'WASTE', 'ADJUST'), quantity_delta: DECIMAL(10,3), unit_cost: DECIMAL(10,2), reason: VARCHAR(255), occurred_at: DATETIME)
+- DiningTable(<ins>table_id</ins>: INT, restaurant_id: INT, label: VARCHAR(10), seats: INT, section: VARCHAR(30))
+- Customer(<ins>customer_id</ins>: INT, name: VARCHAR(100), phone: VARCHAR(20), email: VARCHAR(255))
+- Reservation(<ins>reservation_id</ins>: INT, table_id: INT, customer_id: INT, reserved_for: DATETIME, party_size: INT, status: ENUM('BOOKED', 'SEATED', 'CANCELLED', 'NO_SHOW'))
+- CustomerOrder(<ins>order_id</ins>: INT, restaurant_id: INT, customer_id: INT, channel: ENUM('IN_PERSON', 'PHONE', 'ONLINE'), fulfillment: ENUM('DINE_IN', 'PICKUP', 'DELIVERY'), status: ENUM('PENDING', 'CONFIRMED', 'FULFILLED', 'CANCELLED'), payment_type: ENUM('CASH', 'CARD', 'ONLINE', 'THIRD_PARTY), tip: DECIMAL(8,2), created_at: DATETIME, started_at: DATETIME, finished_at: DATETIME, delivery_address: VARCHAR(255), delivery_notes: VARCHAR(255), courier: ENUM('IN_HOUSE', 'UBER_EATS'), external_order_ref: VARCHAR(64))
+- DineInDetail(<ins>order_id</ins>: INT, table_id: INT, server_id: INT, party_size: INT)
+- OrderItem(<ins>order_item_id</ins>: INT, order_id: INT, menu_item_id: INT, quantity: INT, unit_price: DECIMAL(8,2), notes: VARCHAR(255))
+- Review(<ins>review_id</ins>: INT, order_id: INT, rating: INT, comment: TEXT, created_at: DATETIME)
+
+
+
 
 
