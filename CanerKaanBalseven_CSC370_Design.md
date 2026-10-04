@@ -216,3 +216,111 @@ The requirements are grouped into the three parts of the system. For each part, 
 **Not covered this sprint:** payroll, attendance and time clock, time-off requests, kitchen display tickets, labour and operations analytics, marketing campaigns, announcements, weather logs, and AI insights.
 
 Note: Sensitive personal fields from the original staff model, such as national ID, bank account (IBAN), and blood type, are left out on purpose. No current requirement needs them, and storing personal data without a purpose is poor data governance.
+
+
+---
+
+## 4. Entity-Relationship Diagram
+
+![Full ERD](erd/erd.png)
+
+| Symbol | Meaning |
+|---|---|
+| Rectangle | Entity set |
+| Ellipse | Attribute; an **underlined** attribute is the entity set's identifier |
+| Diamond | Relationship; an ellipse attached to a diamond is a relationship attribute |
+| Arrowhead into an entity set | "At most one" on that side of the relationship |
+| No arrowhead | "Many" on that side |
+| Arrowheads on both sides | One-one relationship |
+
+Each relationship will also described with its (min, max) participation in the next sprint. 
+
+The diagram has **16 entity sets** and **21 relationships**.
+### 4.1 Staff
+
+![ERD: Staff part](erd/erd_staff.png)
+
+**Entity sets**
+
+| Entity set | Identifier | Represents |
+|---|---|---|
+| Restaurant | restaurant_id | A restaurant using the system ) |
+| Role | role_id | A job title defined by a restaurant, such as Server or Line Cook |
+| Staff | staff_id | An employee of a restaurant |
+| StaffCredential | username | The login details of a staff member who uses the app |
+| Shift | shift_id | A scheduled block of work for one staff member) |
+| SwapRequest | swap_id | An offer to give away a shift, possibly covered by someone else |
+
+**Relationships**
+
+| Relationship | Reads as | Multiplicity |
+|---|---|---|
+| Defines | A restaurant defines roles | many-one |
+| Holds | A staff member holds a role | many-one |
+| HasLogin | A staff member has a login | one-one |
+| Works | A shift is worked by a staff member | many-one |
+| Offers | A swap request offers a shift | many-one |
+| Covers | A staff member covers a swap request | many-one |
+
+
+### 4.2 Menu and Inventory
+
+![ERD: Menu and Inventory part](erd/erd_menu_inventory.png)
+
+**Entity sets**
+
+| Entity set | Identifier | Represents |
+|---|---|---|
+| MenuCategory | category_id | A section of a restaurant's menu, such as Mains or Drink |
+| MenuItem | menu_item_id | A dish or drink that can be ordered |
+| InventoryItem | inventory_item_id | An ingredient or supply the restaurant keeps in stock |
+| StockMovement | movement_id | One logged change to the quantity of an inventory item |
+
+**Relationships**
+
+| Relationship | Reads as | Multiplicity |
+|---|---|---|
+| HasMenu | A restaurant has menu categories | many-one |
+| InCategory | A menu item is in a category | many-one |
+| HasInventory | A restaurant has inventory items | many-one |
+| Uses | A menu item uses inventory items (attribute: `qty_per_serving`) | many-many |
+| Moves | A stock movement changes an inventory item | many-one |
+
+### 4.3 Front of House
+
+![ERD: Front of House part](erd/erd_front_of_house.png)
+
+**Entity sets**
+
+| Entity set | Identifier | Represents |
+|---|---|---|
+| DiningTable | table_id | A physical table in a restaurant |
+| Customer | customer_id | A person who orders or reserves |
+| Reservation | reservation_id | A booking of a table for a date and time and name |
+| CustomerOrder | order_id | An order placed at a restaurant |
+| OrderItem | order_item_id | One line of an order |
+| Review | review_id | A customer's rating of an order |
+
+**Relationships**
+
+| Relationship | Reads as | Multiplicity |
+|---|---|---|
+| HasTable | A restaurant has tables | many-one |
+| BookedBy | A reservation is booked by a customer | many-one |
+| BookedAt | A reservation is booked at a table | many-one |
+| Receives | A restaurant receives orders | many-one |
+| Orders | A customer orders an order | many-one |
+| SeatedAt | A dine-in order is seated at a table (attribute: `party_size`) | many-one |
+| ServedBy | A dine-in order is served by a staff member | many-one |
+| Contains | An order contains order items | many-one |
+| OfItem | An order item is of a menu item | many-one |
+| About | A review is about an order | one-one |
+
+**Design decisions**
+
+For all entities, relationships, and attributes this is not the final version of it. When we finalize our whole ERD in the next sprint, all of them will be double-checked and we will create new logic (attributes, relationships, etc) to meet with machine learning aspect of this project, which was already implemented in the backend but the database was not adjusted. 
+
+---
+
+
+
