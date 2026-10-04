@@ -84,8 +84,8 @@ To make these goals measurable, we broke them into the following success criteri
 | S1 | Requirements are written down, numbered, and the out-of-scope parts are listed explicitly | Section 3
 | S2 | The ERD is complete: every requirement maps to at least one entity set or relationship, and every entity set has an identifier | Section 4
 | S3 | The ERD is mapped to relations using the rules from the course (many-one → foreign key, many-many → mapping table) | Section 5
-| S4 | Every relation has its keys and functional dependencies documented | Section 6 & Section 7.1
-| S5 | The flawed relations of the original schema are decomposed with the BCNF algorithm, and every final relation is verified to be in BCNF | Section 7.3 & 7.4
+| S4 | Every relation has its keys and functional dependencies documented | Section 6 & Section 7
+| S5 | The flawed relations of the original schema are decomposed with the BCNF algorithm, and every final relation is verified to be in BCNF | Section 7
 | S6 | The DDL runs on MySQL with zero errors, and the schema rejects invalid data | Section 8
 
 These criteria map to the Data Modelling competency bullets:
@@ -498,6 +498,7 @@ Note: The Limitations will be updated in the next sprints.
 | **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema 
 | **G5.** Write the SQL DDL for the new relations and revise the implementation
 | **G6.** Fix the cross-restaurant limitation .
+| **G7** Fix the problems obtained via feedback
 
 ### Questions for the TA-client
 
