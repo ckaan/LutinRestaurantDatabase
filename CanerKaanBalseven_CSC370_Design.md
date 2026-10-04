@@ -90,6 +90,8 @@ To make these goals measurable, we broke them into the following success criteri
 
 These criteria map to the Data Modelling competency bullets:
 
+### Competency Mapping
+
 | Competency bullet | Covered by |
 |---|---|
 | L1: Selects appropriate data types for tables | Section 6 |
@@ -99,6 +101,13 @@ These criteria map to the Data Modelling competency bullets:
 | L2: Eliminates data anomalies with effective normalisation | Section 5 |
 | L2: Justifies the quality of a schema through a theoretical lens | Section 5 |
 | L2: Maps requirements onto schemata and vice versa | Section 1, Section 2 |
+
+### Partially Met Goals
+
+| What is not finished | Technical reason | Effect on learning goals | Plan |
+|---|---|---|---|
+| (min, max) participation is not yet on the ERD | The arrowhead notation already gives each relationship's multiplicity; adding (min, max) to all 21 relationships needs the final ERD, which will change when the out-of-scope parts are added | None: multiplicity is shown with arrowheads and listed for every relationship in Section 4 | Next sprint goal G2 |
+| Only two decompositions of the original schema (D1, D2) are written up | Redesigning ~35 original models took longer than expected: several original tables recorded the same facts (four separate inventory tables) and had to be merged before they could be decomposed. The Order table cannot be split with the textbook BCNF algorithm, because take-out orders have no table (NULL), and the proper fix needs inheritance from the Advanced Relational Design module. I am also a one-person team. | None for the final design: every final relation is verified in BCNF (Section 7.3) | Next sprint goal G4 |
 
 ---
 
@@ -238,6 +247,8 @@ Each relationship will also described with its (min, max) participation in the n
 The diagram has **16 entity sets** and **21 relationships**.
 ### 4.1 Staff
 
+**Requirements covered:** [Section 3.1]
+
 **Entity sets**
 
 | Entity set | Identifier | Represents |
@@ -263,6 +274,8 @@ The diagram has **16 entity sets** and **21 relationships**.
 
 ### 4.2 Menu and Inventory
 
+**Requirements covered:** [Section 3.2]
+
 **Entity sets**
 
 | Entity set | Identifier | Represents |
@@ -283,6 +296,8 @@ The diagram has **16 entity sets** and **21 relationships**.
 | Moves | A stock movement changes an inventory item | many-one |
 
 ### 4.3 Front of House
+
+**Requirements covered:** [Section 3.3]
 
 **Entity sets**
 
@@ -427,6 +442,8 @@ ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
 
 ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 
+### 7.2 BCNF Decompositions
+
 #### Staff
 
 ##### D1: Staff → Role + Staff
@@ -460,6 +477,32 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets as a result of being only one in the team. 
 ---
 
+### 7.3 BCNF Verification
+NOTE: ASK TA FOR THE NEXT SPRINT 
+
+| Relation | Closures of FD left sides | BCNF |
+|---|---|---|
+| Restaurant | {restaurant_id} = all attributes | ✓ |
+| Role | {role_id}⁺ = all attributes<br>{restaurant_id, role_name} = all attributes | ✓ |
+| Staff | {staff_id} = all attributes | ✓ |
+| StaffCredential | {staff_id}⁺ = all attributes<br>{username} = all attributes | ✓ |
+| Shift | {shift_id} = all attributes | ✓ |
+| SwapRequest | {swap_id} = all attributes | ✓ |
+| MenuCategory | {category_id}⁺ = all attributes<br>{restaurant_id, name} = all attributes | ✓ |
+| MenuItem | {menu_item_id}⁺ = all attributes<br>{category_id, name} = all attributes | ✓ |
+| InventoryItem | {inventory_item_id}⁺ = all attributes<br>{restaurant_id, name} = all attributes | ✓ |
+| RecipeLine | {menu_item_id, inventory_item_id} = all attributes | ✓ |
+| StockMovement | {movement_id} = all attributes | ✓ |
+| DiningTable | {table_id} = all attributes<br>{restaurant_id, label}⁺ = all attributes | ✓ |
+| Customer | {customer_id} = all attributes<br>{phone}⁺ = all attributes | ✓ |
+| Reservation | {reservation_id} = all attributes<br>{table_id, reserved_for}⁺ = all attributes | ✓ |
+| CustomerOrder | {order_id} = all attributes | ✓ |
+| DineInDetail | {order_id} = all attributes | ✓ |
+| OrderItem | {order_item_id} = all attributes | ✓ |
+| Review | {review_id} = all attributes<br>{order_id}⁺ = all attributes | ✓ |
+
+---
+
 
 ## 8. Implementation
 
@@ -490,15 +533,17 @@ Note: The Limitations will be updated in the next sprints.
 
 ## 10. Next Sprint Goals
 
-| Goal | Current limitation | Success criterion |
-|---|---|---|
-| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts are not in the ERD yet and the database was never adjusted for the machine learning features | Every new requirement appears in the ERD |
-| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final
-| **G3.** Apply Level 3 design techniques
-| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema 
-| **G5.** Write the SQL DDL for the new relations and revise the implementation
-| **G6.** Fix the cross-restaurant limitation .
-| **G7** Fix the problems obtained via feedback
+**Sprint 1: Advanced Relational Design.** Course-level target: **Data Modelling, Level 3** 
+
+| Goal | Current limitation | Competency | Success criterion (measurable) |
+|---|---|---|---|
+| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts are not in the ERD yet and the database was never adjusted for the machine learning features | L2: maps requirements onto schemata; L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check |
+| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final and relationships only show arrowheads | L2: minimal and complete design; L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items |
+| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for OrderItem and Role | Unused NULL columns (Section 9) | L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | NULL values in these columns on the sample data go from 17 to 0; mapping strategies compared |
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 are written up | L2: eliminates anomalies; L3: applies alternative normal forms | Remaining decompositions written (Order, MenuItemIngredient, Purchase); 100% of relations in the BCNF verification table |
+| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covers only 18 relations | L1: writes SQL that implements a relational design | `schema.sql` runs with 0 errors; all `demo.sql` rejections still happen |
+| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9) | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected, or the test is scheduled for the Advanced SQL sprint if a check is chosen; the decision is documented |
+| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix; 100% resolved or explained |
 
 ### Questions for the TA-client
 
@@ -515,7 +560,7 @@ Note: The Limitations will be updated in the next sprints.
 
 **Generative AI.**
 
-- **Claude (Anthropic)** was used to review the original schema for anomalies, relations, and draft this document (wording, structure idea and confirming the logic) and the seed.sql and demo.sql. Additionally, asked to AI how to meet better with course rubric to match with A+.
+- **Claude (Anthropic)** was used to review the original schema for anomalies, relations, and draft this document (wording, structure idea and confirming the logic) and the seed.sql and demo.sql. Additionally, asked to AI how to meet better with course rubric to match with A+ as well as BCNF Verification is generated by AI but understood and need to confirm the logic with TA. Also, AI is used to guide me to do the assignment step by step in a most meaningful and fast way; so I used it for planning. 
 
 **How the team verified the work.** Because the team worked through the functional dependencies and decompositions ourselves, using AI did not replace developing the course competencies. However, I still believe there will be problems about them especially after implementing the whole data entities. I will need to confirm them with TA. Additionally, because it is my idea, technically there is no right or wrong way to do it explicitly; I might need to reestablish the relationships etc. based on what we are going to implement as a functionality to the project. I focused on what we did instead of what we are going to do in this sprint. If there is no time until Sprint 1 for functionality confirmation; I am planning to do it at least until Sprint 2. I believe ERD should not supposed to take this much time in this course but my project is data project at the end of the day so that it will get revised in any time. 
 
