@@ -138,7 +138,7 @@ The requirements are grouped into the three parts of the system. For each part, 
 </tr>
 </table>
 
-![ERD: Staff part](figures/erd_staff.png)
+
 
 ### 3.2 Menu and Inventory
 
@@ -171,7 +171,7 @@ The requirements are grouped into the three parts of the system. For each part, 
 </tr>
 </table>
 
-![ERD: Menu and Inventory part](figures/erd_menu_inventory.png)
+
 
 ### 3.3 Front of House
 
@@ -210,7 +210,6 @@ The requirements are grouped into the three parts of the system. For each part, 
 </tr>
 </table>
 
-![ERD: Front of House part](figures/erd_front_of_house.png)
 
 ### 3.4 Out of Scope
 
