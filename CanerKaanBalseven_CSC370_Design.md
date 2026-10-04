@@ -391,6 +391,77 @@ The result is 18 relations. Primary keys are <ins>underlined</ins>.
 
 ---
 
+## 7. Functional Dependencies and BCNF
+
+### 7.1 Functional Dependencies
 
 
+**Staff**
 
+| Relation | Functional dependencies |
+|---|---|
+| Restaurant | restaurant_id → name, address, phone, currency |
+| Role | role_id → restaurant_id, role_name, department<br>restaurant_id, role_name → role_id, department |
+| Staff | staff_id → role_id, name, email, phone, hire_date, pay_type, hourly_rate, monthly_salary, is_active |
+| StaffCredential | staff_id → username, password_hash, force_reset, last_login_at<br>username → staff_id, password_hash, force_reset, last_login_at |
+| Shift | shift_id → staff_id, start_at, end_at, notes |
+| SwapRequest | swap_id → shift_id, cover_staff_id, status, created_at |
+
+**Menu and Inventory**
+
+| Relation | Functional dependencies |
+|---|---|
+| MenuCategory | category_id → restaurant_id, name, sort_order<br>restaurant_id, name → category_id, sort_order |
+| MenuItem | menu_item_id → category_id, name, price, is_available<br>category_id, name → menu_item_id, price, is_available |
+| InventoryItem | inventory_item_id → restaurant_id, name, unit, par_level, lead_time_days<br>restaurant_id, name → inventory_item_id, unit, par_level, lead_time_days |
+| RecipeLine (from the "Uses" relationship) | menu_item_id, inventory_item_id → qty_per_serving |
+| StockMovement | movement_id → inventory_item_id, movement_type, quantity_delta, unit_cost, reason, occurred_at |
+
+**Front of House**
+
+| Relation | Functional dependencies |
+|---|---|
+| DiningTable | table_id → restaurant_id, label, seats, section<br>restaurant_id, label → table_id, seats, section |
+| Customer | customer_id → name, phone, email<br>phone → customer_id, name, email |
+| Reservation | reservation_id → table_id, customer_id, reserved_for, party_size, status<br>table_id, reserved_for → reservation_id, customer_id, party_size, status |
+| CustomerOrder | order_id → restaurant_id, customer_id, channel, fulfillment, status, payment_type, tip, created_at, started_at, finished_at, delivery_address, delivery_notes, courier, external_order_ref |
+| DineInDetail (from *SeatedAt* and *ServedBy*) | order_id → table_id, server_id, party_size |
+| OrderItem | order_item_id → order_id, menu_item_id, quantity, unit_price, notes |
+| Review | review_id → order_id, rating, comment, created_at<br>order_id → review_id, rating, comment, created_at |
+
+ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
+
+ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
+
+#### Staff
+
+##### D1: Staff → Role + Staff
+
+- **Before (original app):** Staff(staff_id, restaurant_id, name, role_name, department, …)
+- **FDs:**
+  - staff_id → restaurant_id, name, role_name, department, …
+  - **restaurant_id, role_name → department** 
+- **Problem:** the department was repeated for every employee with the same role.
+- **Closures:**
+  - {staff_id} = all attributes, so staff_id is a key.
+  - {restaurant_id, role_name} = {restaurant_id, role_name, department}, so this is a **BCNF violation**.
+- **Decomposition:**
+  - A = {restaurant_id, role_name, department}
+  - B = {staff_id, restaurant_id, role_name, name, …}
+- **After (our ERD):** **Role**(role_id, restaurant_id, role_name, department) and **Staff**(staff_id, role_id, name, …). Since role_id → restaurant_id, Staff does not need restaurant_id anymore. Staff and Role are now connected by the **Holds** relationship.
+
+##### D2: SwapRequest  #ASK THIS FOR THE NEXT SPRINT 
+
+- **Before (original app):** SwapRequest(swap_id, shift_id, staff_id, status, created_at)
+- **FDs:**
+  - swap_id → shift_id, staff_id, status, created_at
+  - **shift_id → staff_id** 
+- **Problem:** the staff was stored twice, so the two could disagree.
+- **Violation:** {shift_id} = {shift_id, staff_id} 
+- **Decomposition:**
+  - A = {shift_id, staff_id}, which is already in Shift(shift_id, staff_id)
+  - B = {swap_id, shift_id, status, created_at}
+- **After (our ERD):** **SwapRequest**(swap_id, shift_id, staff_id, status, created_at). The staff is found through the **Offers** relationship; also added the **Covers** relationship (staff_id) to record who covers the shift.
+
+Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets.
+---
