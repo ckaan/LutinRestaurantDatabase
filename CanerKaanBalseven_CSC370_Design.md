@@ -101,3 +101,119 @@ These criteria map to the Data Modelling competency bullets:
 | L2: Maps requirements onto schemata and vice versa | Section 1, Section 2 |
 
 ---
+
+## 3. Requirements
+
+The requirements are grouped into the three parts of the system. For each part, the left column lists what the system must let people do, and the right column lists the data the database must store to support it. The ERD excerpt below each part shows the entity sets and relationships those data requirements produced.
+
+### 3.1 Staff
+
+<table>
+<tr><th>Requirements / Features</th><th>Corresponding Data Requirements</th></tr>
+<tr>
+<td valign="top">
+<ul>
+<li>Several restaurants use the same system, each seeing only its own data</li>
+<li>Managers create roles (Server, Line Cook, …) and assign each to a department</li>
+<li>Managers add, edit, and deactivate staff</li>
+<li>Show which department each staff member works in</li>
+<li>Staff log in to the app; new accounts must reset their password</li>
+<li>Managers schedule shifts</li>
+<li>Staff view their own schedule</li>
+<li>Staff offer a shift for a swap</li>
+<li>A coworker volunteers to cover an offered shift</li>
+<li>Managers approve or deny swaps</li>
+</ul>
+</td>
+<td valign="top">
+<ul>
+<li>Restaurants with id's</li>
+<li>Roles of each restaurant, with their department</li>
+<li>Staff with id's, contact details, hire date, pay type, and pay rate</li>
+<li>Login credentials for staff who use the app</li>
+<li>Shifts: who works, start and end time</li>
+<li>Swap requests: which shift, who covers, status</li>
+</ul>
+</td>
+</tr>
+</table>
+
+![ERD: Staff part](figures/erd_staff.png)
+
+### 3.2 Menu and Inventory
+
+<table>
+<tr><th>Requirements / Features</th><th>Corresponding Data Requirements</th></tr>
+<tr>
+<td valign="top">
+<ul>
+<li>Show the menu grouped by category, in a chosen order</li>
+<li>Managers add, edit, and hide menu items and change prices</li>
+<li>Define a recipe for each dish</li>
+<li>Calculate the ingredient cost of a dish</li>
+<li>Log supplier deliveries with their cost</li>
+<li>Log waste and stock-count adjustments</li>
+<li>Deduct ingredients when dishes are sold</li>
+<li>Show the current stock of each ingredient</li>
+<li>Warn when stock falls below the par level</li>
+<li>Suggest when to reorder, using the supplier's lead time</li>
+</ul>
+</td>
+<td valign="top">
+<ul>
+<li>Menu categories with display order</li>
+<li>Menu items with price and availability</li>
+<li>Inventory items with unit, par level, and lead time</li>
+<li>Recipes: quantity of each ingredient per dish</li>
+<li>Stock movements: type, amount, cost, reason, time</li>
+</ul>
+</td>
+</tr>
+</table>
+
+![ERD: Menu and Inventory part](figures/erd_menu_inventory.png)
+
+### 3.3 Front of House
+
+<table>
+<tr><th>Requirements / Features</th><th>Corresponding Data Requirements</th></tr>
+<tr>
+<td valign="top">
+<ul>
+<li>Show the restaurant's tables by section</li>
+<li>Customers reserve a table for a date and time</li>
+<li>Prevent double-booking a table</li>
+<li>Take orders in person, by phone, or online</li>
+<li>Seat dine-in orders at a table and assign a server</li>
+<li>Handle pickup and delivery orders, including Uber Eats</li>
+<li>Add dishes to an order with notes ("no onions")</li>
+<li>Track order status from pending to fulfilled</li>
+<li>Record the payment type and tip</li>
+<li>Calculate order totals</li>
+<li>Measure how long orders take to prepare</li>
+<li>Look up a returning customer's order history</li>
+<li>Customers review an order</li>
+</ul>
+</td>
+<td valign="top">
+<ul>
+<li>Dining tables with label, seats, and section</li>
+<li>Customers with id's and a unique phone number</li>
+<li>Reservations: who, which table, when, party size</li>
+<li>Orders: restaurant, channel, fulfilment type, status, payment, tip, timestamps</li>
+<li>Dine-in details: table, server, party size</li>
+<li>Delivery details: address, notes, courier, external reference</li>
+<li>Order lines: dish, quantity, price at time of sale, notes</li>
+<li>Reviews: rating and comment, at most one per order</li>
+</ul>
+</td>
+</tr>
+</table>
+
+![ERD: Front of House part](figures/erd_front_of_house.png)
+
+### 3.4 Out of Scope
+
+**Not covered this sprint:** payroll, attendance and time clock, time-off requests, kitchen display tickets, labour and operations analytics, marketing campaigns, announcements, weather logs, and AI insights.
+
+Note: Sensitive personal fields from the original staff model, such as national ID, bank account (IBAN), and blood type, are left out on purpose. No current requirement needs them, and storing personal data without a purpose is poor data governance.
