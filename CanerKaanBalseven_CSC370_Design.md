@@ -478,3 +478,16 @@ Note: Might get revised!
 | `sql/demo.sql` | to test to meet with the rubric |
 
 ---
+
+## 9. Known Limitations
+
+1. **Cross-restaurant consistency.** Every row belongs to one restaurant, so each restaurant's data stays separate. However, the database does not check that connected data belongs to the *same* restaurant. For example, an order from Harbour Grill could contain a menu item from Kebab Corner, because OrderItem only checks that the menu item exists.
+   - **How it is handled now:** the application always filters by the logged-in restaurant, so users only ever see and select their own restaurant's menu items, tables, and staff.
+   - **How we will fix it:** next sprint we will compare two options:
+     - **Add restaurant_id to the connecting tables** 
+     - **Keep the tables in BCNF and add a check** 
+
+
+Note: The Limitations will be updated in the next sprints. 
+
+---
