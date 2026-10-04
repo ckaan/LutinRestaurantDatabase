@@ -465,3 +465,16 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 
 Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets.
 ---
+
+
+## 8. Implementation
+
+Note: Might get revised!
+
+| File | Contents |
+|---|---|
+| `sql/schema.sql` | DDL for the 18 relations |
+| `sql/seed.sql` | Sample data for two restaurants |
+| `sql/demo.sql` | to test to meet with the rubric |
+
+---
