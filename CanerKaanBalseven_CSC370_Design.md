@@ -481,6 +481,8 @@ Note: Might get revised!
 
 ## 9. Known Limitations
 
+#ASK TO TA FOR THE NEXT SPRINT
+
 1. **Cross-restaurant consistency.** Every row belongs to one restaurant, so each restaurant's data stays separate. However, the database does not check that connected data belongs to the *same* restaurant. For example, an order from Harbour Grill could contain a menu item from Kebab Corner, because OrderItem only checks that the menu item exists.
    - **How it is handled now:** the application always filters by the logged-in restaurant, so users only ever see and select their own restaurant's menu items, tables, and staff.
    - **How we will fix it:** next sprint we will compare two options:
@@ -491,3 +493,24 @@ Note: Might get revised!
 Note: The Limitations will be updated in the next sprints. 
 
 ---
+
+## 10. Next Sprint Goals
+
+| Goal | Current limitation | Success criterion |
+|---|---|---|
+| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts are not in the ERD yet and the database was never adjusted for the machine learning features | Every new requirement appears in the ERD |
+| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final
+| **G3.** Apply Level 3 design techniques
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema 
+| **G5.** Write the SQL DDL for the new relations and revise the implementation
+| **G6.** Fix the cross-restaurant limitation .
+
+### Questions for the TA-client
+
+1. Are the superkeys and candidate keys of DiningTable and Review
+2. SwapRequest decomposition (D2) 
+3. Should we also list functional dependencies that do not hold?
+4. Should we document the anomalies of the original schema in more detail?
+
+
+   
