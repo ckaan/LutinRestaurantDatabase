@@ -7,13 +7,13 @@
   <br><br><br>
 </p>
 
-<h1 align="center">Restaurant Operations Database</h1>
+<h1 align="center">Restaurant Management Database</h1>
 <h3 align="center">Conceptual and Relational Design: Kickoff Sprint</h3>
 
 <p align="center">
   <br><br>
   <b>Group 47</b><br>
-  Caner Kaan Balseven<br>
+  Caner Kaan Balseven V01074078<br>
   <br><br>
   <b>TA-Client:</b> Nikhil Partap Singh Dhillon <br>
   <b>Instructor:</b> Sean Chester
