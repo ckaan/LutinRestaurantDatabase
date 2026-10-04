@@ -345,6 +345,51 @@ The result is 18 relations. Primary keys are <ins>underlined</ins>.
 - OrderItem(<ins>order_item_id</ins>: INT, order_id: INT, menu_item_id: INT, quantity: INT, unit_price: DECIMAL(8,2), notes: VARCHAR(255))
 - Review(<ins>review_id</ins>: INT, order_id: INT, rating: INT, comment: TEXT, created_at: DATETIME)
 
+---
+
+## 6. Keys
+
+**Definitions**
+
+- **Superkey:** any set of attributes whose closure is the whole relation.
+- **Candidate key:** a column, or a minimal set of columns, that can uniquely identify any row in a database table.
+- **Primary key:** a constraint that uniquely identifies each record in a database table
+- **Non-prime attribute:** an attribute that is not part of any candidate key.
+
+### Staff
+
+| Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
+|---|---|---|---|---|
+| Restaurant | {restaurant_id} | restaurant_id | any set containing restaurant_id | name, address, phone, currency |
+| Role | {role_id}, {restaurant_id, role_name} | role_id | any set containing both restaurant_id and role_name | department |
+| Staff | {staff_id} | staff_id | any set containing staff_id | role_id, name, email, phone, hire_date, pay_type, hourly_rate, monthly_salary, is_active |
+| StaffCredential | {staff_id}, {username} | staff_id | any set containing staff_id or username | password_hash, force_reset, last_login_at |
+| Shift | {shift_id} | shift_id | any set containing shift_id | staff_id, start_at, end_at, notes |
+| SwapRequest | {swap_id} | swap_id | any set containing swap_id | shift_id, cover_staff_id, status, created_at |
+
+### Menu and Inventory
+
+| Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
+|---|---|---|---|---|
+| MenuCategory | {category_id}, {restaurant_id, name} | category_id | any set containing both restaurant_id and name | sort_order |
+| MenuItem | {menu_item_id}, {category_id, name} | menu_item_id | any set containing containing both category_id and name | price, is_available |
+| InventoryItem | {inventory_item_id}, {restaurant_id, name} | inventory_item_id | any set containing inventory_item_id, *or* containing both restaurant_id and name | unit, par_level, lead_time_days |
+| RecipeLine (comes from "Uses" relationship) | {menu_item_id, inventory_item_id} | (menu_item_id, inventory_item_id) | the key itself | qty_per_serving |
+| StockMovement | {movement_id} | movement_id | any set containing movement_id | inventory_item_id, movement_type, quantity_delta, unit_cost, reason, occurred_at |
+
+### Front of House
+
+| Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
+|---|---|---|---|---|
+| DiningTable | {table_id}, {restaurant_id, label} | table_id | any set containing both restaurant_id and table_id | seats, section | # ASK THIS LINE FOR NEXT SPRINT
+| Customer | {customer_id}, {phone} | customer_id | any set containing customer_id  | name, email |
+| Reservation | {reservation_id}, {table_id, reserved_for} | reservation_id | any set containing reservation_id | customer_id, party_size, status |
+| CustomerOrder | {order_id} | order_id | any set containing order_id | all other attributes |
+| DineInDetail | {order_id} | order_id | any set containing order_id | table_id, server_id, party_size |
+| OrderItem | {order_item_id} | order_item_id | any set containing order_item_id | order_id, menu_item_id, quantity, unit_price, notes |
+| Review | {review_id}, {order_id} | review_id | any set containing review_id *or* order_id | rating, comment, created_at | #ASK THIS LINE FOR NEXT SPRINT
+
+---
 
 
 
