@@ -511,8 +511,8 @@ Note: Might get revised!
 | File | Contents |
 |---|---|
 | `sql/schema.sql` | DDL for the 18 relations |
-| `sql/seed.sql` | Sample data for two restaurants |
-| `sql/demo.sql` | to test to meet with the rubric |
+| `sql/seed.sql` | Sample data for two restaurants (Possibly in the next sprint) |
+| `sql/demo.sql` | to test to meet with the rubric (Possibly in the next sprint) |
 
 ---
 
@@ -538,12 +538,12 @@ Note: The Limitations will be updated in the next sprints.
 | Goal | Current limitation | Competency | Success criterion (measurable) |
 |---|---|---|---|
 | **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts are not in the ERD yet and the database was never adjusted for the machine learning features | L2: maps requirements onto schemata; L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check |
-| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final and relationships only show arrowheads | L2: minimal and complete design; L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items |
-| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for OrderItem and Role | Unused NULL columns (Section 9) | L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | NULL values in these columns on the sample data go from 17 to 0; mapping strategies compared |
-| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 are written up | L2: eliminates anomalies; L3: applies alternative normal forms | Remaining decompositions written (Order, MenuItemIngredient, Purchase); 100% of relations in the BCNF verification table |
-| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covers only 18 relations | L1: writes SQL that implements a relational design | `schema.sql` runs with 0 errors; all `demo.sql` rejections still happen |
-| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9) | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected, or the test is scheduled for the Advanced SQL sprint if a check is chosen; the decision is documented |
-| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix; 100% resolved or explained |
+| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final and relationships only show arrowheads | L2: minimal and complete design; L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; ERD checklist with 0 unmatched items but will not create ERD_Checklist.md and uploaded it |
+| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for OrderItem and Role | Unused NULL columns | L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | NULL values in these columns on the sample data go from 17 to 0 |
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 are written up | L2: eliminates anomalies; L3: applies alternative normal forms | Remaining decompositions written |
+| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covers only 18 relations | L1: writes SQL that implements a relational design | `schema.sql` runs with 0 errors |
+| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected or other possible solutions **#ASK TA**|
+| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix |
 
 ### Questions for the TA-client
 
@@ -560,7 +560,7 @@ Note: The Limitations will be updated in the next sprints.
 
 **Generative AI.**
 
-- **Claude (Anthropic)** was used to review the original schema for anomalies, relations, and draft this document (wording, structure idea and confirming the logic) and the seed.sql and demo.sql. Additionally, asked to AI how to meet better with course rubric to match with A+ as well as BCNF Verification is generated by AI but understood and need to confirm the logic with TA. Also, AI is used to guide me to do the assignment step by step in a most meaningful and fast way; so I used it for planning. 
+- **Claude (Anthropic)** was used to review the original schema for unseen relations, and draft this document (wording, structure idea and confirming the logic). Additionally, asked to AI how to meet better with course rubric to match with A+ as well as BCNF Verification is generated by AI but understood and need to confirm the logic with TA. Also, AI is used to guide me to do the assignment step by step in the most meaningful and the fastest way; so I used it for planning also did not follow blindly I did other things before what I should do according to AI. Moreover, even though I mapped competencies to what i did, I also got help from AI to match them in a perfect way and actually understood what i did in a level-wise category. 
 
 **How the team verified the work.** Because the team worked through the functional dependencies and decompositions ourselves, using AI did not replace developing the course competencies. However, I still believe there will be problems about them especially after implementing the whole data entities. I will need to confirm them with TA. Additionally, because it is my idea, technically there is no right or wrong way to do it explicitly; I might need to reestablish the relationships etc. based on what we are going to implement as a functionality to the project. I focused on what we did instead of what we are going to do in this sprint. If there is no time until Sprint 1 for functionality confirmation; I am planning to do it at least until Sprint 2. I believe ERD should not supposed to take this much time in this course but my project is data project at the end of the day so that it will get revised in any time. 
 
