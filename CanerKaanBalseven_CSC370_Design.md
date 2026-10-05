@@ -463,16 +463,16 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 
 ##### D2: SwapRequest  #ASK THIS FOR THE NEXT SPRINT 
 
-- **Before (original app):** SwapRequest(swap_id, shift_id, staff_id, status, created_at)
+- **Before (original app):** SwapRequest(swap_id, shift_id, cover_staff_id, status, created_at)
 - **FDs:**
-  - swap_id → shift_id, staff_id, status, created_at
-  - **shift_id → staff_id** 
+  - swap_id → shift_id, cover_staff_id, status, created_at
+  - **shift_id → cover_staff_id** 
 - **Problem:** the staff was stored twice, so the two could disagree.
-- **Violation:** {shift_id} = {shift_id, staff_id} 
+- **Violation:** {shift_id} = {shift_id, cover_staff_id} 
 - **Decomposition:**
-  - A = {shift_id, staff_id}, which is already in Shift(shift_id, staff_id)
+  - A = {shift_id, cover_staff_id}, which is already in Shift(shift_id, staff_id)
   - B = {swap_id, shift_id, status, created_at}
-- **After (our ERD):** **SwapRequest**(swap_id, shift_id, staff_id, status, created_at). The staff is found through the **Offers** relationship; also added the **Covers** relationship (staff_id) to record who covers the shift.
+- **After (our ERD):** **SwapRequest**(swap_id, shift_id, cover_staff_id, status, created_at). The staff is found through the **Offers** relationship; also added the **Covers** relationship (cover_staff_id) to record who covers the shift.
 
 Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets as a result of being only one in the team. 
 ---
@@ -533,7 +533,7 @@ Note: The Limitations will be updated in the next sprints.
 
 ## 10. Next Sprint Goals
 
-**Sprint 1: Advanced Relational Design.** Course-level target: **Data Modelling, Level 3** 
+**Sprint 1: Advanced Relational Design.** Course-level targets: **Data Modelling, Level 3** (design), **Data Modelling, Level 1** (SQL implementation), and **Back-end Engineering, Level 1** (consistency).
 
 | Goal | Current limitation | Competency | Success criterion (measurable) |
 |---|---|---|---|
@@ -544,19 +544,22 @@ Note: The Limitations will be updated in the next sprints.
 | **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covers only 18 relations | L1: writes SQL that implements a relational design | `schema.sql` runs with 0 errors |
 | **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected or other possible solutions **#ASK TA**|
 | **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix |
+| **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty | Data Modelling L1: writes SQL that implements a relational design, selects appropriate data types; Back-end Engineering L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** |
+
+**Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
 ### Questions for the TA-client
 
 1. Are the superkeys and candidate keys of DiningTable and Review
 2. SwapRequest decomposition (D2) 
 3. Should we also list functional dependencies that do not hold?
-4. Should we document the anomalies of the original schema in more detail?
+4. Should we document the anomalies of the original schema in more detail? ... Look notes for more
 
 ---
 
 ## 11. Use of Generative AI and Prior Work
 
-**Prior work.** The original Prisma schema and application were written organically by Caner Kaan Balseven during an entrepreneurship co-op term, before this course. Everything in this document and repository is a redesign done for CSC 370.
+**Prior work.** The original Prisma schema and application were written organically by Caner Kaan Balseven during an entrepreneurship co-op term, before this course. Everything in this document and repository is a redesign done for CSC 370. In Addition, 'schema.sql' was kind of already implemented in my co-op work term; I only converted the tables Prisma ORM to SQL also did not focus on NULL values, etc. in this sprint. I will be focusing on these in the next sprint. 
 
 **Generative AI.**
 
