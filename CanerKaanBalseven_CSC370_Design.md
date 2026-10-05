@@ -231,7 +231,7 @@ NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA
 
 ## 4. Entity-Relationship Diagram
 
-![Full ERD](erd/erd.png)
+![Full ERD](figures/full_erd.jpg)
 
 | Symbol | Meaning |
 |---|---|
