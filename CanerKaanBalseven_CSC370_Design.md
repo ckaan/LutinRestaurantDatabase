@@ -544,6 +544,7 @@ Note: The Limitations will be updated in the next sprints.
 | **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected or other possible solutions **#ASK TA**|
 | **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix |
 | **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty | Data Modelling L1: writes SQL that implements a relational design, selects appropriate data types; Back-end Engineering L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** |
+| **G9.** Review and fix this sprint's deliverables:  | Parts of this sprint's work still need to be confirmed | Data Modelling L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql`|
 
 **Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
