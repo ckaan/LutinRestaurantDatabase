@@ -19,7 +19,6 @@
   <b>Instructor:</b> Sean Chester
   <br><br>
   <b>Submission:</b> Project Kickoff · October 4, 2026<br>
-  <b>Commit:</b>
   <br><br>
 </p>
 
