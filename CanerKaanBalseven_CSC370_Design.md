@@ -430,13 +430,13 @@ The result is 18 relations. Primary keys are <ins>underlined</ins>.
 
 | Relation | Functional dependencies |
 |---|---|
-| DiningTable | table_id → restaurant_id, label, seats, section<br>restaurant_id, label → table_id, seats, section |
+| DiningTable | table_id → restaurant_id, label, seats, section<br>restaurant_id, label → table_id, seats, section [**ASK**] |
 | Customer | customer_id → name, phone, email<br>phone → customer_id, name, email |
 | Reservation | reservation_id → table_id, customer_id, reserved_for, party_size, status<br>table_id, reserved_for → reservation_id, customer_id, party_size, status |
 | CustomerOrder | order_id → restaurant_id, customer_id, channel, fulfillment, status, payment_type, tip, created_at, started_at, finished_at, delivery_address, delivery_notes, courier, external_order_ref |
-| DineInDetail (from *SeatedAt* and *ServedBy*) | order_id → table_id, server_id, party_size |
+| DineInDetail (from *SeatedAt* and *ServedBy*) | order_id → table_id, server_id, party_size [**ASK**]|
 | OrderItem | order_item_id → order_id, menu_item_id, quantity, unit_price, notes |
-| Review | review_id → order_id, rating, comment, created_at<br>order_id → review_id, rating, comment, created_at |
+| Review | review_id → order_id, rating, comment, created_at<br>order_id → review_id, rating, comment, created_at  [**ASK**]|
 
 ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
 
