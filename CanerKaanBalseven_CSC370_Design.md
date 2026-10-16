@@ -443,35 +443,97 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 
 ### 7.2 BCNF Decompositions
 
+These relations come from the original app, before the redesign. For each one, attributes are given letters, the closure of each FD's left side is computed, and every left side that is not a key is a BCNF violation. A violation X → Y is decomposed into R1 = X⁺ and R2 = (all attributes \ X⁺) ∪ X, and the steps repeat until no violation is left.
+
+**Example of the method.** With A → B, B → C, and AB → D:
+- {A}⁺: start with A; A → B adds B; B → C adds C; now A and B are both in, so AB → D adds D. {A}⁺ = {A, B, C, D}, so A is a key.
+- {B}⁺: start with B; B → C adds C. {B}⁺ = {B, C}, not all attributes, so B → C is a BCNF violation.
+
 #### Staff
 
 ##### D1: Staff → Role + Staff
 
-- **Before (original app):** Staff(staff_id, restaurant_id, name, role_name, department, …)
-- **FDs:**
-  - staff_id → restaurant_id, name, role_name, department, …
-  - **restaurant_id, role_name → department** 
-- **Problem:** the department was repeated for every employee with the same role.
+| Letter | A | B | C | D | E |
+|---|---|---|---|---|---|
+| Attribute | staff_id | restaurant_id | role_name | department | name |
+
+- **FDs:** A → B, C, D, E and B, C → D (a role is always in the same department)
 - **Closures:**
-  - {staff_id} = all attributes, so staff_id is a key.
-  - {restaurant_id, role_name} = {restaurant_id, role_name, department}, so this is a **BCNF violation**.
-- **Decomposition:**
-  - A = {restaurant_id, role_name, department}
-  - B = {staff_id, restaurant_id, role_name, name, …}
-- **After (our ERD):** **Role**(role_id, restaurant_id, role_name, department) and **Staff**(staff_id, role_id, name, …). Since role_id → restaurant_id, Staff does not need restaurant_id anymore. Staff and Role are now connected by the **Holds** relationship.
+  - {A}⁺ = {A, B, C, D, E}, so A is a key
+  - {B, C}⁺ = {B, C, D}, not all attributes, so **B, C → D is a BCNF violation**
+- **Decomposition on B, C → D:**
+  - R1 = {B, C}⁺ = {B, C, D}
+  - R2 = {A, B, C, D, E} \ {B, C, D} ∪ {B, C} = {A, B, C, E}
+- **Check:** in R1, {B, C} is the key; in R2, A is the key. Both are in BCNF.
+- **After:** **Role**(restaurant_id, role_name, department) and **Staff**(staff_id, restaurant_id, role_name, name, …), connected by the **Holds** relationship.
 
-##### D2: SwapRequest  #ASK THIS FOR THE NEXT SPRINT 
+##### D2: SwapRequest
 
-- **Before (original app):** SwapRequest(swap_id, shift_id, cover_staff_id, status, created_at)
-- **FDs:**
-  - swap_id → shift_id, cover_staff_id, status, created_at
-  - **shift_id → cover_staff_id** 
-- **Problem:** the staff was stored twice, so the two could disagree.
-- **Violation:** {shift_id} = {shift_id, cover_staff_id} 
-- **Decomposition:**
-  - A = {shift_id, cover_staff_id}, which is already in Shift(shift_id, staff_id)
-  - B = {swap_id, shift_id, status, created_at}
-- **After (our ERD):** **SwapRequest**(swap_id, shift_id, cover_staff_id, status, created_at). The staff is found through the **Offers** relationship; also added the **Covers** relationship (cover_staff_id) to record who covers the shift.
+| Letter | A | B | C | D | E |
+|---|---|---|---|---|---|
+| Attribute | swap_id | shift_id | requester_id | status | created_at |
+
+- **FDs:** A → B, C, D, E and B → C (only the owner of a shift can offer it)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E}, so A is a key
+  - {B}⁺ = {B, C}, not all attributes, so **B → C is a BCNF violation**
+- **Decomposition on B → C:**
+  - R1 = {B}⁺ = {B, C}, which is already Shift(shift_id, staff_id)
+  - R2 = {A, B, D, E}
+- **After:** **SwapRequest**(swap_id, shift_id, cover_staff_id, status, created_at). The requester is found through the **Offers** relationship. The **Covers** relationship (cover_staff_id) was added to record who covers the shift.
+
+#### Menu and Inventory
+
+##### D3: MenuItemIngredient → RecipeLine
+
+| Letter | A | B | C | D |
+|---|---|---|---|---|
+| Attribute | menu_item_id | inventory_item_id | qty_per_serving | unit |
+
+- **FDs:** A, B → C and B → D (an ingredient always has the same unit)
+- **Closures:**
+  - {A}⁺ = {A}
+  - {B}⁺ = {B, D}, not all attributes, so **B → D is a BCNF violation**
+  - {A, B}⁺ = {A, B, C, D}, so {A, B} is a key
+- **Decomposition on B → D:**
+  - R1 = {B}⁺ = {B, D}, which moves into InventoryItem
+  - R2 = {A, B, C}
+- **Check:** in R1, B is the key; in R2, {A, B} is the key. Both are in BCNF.
+- **After:** **RecipeLine**(menu_item_id, inventory_item_id, qty_per_serving), with `unit` stored once in **InventoryItem**.
+
+##### D4: Purchase → StockMovement
+
+| Letter | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|
+| Attribute | purchase_id | inventory_item_id | restaurant_id | quantity | unit_cost | date |
+
+- **FDs:** A → B, C, D, E, F and B → C (an ingredient belongs to one restaurant)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F}, so A is a key
+  - {B}⁺ = {B, C}, not all attributes, so **B → C is a BCNF violation**
+- **Decomposition on B → C:**
+  - R1 = {B}⁺ = {B, C}, which is already in InventoryItem
+  - R2 = {A, B, D, E, F}
+- **After:** R2 became **StockMovement** (a RECEIVE movement). The old InventoryTxn, Count, and InventoryState tables had the same violation, so all of them were merged into StockMovement.
+
+#### Front of House
+
+##### D5: Order → CustomerOrder + DineInDetail + Customer
+
+| Letter | A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| Attribute | order_id | table_id | table_label | table_section | restaurant_id | customer_phone | customer_name |
+
+- **FDs:** A → B, C, D, E, F, G and B → C, D, E and F → G
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F, G}, so A is a key
+  - {B}⁺ = {B, C, D, E}, not all attributes, so **B → C, D, E is a BCNF violation**
+  - {F}⁺ = {F, G}, not all attributes, so **F → G is a BCNF violation**
+- **Decomposition on F → G:**
+  - R1 = {F}⁺ = {F, G}, which becomes Customer
+  - R2 = {A, B, C, D, E, F}
+- **Decomposition on B → C, D, E:** the algorithm would give {B, C, D, E} and {A, B, F}, which removes restaurant_id (E) from the order. But pickup and delivery orders have no table (B is NULL), so they would lose their restaurant. Instead, the table information moved into a separate relation used only for dine-in orders, and the order keeps E.
+- **After:** **CustomerOrder**(order_id, restaurant_id, customer_id, …), **DineInDetail**(order_id, table_id, server_id, party_size), and **Customer**(customer_id, name, phone, email).
 
 Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets as a result of being only one in the team. 
 ---
