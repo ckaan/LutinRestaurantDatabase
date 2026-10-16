@@ -339,7 +339,7 @@ The result is 18 relations. Primary keys are <ins>underlined</ins>.
 - Staff(<ins>staff_id</ins>: INT, role_id: INT, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, pay_type: ENUM('HOURLY', 'SALARY'), hourly_rate: DECIMAL(8,2), monthly_salary: DECIMAL(10,2), is_active: BOOLEAN)
 - StaffCredential(<ins>staff_id</ins>: INT, username: VARCHAR(50), password_hash: CHAR(60), force_reset: BOOLEAN, last_login_at: DATETIME)
 - Shift(<ins>shift_id</ins>: INT, staff_id: INT, start_at: DATETIME, end_at: DATETIME, notes: VARCHAR(255))
-- SwapRequest(<ins>swap_id</ins>: INT, shift_id: INT, cover_staff_id: INT, status: ENUM('PENDING', 'APPROVED', 'DENIED'), created_at: DATETIME)
+- SwapRequest(<ins>swap_id</ins>: INT, <ins>shift_id:</ins> INT, cover_staff_id: INT, status: ENUM('PENDING', 'APPROVED', 'DENIED'), created_at: DATETIME)
 - MenuCategory(<ins>category_id</ins>: INT, restaurant_id: INT, name: VARCHAR(50), sort_order: INT)
 - MenuItem(<ins>menu_item_id</ins>: INT, category_id: INT, name: VARCHAR(100), price: DECIMAL(8,2), is_available: BOOLEAN)
 - InventoryItem(<ins>inventory_item_id</ins>: INT, restaurant_id: INT, name: VARCHAR(100), unit: ENUM('g', 'kg', 'ml', 'l', 'unit'), par_level: DECIMAL(10,3), lead_time_days: INT)
