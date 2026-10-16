@@ -335,7 +335,7 @@ For all entities, relationships, and attributes this is not the final version of
 The result is 18 relations. Primary keys are <ins>underlined</ins>.
 
 - Restaurant(<ins>restaurant_id</ins>: INT, name: VARCHAR(100), address: VARCHAR(255), phone: VARCHAR(20), currency: CHAR(3))
-- Role(<ins>role_id</ins>: INT, restaurant_id: INT, role_name: VARCHAR(50), department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'))
+- Role(<ins>role_id</ins>: INT, <ins>restaurant_id:</ins> INT, role_name: VARCHAR(50), department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'))
 - Staff(<ins>staff_id</ins>: INT, role_id: INT, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, pay_type: ENUM('HOURLY', 'SALARY'), hourly_rate: DECIMAL(8,2), monthly_salary: DECIMAL(10,2), is_active: BOOLEAN)
 - StaffCredential(<ins>staff_id</ins>: INT, username: VARCHAR(50), password_hash: CHAR(60), force_reset: BOOLEAN, last_login_at: DATETIME)
 - Shift(<ins>shift_id</ins>: INT, staff_id: INT, start_at: DATETIME, end_at: DATETIME, notes: VARCHAR(255))
