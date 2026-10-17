@@ -27,7 +27,7 @@
 | Version | Sprint | Date | Commit | Summary |
 |---|---|---|---|---|
 | 1.0 | Project Kickoff | October 4, 2026 | [3e80d50](https://github.com/ckaan/LutinRestaurantDatabase/tree/3e80d5078ac2d8ac66e3346d299b412badb4e019) | Requirements, first ERD (16 entity sets, 21 relationships), relational schema (18 relations), keys, FDs, BCNF decompositions D1–D2, `schema.sql` |
-| 2.0 | Sprint 1 | October 18, 2026 | see Brightspace submission | Kickoff goals carried forward as Sprint 1 goals (Section 2); Role changed to a weak entity set; all five decompositions D1–D5 written with the closure method; Sprint 2 plan (Section 10) |
+| 2.0 | Sprint 1 | October 18, 2026 | see Brightspace submission |  |
 | 3.0 | Sprint 2 | November 8, 2026 | | |
 | 4.0 | Final Submission | November 29, 2026 | | |
 
