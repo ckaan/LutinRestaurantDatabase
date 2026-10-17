@@ -535,32 +535,44 @@ These relations come from the original app, before the redesign. For each one, a
 - **Decomposition on B → C, D, E:** the algorithm would give {B, C, D, E} and {A, B, F}, which removes restaurant_id (E) from the order. But pickup and delivery orders have no table (B is NULL), so they would lose their restaurant. Instead, the table information moved into a separate relation used only for dine-in orders, and the order keeps E.
 - **After:** **CustomerOrder**(order_id, restaurant_id, customer_id, …), **DineInDetail**(order_id, table_id, server_id, party_size), and **Customer**(customer_id, name, phone, email).
 
-Note: There are more normalization for this 18 entity sets which ERD reflects them; however, the rest will be completed in this document in the next spring along with left out entity sets as a result of being only one in the team. 
+
 ---
 
 ### 7.3 BCNF Verification
-NOTE: ASK TA FOR THE NEXT SPRINT 
+
+**Staff**
 
 | Relation | Closures of FD left sides | BCNF |
 |---|---|---|
-| Restaurant | {restaurant_id} = all attributes | ✓ |
-| Role | {role_id}⁺ = all attributes<br>{restaurant_id, role_name} = all attributes | ✓ |
-| Staff | {staff_id} = all attributes | ✓ |
-| StaffCredential | {staff_id}⁺ = all attributes<br>{username} = all attributes | ✓ |
-| Shift | {shift_id} = all attributes | ✓ |
-| SwapRequest | {swap_id} = all attributes | ✓ |
-| MenuCategory | {category_id}⁺ = all attributes<br>{restaurant_id, name} = all attributes | ✓ |
-| MenuItem | {menu_item_id}⁺ = all attributes<br>{category_id, name} = all attributes | ✓ |
-| InventoryItem | {inventory_item_id}⁺ = all attributes<br>{restaurant_id, name} = all attributes | ✓ |
-| RecipeLine | {menu_item_id, inventory_item_id} = all attributes | ✓ |
-| StockMovement | {movement_id} = all attributes | ✓ |
-| DiningTable | {table_id} = all attributes<br>{restaurant_id, label}⁺ = all attributes | ✓ |
-| Customer | {customer_id} = all attributes<br>{phone}⁺ = all attributes | ✓ |
-| Reservation | {reservation_id} = all attributes<br>{table_id, reserved_for}⁺ = all attributes | ✓ |
-| CustomerOrder | {order_id} = all attributes | ✓ |
-| DineInDetail | {order_id} = all attributes | ✓ |
-| OrderItem | {order_item_id} = all attributes | ✓ |
-| Review | {review_id} = all attributes<br>{order_id}⁺ = all attributes | ✓ |
+| Restaurant | {restaurant_id}⁺ = all attributes | ✓ |
+| Role | {restaurant_id, role_name}⁺ = all attributes | ✓ |
+| Staff | {staff_id}⁺ = all attributes | ✓ |
+| StaffCredential | {staff_id}⁺ = all attributes<br>{username}⁺ = all attributes | ✓ |
+| Shift | {shift_id}⁺ = all attributes | ✓ |
+| SwapRequest | {swap_id}⁺ = all attributes | ✓ |
+
+**Menu and Inventory**
+
+| Relation | Closures of FD left sides | BCNF |
+|---|---|---|
+| MenuCategory | {category_id}⁺ = all attributes<br>{restaurant_id, name}⁺ = all attributes | ✓ |
+| MenuItem | {menu_item_id}⁺ = all attributes<br>{category_id, name}⁺ = all attributes | ✓ |
+| InventoryItem | {inventory_item_id}⁺ = all attributes<br>{restaurant_id, name}⁺ = all attributes | ✓ |
+| RecipeLine | {menu_item_id, inventory_item_id}⁺ = all attributes | ✓ |
+| StockMovement | {movement_id}⁺ = all attributes | ✓ |
+
+**Front of House**
+
+| Relation | Closures of FD left sides | BCNF |
+|---|---|---|
+| DiningTable | {table_id}⁺ = all attributes<br>{restaurant_id, label}⁺ = all attributes | ✓ |
+| Customer | {customer_id}⁺ = all attributes<br>{phone}⁺ = all attributes | ✓ |
+| Reservation | {reservation_id}⁺ = all attributes<br>{table_id, reserved_for}⁺ = all attributes | ✓ |
+| CustomerOrder | {order_id}⁺ = all attributes | ✓ |
+| DineInDetail | {order_id}⁺ = all attributes | ✓ |
+| OrderItem | {order_item_id}⁺ = all attributes | ✓ |
+| Review | {review_id}⁺ = all attributes<br>{order_id}⁺ = all attributes | ✓ |
+
 
 ---
 
