@@ -76,45 +76,58 @@ This project redesigns that database properly, the way it should be done in indu
 
 The original application has about 35 Prisma models. This sprint covers the operational core of the system; the remaining subsystems are planned for later sprints (see Section 10).
 
-## 2. Kickoff Sprint Goals
+## 2. Sprint 1 Goals
 
-The goals for this sprint, as set by the assignment:
+**Sprint 1: Advanced Relational Design.** Course-level targets: **Data Modelling, Level 3** (design), **Data Modelling, Level 1** (SQL implementation), and **Back-end Engineering, Level 1** (consistency).
 
-> **G1.** Demonstrate the course-level competency of developing conceptual and relational schemata for a set of requirements that we come up with, reaching at least partway through **Level 2 of the Data Modelling (Data Architecture) competency**.
->
-> **G2.** Build a complete ERD and implement it as a normalized relational database with SQL DDL code.
+These goals were planned at the end of the Kickoff (version 1.0, Section 10). In addition, `schema.sql` in the Kickoff translated the redesigned tables into SQL, starting from the tables of my co-op project. The Kickoff focused on the design (ERD, keys, FDs, BCNF), so constraints such as NOT NULL were not covered yet; they are part of this sprint (G8).
 
-To make these goals measurable, we broke them into the following success criteria:
+### 2.1 Goals and Success Criteria
 
-| # | Success criterion | Evidence |
-|---|---|---|
-| S1 | Requirements are written down, numbered, and the out-of-scope parts are listed explicitly | Section 3
-| S2 | The ERD is complete: every requirement maps to at least one entity set or relationship, and every entity set has an identifier | Section 4
-| S3 | The ERD is mapped to relations using the rules from the course (many-one → foreign key, many-many → mapping table) | Section 5
-| S4 | Every relation has its keys and functional dependencies documented | Section 6 & Section 7
-| S5 | The flawed relations of the original schema are decomposed with the BCNF algorithm, and every final relation is verified to be in BCNF | Section 7
-| S6 | The DDL runs on MySQL with zero errors, and the schema rejects invalid data | Section 8
+| Goal | Limitation it fixes | Competency | Success criterion (measurable) | Status | Evidence |
+|---|---|---|---|---|---|
+| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts were not in the ERD and the database was never adjusted for the machine learning features | DM L2: maps requirements onto schemata; DM L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check | *[Met / Partially met / Not met]* | *[Section]* |
+| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD was not final and relationships only showed arrowheads | DM L2: minimal and complete design; DM L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items | | |
+| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for Role and OrderItem | Attributes that are NULL by design (Section 9, item 2) | DM L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | Attributes that must be NULL for some rows go from **6** (4 delivery columns + 2 pay columns) to **0**; Role and OrderItem drawn as weak entity sets | | Role done (Sections 5–7) |
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 were written up | DM L2: eliminates anomalies; DM L3: applies alternative normal forms | All five decompositions (D1–D5) written with closures; **100%** of relations in the BCNF verification table | | Section 7.2 (D1–D5 done) |
+| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covered only 18 relations | DM L1: writes SQL that implements a relational design | `schema.sql` runs with **0** errors and creates every relation in Section 5 | | |
+| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9, item 1) | DM L3: assesses incongruity between conceptual and relational schemata | Both options compared and one chosen; a test adding another restaurant's menu item to an order is **rejected** (or scheduled for Sprint 2 if a trigger is chosen) | | |
+| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | | |
+| **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty (Section 9, item 4) | DM L1: writes SQL that implements a relational design, selects appropriate data types; BE L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** | | |
+| **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | | Sections 5–7 updated |
 
-These criteria map to the Data Modelling competency bullets:
+*DM = Data Modelling, BE = Back-end Engineering.*
 
-### Competency Mapping
+**Note:** Sprint goals are subject to change; about 80% of them are aimed to be met in this sprint.
+
+### 2.2 Missed or Partially Met Goals
+
+*[Fill in at the end of Sprint 1*
+
+| Goal | What is not finished | Technical reason | Effect on learning goals | Plan |
+|---|---|---|---|---|
+| | | | | |
+
+### 2.3 Competency Mapping
 
 | Competency bullet | Covered by |
 |---|---|
-| L1: Selects appropriate data types for tables | Section 6 |
-| L1: Writes SQL code that implements a relational design | Section 6 |
-| L1: Documents relationships with correct ERDs | Section 2 |
-| L2: Identifies dependencies among attributes and appropriate keys | Section 4 |
-| L2: Eliminates data anomalies with effective normalisation | Section 5 |
-| L2: Justifies the quality of a schema through a theoretical lens | Section 5 |
-| L2: Maps requirements onto schemata and vice versa | Section 1, Section 2 |
+| DM L1: Selects appropriate data types for tables | [Section 5](#5-relational-schema), G8 |
+| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation), G5, G8 |
+| DM L1: Documents relationships with correct ERDs | [Section 4](#4-entity-relationship-diagram), G2 |
+| DM L2: Identifies dependencies among attributes and appropriate keys | [Section 6](#6-keys), [Section 7.1](#71-functional-dependencies) |
+| DM L2: Eliminates data anomalies with effective normalisation | [Section 7.2](#72-bcnf-decompositions), G4 |
+| DM L2: Justifies the quality of a schema through a theoretical lens | [Section 7.3](#73-bcnf-verification), G9 |
+| DM L2: Maps requirements onto schemata and vice versa | [Section 3](#3-requirements), [Section 4](#4-entity-relationship-diagram), G1, G2 |
+| DM L3: Uses inheritance and weak entity sets when they are more expressive | G3 |
+| DM L3: Considers the impact of NULL values and inheritance on FDs | G3, [Section 7.2](#72-bcnf-decompositions) (D5) |
+| DM L3: Assesses incongruity between conceptual and relational schemata | G6 |
+| DM L3: Systematically evaluates strengths and weaknesses of a schema | G2, G9 |
+| BE L1: Ensures a database never enters an inconsistent state | G8 |
 
-### Partially Met Goals
+### 2.4 Previous Sprint (Kickoff) Recap
 
-| What is not finished | Technical reason | Effect on learning goals | Plan |
-|---|---|---|---|
-| (min, max) participation is not yet on the ERD | The arrowhead notation already gives each relationship's multiplicity; adding (min, max) to all 21 relationships needs the final ERD, which will change when the out-of-scope parts are added | None: multiplicity is shown with arrowheads and listed for every relationship in Section 4 | Next sprint goal G2 |
-| Only two decompositions of the original schema (D1, D2) are written up | Redesigning ~35 original models took longer than expected: several original tables recorded the same facts (four separate inventory tables) and had to be merged before they could be decomposed. The Order table cannot be split with the textbook BCNF algorithm, because take-out orders have no table (NULL), and the proper fix needs inheritance from the Advanced Relational Design module. I am also a one-person team. | None for the final design: every final relation is verified in BCNF (Section 7.3) | Next sprint goal G4 |
+The Kickoff (version 1.0) delivered the requirements, the first ERD, the relational schema, keys, FDs, two BCNF decompositions, and `schema.sql`. Two things were only partially met: (min, max) participation on the ERD (now G2) and the remaining decompositions (now G4). The full Kickoff version can be seen at the commit linked in the Version History.
 
 ---
 
@@ -614,19 +627,6 @@ Note: The Limitations will be updated in the next sprints.
 
 ## 10. Next Sprint Goals
 
-**Sprint 1: Advanced Relational Design.** Course-level targets: **Data Modelling, Level 3** (design), **Data Modelling, Level 1** (SQL implementation), and **Back-end Engineering, Level 1** (consistency).
-
-| Goal | Current limitation | Competency | Success criterion (measurable) |
-|---|---|---|---|
-| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts are not in the ERD yet and the database was never adjusted for the machine learning features | L2: maps requirements onto schemata; L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check |
-| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD is not final and relationships only show arrowheads | L2: minimal and complete design; L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; ERD checklist with 0 unmatched items but will not create ERD_Checklist.md and uploaded it |
-| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for OrderItem and Role | Unused NULL columns | L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | NULL values in these columns on the sample data go from 17 to 0 |
-| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 are written up | L2: eliminates anomalies; L3: applies alternative normal forms | Remaining decompositions written |
-| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covers only 18 relations | L1: writes SQL that implements a relational design | `schema.sql` runs with 0 errors |
-| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted | L3: assesses incongruity between conceptual and relational schemata | A test adding another restaurant's menu item to an order is rejected or other possible solutions **#ASK TA**|
-| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on this sprint | All of the above | Every feedback item is listed with its fix |
-| **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty | Data Modelling L1: writes SQL that implements a relational design, selects appropriate data types; Back-end Engineering L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** |
-| **G9.** Review and fix this sprint's deliverables:  | Parts of this sprint's work still need to be confirmed | Data Modelling L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql`|
 
 **Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
