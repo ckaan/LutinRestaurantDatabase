@@ -475,17 +475,24 @@ The ERD in Section 4 maps to **31 relations**.
 
 ### 7.1 Functional Dependencies
 
+The non-trivial functional dependencies of each relation, in the notation X → Y. When several attributes appear on the left side, they determine the right side *together*.
 
-**Staff**
+**Staff and Labour**
 
 | Relation | Functional dependencies |
 |---|---|
 | Restaurant | restaurant_id → name, address, phone, currency |
-| Role | role_id → restaurant_id, role_name, department<br>restaurant_id, role_name → role_id, department |
-| Staff | staff_id → role_id, name, email, phone, hire_date, pay_type, hourly_rate, monthly_salary, is_active |
+| Role | restaurant_id, role_name → department |
+| Staff | staff_id → restaurant_id, role_name, name, email, phone, hire_date, is_active |
+| HourlyStaff | staff_id → hourly_rate |
+| SalariedStaff | staff_id → monthly_salary |
 | StaffCredential | staff_id → username, password_hash, force_reset, last_login_at<br>username → staff_id, password_hash, force_reset, last_login_at |
 | Shift | shift_id → staff_id, start_at, end_at, notes |
-| SwapRequest | swap_id → shift_id, cover_staff_id, status, created_at |
+| SwapRequest | swap_id → shift_id, cover_staff_id, decided_by, status, created_at |
+| TimeClockEvent | event_id → staff_id, shift_id, event_type, occurred_at, note |
+| TimeOffRequest | request_id → staff_id, decided_by, start_date, end_date, hours, reason, status, created_at |
+| PayRecord | pay_record_id → staff_id, period_start, period_end, hours_worked, rate_snapshot, bonus, deductions<br>staff_id, period_start → pay_record_id, period_end, hours_worked, rate_snapshot, bonus, deductions |
+| StaffingRequirement | requirement_id → restaurant_id, work_date, start_time, end_time, department, required_count<br>restaurant_id, work_date, department, start_time → requirement_id, end_time, required_count |
 
 **Menu and Inventory**
 
@@ -501,13 +508,25 @@ The ERD in Section 4 maps to **31 relations**.
 
 | Relation | Functional dependencies |
 |---|---|
-| DiningTable | table_id → restaurant_id, label, seats, section<br>restaurant_id, label → table_id, seats, section [**ASK**] |
+| DiningTable | table_id → restaurant_id, label, seats, section<br>restaurant_id, label → table_id, seats, section |
 | Customer | customer_id → name, phone, email<br>phone → customer_id, name, email |
 | Reservation | reservation_id → table_id, customer_id, reserved_for, party_size, status<br>table_id, reserved_for → reservation_id, customer_id, party_size, status |
-| CustomerOrder | order_id → restaurant_id, customer_id, channel, fulfillment, status, payment_type, tip, created_at, started_at, finished_at, delivery_address, delivery_notes, courier, external_order_ref |
-| DineInDetail (from *SeatedAt* and *ServedBy*) | order_id → table_id, server_id, party_size [**ASK**]|
-| OrderItem | order_item_id → order_id, menu_item_id, quantity, unit_price, notes |
-| Review | review_id → order_id, rating, comment, created_at<br>order_id → review_id, rating, comment, created_at  [**ASK**]|
+| CustomerOrder | order_id → restaurant_id, customer_id, channel, status, payment_type, tip, created_at, started_at, finished_at |
+| DineInOrder | order_id → table_id, server_id, party_size |
+| DeliveryOrder | order_id → delivery_address, delivery_notes, courier, external_order_ref |
+| KitchenTicket | ticket_id → order_id, batch_no, status, is_priority, created_at, completed_at<br>order_id, batch_no → ticket_id, status, is_priority, created_at, completed_at |
+| OrderItem | order_id, line_no → menu_item_id, ticket_id, quantity, unit_price, notes |
+| Review | review_id → order_id, rating, comment, created_at<br>order_id → review_id, rating, comment, created_at |
+
+**Marketing and Analytics**
+
+| Relation | Functional dependencies |
+|---|---|
+| Campaign | campaign_id → restaurant_id, name, start_date, end_date, budget |
+| CampaignItem (from the "Promotes" relationship) | none (only the trivial FD campaign_id, menu_item_id → campaign_id, menu_item_id) |
+| Announcement | announcement_id → restaurant_id, author_id, message, announcement_type, is_active, created_at |
+| WeatherObservation | restaurant_id, observed_date → temp_max, temp_min, condition, precipitation_mm |
+| Insight | insight_id → restaurant_id, title, message, insight_type, created_at, expires_at |
 
 ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
 
@@ -515,13 +534,11 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 
 ### 7.2 BCNF Decompositions
 
-These relations come from the original app, before the redesign. For each one, attributes are given letters, the closure of each FD's left side is computed, and every left side that is not a key is a BCNF violation. A violation X → Y is decomposed into R1 = X⁺ and R2 = (all attributes \ X⁺) ∪ X, and the steps repeat until no violation is left.
-
 **Example of the method.** With A → B, B → C, and AB → D:
 - {A}⁺: start with A; A → B adds B; B → C adds C; now A and B are both in, so AB → D adds D. {A}⁺ = {A, B, C, D}, so A is a key.
 - {B}⁺: start with B; B → C adds C. {B}⁺ = {B, C}, not all attributes, so B → C is a BCNF violation.
 
-#### Staff
+#### Staff and Labour
 
 ##### D1: Staff → Role + Staff
 
@@ -534,10 +551,9 @@ These relations come from the original app, before the redesign. For each one, a
   - {A}⁺ = {A, B, C, D, E}, so A is a key
   - {B, C}⁺ = {B, C, D}, not all attributes, so **B, C → D is a BCNF violation**
 - **Decomposition on B, C → D:**
-  - R1 = {B, C}⁺ = {B, C, D}
-  - R2 = {A, B, C, D, E} \ {B, C, D} ∪ {B, C} = {A, B, C, E}
-- **Check:** in R1, {B, C} is the key; in R2, A is the key. Both are in BCNF.
-- **After:** **Role**(restaurant_id, role_name, department) and **Staff**(staff_id, restaurant_id, role_name, name, …), connected by the **Holds** relationship.
+  - R1 = {B, C, D}
+  - R2 = {A, B, C, E}
+- **After:** **Role**(restaurant_id, role_name, department) and **Staff**(staff_id, restaurant_id, role_name, name, …)
 
 ##### D2: SwapRequest
 
@@ -550,13 +566,42 @@ These relations come from the original app, before the redesign. For each one, a
   - {A}⁺ = {A, B, C, D, E}, so A is a key
   - {B}⁺ = {B, C}, not all attributes, so **B → C is a BCNF violation**
 - **Decomposition on B → C:**
-  - R1 = {B}⁺ = {B, C}, which is already Shift(shift_id, staff_id)
+  - R1 = {B}⁺ = {B, C}
   - R2 = {A, B, D, E}
-- **After:** **SwapRequest**(swap_id, shift_id, cover_staff_id, status, created_at). The requester is found through the **Offers** relationship. The **Covers** relationship (cover_staff_id) was added to record who covers the shift.
+- **After:** **SwapRequest**(swap_id, shift_id, cover_staff_id, decided_by, status, created_at).
+
+##### D3: TimeOffRequest
+
+| Letter | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|
+| Attribute | request_id | staff_id | staff_name | restaurant_id | start_date | status |
+
+- **FDs:** A → B, C, D, E, F and B → C, D (a staff member always has the same name and restaurant)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F}, so A is a key
+  - {B}⁺ = {B, C, D}, not all attributes, so **B → C, D is a BCNF violation**
+- **Decomposition on B → C, D:**
+  - R1 = {B}⁺ = {B, C, D}, which is already in Staff
+  - R2 = {A, B, E, F}
+- **After:** **TimeOffRequest**(request_id, staff_id, decided_by, start_date, end_date, hours, reason, status, created_at). 
+
+##### D4: PayRecord
+
+| Letter | A | B | C | D | E | F | G | H |
+|---|---|---|---|---|---|---|---|---|
+| Attribute | pay_record_id | staff_id | hours_worked | rate | gross_pay | bonus | deductions | total_pay |
+
+- **FDs:** A → B, C, D, E, F, G, H and C, D → E (gross pay = hours × rate) and E, F, G → H (total pay = gross + bonus − deductions)
+- **Closures:**
+  - {A}⁺ = all attributes, so A is a key
+  - {C, D}⁺ = {C, D, E}, not all attributes, so **C, D → E is a BCNF violation**
+  - {E, F, G}⁺ = {E, F, G, H}, not all attributes, so **E, F, G → H is a BCNF violation**
+- **Decomposition:** R1 = {C, D, E}
+- **After:** **PayRecord**(pay_record_id, staff_id, period_start, period_end, hours_worked, rate_snapshot, bonus, deductions).
 
 #### Menu and Inventory
 
-##### D3: MenuItemIngredient → RecipeLine
+##### D5: MenuItemIngredient → RecipeLine
 
 | Letter | A | B | C | D |
 |---|---|---|---|---|
@@ -570,10 +615,9 @@ These relations come from the original app, before the redesign. For each one, a
 - **Decomposition on B → D:**
   - R1 = {B}⁺ = {B, D}, which moves into InventoryItem
   - R2 = {A, B, C}
-- **Check:** in R1, B is the key; in R2, {A, B} is the key. Both are in BCNF.
-- **After:** **RecipeLine**(menu_item_id, inventory_item_id, qty_per_serving), with `unit` stored once in **InventoryItem**.
+- **After:** **RecipeLine**(menu_item_id, inventory_item_id, qty_per_serving).
 
-##### D4: Purchase → StockMovement
+##### D6: Purchase → StockMovement
 
 | Letter | A | B | C | D | E | F |
 |---|---|---|---|---|---|---|
@@ -586,11 +630,11 @@ These relations come from the original app, before the redesign. For each one, a
 - **Decomposition on B → C:**
   - R1 = {B}⁺ = {B, C}, which is already in InventoryItem
   - R2 = {A, B, D, E, F}
-- **After:** R2 became **StockMovement** (a RECEIVE movement). The old InventoryTxn, Count, and InventoryState tables had the same violation, so all of them were merged into StockMovement.
+- **After:** **StockMovement**.
 
 #### Front of House
 
-##### D5: Order → CustomerOrder + DineInDetail + Customer
+##### D7: Order → CustomerOrder + DineInOrder + Customer
 
 | Letter | A | B | C | D | E | F | G |
 |---|---|---|---|---|---|---|---|
@@ -604,24 +648,43 @@ These relations come from the original app, before the redesign. For each one, a
 - **Decomposition on F → G:**
   - R1 = {F}⁺ = {F, G}, which becomes Customer
   - R2 = {A, B, C, D, E, F}
-- **Decomposition on B → C, D, E:** the algorithm would give {B, C, D, E} and {A, B, F}, which removes restaurant_id (E) from the order. But pickup and delivery orders have no table (B is NULL), so they would lose their restaurant. Instead, the table information moved into a separate relation used only for dine-in orders, and the order keeps E.
-- **After:** **CustomerOrder**(order_id, restaurant_id, customer_id, …), **DineInDetail**(order_id, table_id, server_id, party_size), and **Customer**(customer_id, name, phone, email).
+- **After:** **CustomerOrder**(order_id, restaurant_id, customer_id, …), **DineInOrder**(order_id, table_id, server_id, party_size), and **Customer**(customer_id, name, phone, email).
 
+##### D8: KitchenTicket
+
+| Letter | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|
+| Attribute | ticket_id | order_id | table_label | server_name | restaurant_id | status |
+
+- **FDs:** A → B, C, D, E, F and B → C, D, E (an order always has the same table, server, and restaurant)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F}, so A is a key
+  - {B}⁺ = {B, C, D, E}, not all attributes, so **B → C, D, E is a BCNF violation**
+- **Decomposition on B → C, D, E:**
+  - R1 = {B}⁺ = {B, C, D, E}, which is already in CustomerOrder and DineInOrder
+  - R2 = {A, B, F}
+- **After:** **KitchenTicket**(ticket_id, order_id, batch_no, status, is_priority, created_at, completed_at).
 
 ---
 
 ### 7.3 BCNF Verification
 
-**Staff**
+**Staff and Labour**
 
 | Relation | Closures of FD left sides | BCNF |
 |---|---|---|
 | Restaurant | {restaurant_id}⁺ = all attributes | ✓ |
 | Role | {restaurant_id, role_name}⁺ = all attributes | ✓ |
 | Staff | {staff_id}⁺ = all attributes | ✓ |
+| HourlyStaff | {staff_id}⁺ = all attributes | ✓ |
+| SalariedStaff | {staff_id}⁺ = all attributes | ✓ |
 | StaffCredential | {staff_id}⁺ = all attributes<br>{username}⁺ = all attributes | ✓ |
 | Shift | {shift_id}⁺ = all attributes | ✓ |
 | SwapRequest | {swap_id}⁺ = all attributes | ✓ |
+| TimeClockEvent | {event_id}⁺ = all attributes | ✓ |
+| TimeOffRequest | {request_id}⁺ = all attributes | ✓ |
+| PayRecord | {pay_record_id}⁺ = all attributes<br>{staff_id, period_start}⁺ = all attributes | ✓ |
+| StaffingRequirement | {requirement_id}⁺ = all attributes<br>{restaurant_id, work_date, department, start_time}⁺ = all attributes | ✓ |
 
 **Menu and Inventory**
 
@@ -641,9 +704,21 @@ These relations come from the original app, before the redesign. For each one, a
 | Customer | {customer_id}⁺ = all attributes<br>{phone}⁺ = all attributes | ✓ |
 | Reservation | {reservation_id}⁺ = all attributes<br>{table_id, reserved_for}⁺ = all attributes | ✓ |
 | CustomerOrder | {order_id}⁺ = all attributes | ✓ |
-| DineInDetail | {order_id}⁺ = all attributes | ✓ |
-| OrderItem | {order_item_id}⁺ = all attributes | ✓ |
+| DineInOrder | {order_id}⁺ = all attributes | ✓ |
+| DeliveryOrder | {order_id}⁺ = all attributes | ✓ |
+| KitchenTicket | {ticket_id}⁺ = all attributes<br>{order_id, batch_no}⁺ = all attributes | ✓ |
+| OrderItem | {order_id, line_no}⁺ = all attributes | ✓ |
 | Review | {review_id}⁺ = all attributes<br>{order_id}⁺ = all attributes | ✓ |
+
+**Marketing and Analytics**
+
+| Relation | Closures of FD left sides | BCNF |
+|---|---|---|
+| Campaign | {campaign_id}⁺ = all attributes | ✓ |
+| CampaignItem | no non-trivial FDs (all attributes form the key) | ✓ |
+| Announcement | {announcement_id}⁺ = all attributes | ✓ |
+| WeatherObservation | {restaurant_id, observed_date}⁺ = all attributes | ✓ |
+| Insight | {insight_id}⁺ = all attributes | ✓ |
 
 
 ---
