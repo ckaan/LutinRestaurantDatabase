@@ -353,26 +353,60 @@ For all entities, relationships, and attributes this is not the final version of
 
 ## 5. Relational Schema
 
-The result is 18 relations. Primary keys are <ins>underlined</ins>, and foreign keys are marked with → and the relation they refer to.
+The ERD in Section 4 maps to **31 relations**. 
+
+| ERD construct | Mapping | Example |
+|---|---|---|
+| Entity set | One relation; its identifier becomes the primary key | Customer |
+| Many-one relationship | Foreign key on the "many" side | *Works* → Shift.staff_id |
+| Many-many relationship | Mapping relation whose key combines both identifiers | *Uses* → RecipeLine, *Promotes* → CampaignItem |
+| One-one relationship | The key of one side is also the foreign key | *HasLogin* → StaffCredential.staff_id |
+| Weak entity set | Owner's key + partial key form the primary key | Role(restaurant_id, role_name) |
+| Inheritance (isa), E/R style | One relation per subclass, holding the superclass key and only the subclass's own attributes | HourlyStaff(staff_id, hourly_rate) |
+| Role labels | Become the foreign key's column name | *Covers* (cover) → cover_staff_id |
+
+### Staff and Labour
 
 - Restaurant(<ins>restaurant_id</ins>: INT, name: VARCHAR(100), address: VARCHAR(255), phone: VARCHAR(20), currency: CHAR(3))
 - Role(<ins>restaurant_id</ins>: INT → Restaurant, <ins>role_name</ins>: VARCHAR(50), department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'))
-- Staff(<ins>staff_id</ins>: INT, (restaurant_id: INT, role_name: VARCHAR(50)) → Role, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, pay_type: ENUM('HOURLY', 'SALARY'), hourly_rate: DECIMAL(10,2), monthly_salary: DECIMAL(10,2), is_active: BOOLEAN)
+- Staff(<ins>staff_id</ins>: INT, (restaurant_id: INT, role_name: VARCHAR(50)) → Role, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, is_active: BOOLEAN)
+- HourlyStaff(<ins>staff_id</ins>: INT → Staff, hourly_rate: DECIMAL(10,2))
+- SalariedStaff(<ins>staff_id</ins>: INT → Staff, monthly_salary: DECIMAL(10,2))
 - StaffCredential(<ins>staff_id</ins>: INT → Staff, username: VARCHAR(50), password_hash: CHAR(60), force_reset: BOOLEAN, last_login_at: DATETIME)
 - Shift(<ins>shift_id</ins>: INT, staff_id: INT → Staff, start_at: DATETIME, end_at: DATETIME, notes: VARCHAR(255))
-- SwapRequest(<ins>swap_id</ins>: INT, shift_id: INT → Shift, cover_staff_id: INT → Staff, status: ENUM('PENDING', 'APPROVED', 'DENIED'), created_at: DATETIME)
+- SwapRequest(<ins>swap_id</ins>: INT, shift_id: INT → Shift, cover_staff_id: INT → Staff, decided_by: INT → Staff, status: ENUM('PENDING', 'APPROVED', 'DENIED'), created_at: DATETIME)
+- TimeClockEvent(<ins>event_id</ins>: INT, staff_id: INT → Staff, shift_id: INT → Shift, event_type: ENUM('CLOCK_IN', 'CLOCK_OUT', 'BREAK_START', 'BREAK_END'), occurred_at: DATETIME, note: VARCHAR(255))
+- TimeOffRequest(<ins>request_id</ins>: INT, staff_id: INT → Staff, decided_by: INT → Staff, start_date: DATE, end_date: DATE, hours: DECIMAL(10,2), reason: VARCHAR(255), status: ENUM('PENDING', 'APPROVED', 'REJECTED'), created_at: DATETIME)
+- PayRecord(<ins>pay_record_id</ins>: INT, staff_id: INT → Staff, period_start: DATE, period_end: DATE, hours_worked: DECIMAL(10,2), rate_snapshot: DECIMAL(10,2), bonus: DECIMAL(10,2), deductions: DECIMAL(10,2))
+- StaffingRequirement(<ins>requirement_id</ins>: INT, restaurant_id: INT → Restaurant, work_date: DATE, start_time: TIME, end_time: TIME, department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'), required_count: INT)
+
+### Menu and Inventory
+
 - MenuCategory(<ins>category_id</ins>: INT, restaurant_id: INT → Restaurant, name: VARCHAR(50), sort_order: INT)
 - MenuItem(<ins>menu_item_id</ins>: INT, category_id: INT → MenuCategory, name: VARCHAR(100), price: DECIMAL(10,2), is_available: BOOLEAN)
 - InventoryItem(<ins>inventory_item_id</ins>: INT, restaurant_id: INT → Restaurant, name: VARCHAR(100), unit: ENUM('g', 'kg', 'ml', 'l', 'unit'), par_level: DECIMAL(10,2), lead_time_days: INT)
 - RecipeLine(<ins>menu_item_id</ins>: INT → MenuItem, <ins>inventory_item_id</ins>: INT → InventoryItem, qty_per_serving: DECIMAL(10,2))
 - StockMovement(<ins>movement_id</ins>: INT, inventory_item_id: INT → InventoryItem, movement_type: ENUM('RECEIVE', 'CONSUME', 'WASTE', 'ADJUST'), quantity_delta: DECIMAL(10,2), unit_cost: DECIMAL(10,2), reason: VARCHAR(255), occurred_at: DATETIME)
+
+### Front of House
+
 - DiningTable(<ins>table_id</ins>: INT, restaurant_id: INT → Restaurant, label: VARCHAR(10), seats: INT, section: VARCHAR(30))
 - Customer(<ins>customer_id</ins>: INT, name: VARCHAR(100), phone: VARCHAR(20), email: VARCHAR(255))
 - Reservation(<ins>reservation_id</ins>: INT, table_id: INT → DiningTable, customer_id: INT → Customer, reserved_for: DATETIME, party_size: INT, status: ENUM('BOOKED', 'SEATED', 'CANCELLED', 'NO_SHOW'))
-- CustomerOrder(<ins>order_id</ins>: INT, restaurant_id: INT → Restaurant, customer_id: INT → Customer, channel: ENUM('IN_PERSON', 'PHONE', 'ONLINE'), fulfillment: ENUM('DINE_IN', 'PICKUP', 'DELIVERY'), status: ENUM('PENDING', 'CONFIRMED', 'FULFILLED', 'CANCELLED'), payment_type: ENUM('CASH', 'CARD', 'ONLINE', 'THIRD_PARTY'), tip: DECIMAL(10,2), created_at: DATETIME, started_at: DATETIME, finished_at: DATETIME, delivery_address: VARCHAR(255), delivery_notes: VARCHAR(255), courier: ENUM('IN_HOUSE', 'UBER_EATS'), external_order_ref: VARCHAR(64))
-- DineInDetail(<ins>order_id</ins>: INT → CustomerOrder, table_id: INT → DiningTable, server_id: INT → Staff, party_size: INT)
-- OrderItem(<ins>order_item_id</ins>: INT, order_id: INT → CustomerOrder, menu_item_id: INT → MenuItem, quantity: INT, unit_price: DECIMAL(10,2), notes: VARCHAR(255))
+- CustomerOrder(<ins>order_id</ins>: INT, restaurant_id: INT → Restaurant, customer_id: INT → Customer, channel: ENUM('IN_PERSON', 'PHONE', 'ONLINE'), status: ENUM('PENDING', 'CONFIRMED', 'FULFILLED', 'CANCELLED'), payment_type: ENUM('CASH', 'CARD', 'ONLINE', 'THIRD_PARTY'), tip: DECIMAL(10,2), created_at: DATETIME, started_at: DATETIME, finished_at: DATETIME)
+- DineInOrder(<ins>order_id</ins>: INT → CustomerOrder, table_id: INT → DiningTable, server_id: INT → Staff, party_size: INT)
+- DeliveryOrder(<ins>order_id</ins>: INT → CustomerOrder, delivery_address: VARCHAR(255), delivery_notes: VARCHAR(255), courier: ENUM('IN_HOUSE', 'UBER_EATS'), external_order_ref: VARCHAR(64))
+- KitchenTicket(<ins>ticket_id</ins>: INT, order_id: INT → CustomerOrder, batch_no: INT, status: ENUM('NEW', 'COOKING', 'READY'), is_priority: BOOLEAN, created_at: DATETIME, completed_at: DATETIME)
+- OrderItem(<ins>order_id</ins>: INT → CustomerOrder, <ins>line_no</ins>: INT, menu_item_id: INT → MenuItem, ticket_id: INT → KitchenTicket, quantity: INT, unit_price: DECIMAL(10,2), notes: VARCHAR(255))
 - Review(<ins>review_id</ins>: INT, order_id: INT → CustomerOrder, rating: INT, comment: TEXT, created_at: DATETIME)
+
+### Marketing and Analytics
+
+- Campaign(<ins>campaign_id</ins>: INT, restaurant_id: INT → Restaurant, name: VARCHAR(100), start_date: DATE, end_date: DATE, budget: DECIMAL(10,2))
+- CampaignItem(<ins>campaign_id</ins>: INT → Campaign, <ins>menu_item_id</ins>: INT → MenuItem)
+- Announcement(<ins>announcement_id</ins>: INT, restaurant_id: INT → Restaurant, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
+- WeatherObservation(<ins>restaurant_id</ins>: INT → Restaurant, <ins>observed_date</ins>: DATE, temp_max: DECIMAL(10,2), temp_min: DECIMAL(10,2), condition: ENUM('SUNNY', 'CLOUDY', 'RAIN', 'SNOW'), precipitation_mm: DECIMAL(10,2))
+- Insight(<ins>insight_id</ins>: INT, restaurant_id: INT → Restaurant, title: VARCHAR(100), message: TEXT, insight_type: ENUM('INFO', 'ALERT', 'SUCCESS'), created_at: DATETIME, expires_at: DATETIME)
 
 ---
 
@@ -385,39 +419,56 @@ The result is 18 relations. Primary keys are <ins>underlined</ins>, and foreign 
 - **Primary key:** a constraint that uniquely identifies each record in a database table
 - **Non-prime attribute:** an attribute that is not part of any candidate key.
 
-### Staff
+### Staff and Labour
 
 | Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
 |---|---|---|---|---|
 | Restaurant | {restaurant_id} | restaurant_id | any set containing restaurant_id | name, address, phone, currency |
-| Role | {role_id}, {restaurant_id, role_name} | role_id | any set containing both restaurant_id and role_name | department |
-| Staff | {staff_id} | staff_id | any set containing staff_id | role_id, name, email, phone, hire_date, pay_type, hourly_rate, monthly_salary, is_active |
-| StaffCredential | {staff_id}, {username} | staff_id | any set containing staff_id or username | password_hash, force_reset, last_login_at |
+| Role | {restaurant_id, role_name} | (restaurant_id, role_name) | any set containing both restaurant_id and role_name | department |
+| Staff | {staff_id} | staff_id | any set containing staff_id | restaurant_id, role_name, name, email, phone, hire_date, is_active |
+| HourlyStaff | {staff_id} | staff_id | any set containing staff_id | hourly_rate |
+| SalariedStaff | {staff_id} | staff_id | any set containing staff_id | monthly_salary |
+| StaffCredential | {staff_id}, {username} | staff_id | any set containing staff_id *or* username | password_hash, force_reset, last_login_at |
 | Shift | {shift_id} | shift_id | any set containing shift_id | staff_id, start_at, end_at, notes |
-| SwapRequest | {swap_id} | swap_id | any set containing swap_id | shift_id, cover_staff_id, status, created_at |
+| SwapRequest | {swap_id} | swap_id | any set containing swap_id | shift_id, cover_staff_id, decided_by, status, created_at |
+| TimeClockEvent | {event_id} | event_id | any set containing event_id | staff_id, shift_id, event_type, occurred_at, note |
+| TimeOffRequest | {request_id} | request_id | any set containing request_id | staff_id, decided_by, start_date, end_date, hours, reason, status, created_at |
+| PayRecord | {pay_record_id}, {staff_id, period_start} | pay_record_id | any set containing pay_record_id, *or* containing both staff_id and period_start | period_end, hours_worked, rate_snapshot, bonus, deductions |
+| StaffingRequirement | {requirement_id}, {restaurant_id, work_date, department, start_time} | requirement_id | any set containing requirement_id, *or* containing all of restaurant_id, work_date, department, and start_time | end_time, required_count |
 
 ### Menu and Inventory
 
 | Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
 |---|---|---|---|---|
-| MenuCategory | {category_id}, {restaurant_id, name} | category_id | any set containing both restaurant_id and name | sort_order |
-| MenuItem | {menu_item_id}, {category_id, name} | menu_item_id | any set containing containing both category_id and name | price, is_available |
+| MenuCategory | {category_id}, {restaurant_id, name} | category_id | any set containing category_id, *or* containing both restaurant_id and name | sort_order |
+| MenuItem | {menu_item_id}, {category_id, name} | menu_item_id | any set containing menu_item_id, *or* containing both category_id and name | price, is_available |
 | InventoryItem | {inventory_item_id}, {restaurant_id, name} | inventory_item_id | any set containing inventory_item_id, *or* containing both restaurant_id and name | unit, par_level, lead_time_days |
-| RecipeLine (comes from "Uses" relationship) | {menu_item_id, inventory_item_id} | (menu_item_id, inventory_item_id) | the key itself | qty_per_serving |
+| RecipeLine (from the "Uses" relationship) | {menu_item_id, inventory_item_id} | (menu_item_id, inventory_item_id) | the key itself, or the key plus qty_per_serving | qty_per_serving |
 | StockMovement | {movement_id} | movement_id | any set containing movement_id | inventory_item_id, movement_type, quantity_delta, unit_cost, reason, occurred_at |
 
 ### Front of House
 
 | Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
 |---|---|---|---|---|
-| DiningTable | {table_id}, {restaurant_id, label} | table_id | any set containing both restaurant_id and table_id | seats, section | # ASK THIS LINE FOR NEXT SPRINT
-| Customer | {customer_id}, {phone} | customer_id | any set containing customer_id  | name, email |
-| Reservation | {reservation_id}, {table_id, reserved_for} | reservation_id | any set containing reservation_id | customer_id, party_size, status |
-| CustomerOrder | {order_id} | order_id | any set containing order_id | all other attributes |
-| DineInDetail | {order_id} | order_id | any set containing order_id | table_id, server_id, party_size |
-| OrderItem | {order_item_id} | order_item_id | any set containing order_item_id | order_id, menu_item_id, quantity, unit_price, notes |
-| Review | {review_id}, {order_id} | review_id | any set containing review_id *or* order_id | rating, comment, created_at | #ASK THIS LINE FOR NEXT SPRINT
+| DiningTable | {table_id}, {restaurant_id, label} | table_id | any set containing table_id, *or* containing both restaurant_id and label | seats, section |
+| Customer | {customer_id}, {phone} | customer_id | any set containing customer_id *or* phone | name, email |
+| Reservation | {reservation_id}, {table_id, reserved_for} | reservation_id | any set containing reservation_id, *or* containing both table_id and reserved_for | customer_id, party_size, status |
+| CustomerOrder | {order_id} | order_id | any set containing order_id | restaurant_id, customer_id, channel, status, payment_type, tip, created_at, started_at, finished_at |
+| DineInOrder | {order_id} | order_id | any set containing order_id | table_id, server_id, party_size |
+| DeliveryOrder | {order_id} | order_id | any set containing order_id | delivery_address, delivery_notes, courier, external_order_ref |
+| KitchenTicket | {ticket_id}, {order_id, batch_no} | ticket_id | any set containing ticket_id, *or* containing both order_id and batch_no | status, is_priority, created_at, completed_at |
+| OrderItem | {order_id, line_no} | (order_id, line_no) | any set containing both order_id and line_no | menu_item_id, ticket_id, quantity, unit_price, notes |
+| Review | {review_id}, {order_id} | review_id | any set containing review_id *or* order_id | rating, comment, created_at |
 
+### Marketing and Analytics
+
+| Relation | Candidate keys | Primary key | Superkeys | Non-prime attributes |
+|---|---|---|---|---|
+| Campaign | {campaign_id} | campaign_id | any set containing campaign_id | restaurant_id, name, start_date, end_date, budget |
+| CampaignItem (from the "Promotes" relationship) | {campaign_id, menu_item_id} | (campaign_id, menu_item_id) | the key itself | none |
+| Announcement | {announcement_id} | announcement_id | any set containing announcement_id | restaurant_id, author_id, message, announcement_type, is_active, created_at |
+| WeatherObservation | {restaurant_id, observed_date} | (restaurant_id, observed_date) | any set containing both restaurant_id and observed_date | temp_max, temp_min, condition, precipitation_mm |
+| Insight | {insight_id} | insight_id | any set containing insight_id | restaurant_id, title, message, insight_type, created_at, expires_at |
 ---
 
 ## 7. Functional Dependencies and BCNF
