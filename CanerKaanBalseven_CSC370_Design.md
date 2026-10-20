@@ -27,7 +27,7 @@
 | Version | Sprint | Date | Commit | Summary |
 |---|---|---|---|---|
 | 1.0 | Project Kickoff | October 4, 2026 | [3e80d50](https://github.com/ckaan/LutinRestaurantDatabase/tree/3e80d5078ac2d8ac66e3346d299b412badb4e019) | Requirements, first ERD (16 entity sets, 21 relationships), relational schema (18 relations), keys, FDs, BCNF decompositions D1–D2, `schema.sql` |
-| 2.0 | Sprint 1 | October 18, 2026 | see Brightspace submission |  |
+| 2.0 | Sprint 1 | October 18, 2026 | see Brightspace submission | Complete ERD (29 entity sets, 35 relationships, (min, max)), inheritance and weak entity sets, 31 relations, decompositions D1–D8, 3NF/4NF checks, projected FDs and minimal bases, schema.sql with foreign keys and NOT NULL |
 | 3.0 | Sprint 2 | November 8, 2026 | | |
 | 4.0 | Final Submission | November 29, 2026 | | |
 
@@ -38,21 +38,29 @@
 ## Table of Contents
 
 - [1. Project Background]
-- [2. Kickoff Sprint Goals]
+- [2. Sprint 1 Goals]
+  - [2.1 Goals and Success Criteria]
+  - [2.2 Missed or Partially Met Goals]
+  - [2.3 Competency Mapping]
+  - [2.4 Previous Sprint (Kickoff) Recap]
+  - [2.5 Kickoff Feedback and Fixes]
+  - [2.6 Kickoff Questions]
 - [3. Requirements]
 - [4. Entity-Relationship Diagram]
-  - [4.1 Staff]
+  - [4.1 Staff and Labour]
   - [4.2 Menu and Inventory]
   - [4.3 Front of House]
+  - [4.4 Marketing and Analytics]
+  - [4.5 Requirement ↔ ERD Checklist]
 - [5. Relational Schema]
 - [6. Keys]
 - [7. Functional Dependencies and BCNF]
   - [7.1 Functional Dependencies]
-  - [7.2 Anomalies in the Original Schema]
-  - [7.3 BCNF Decompositions]
-  - [7.4 BCNF Verification]
-  - [7.5 3NF]
-  - [7.6 4NF]
+  - [7.2 BCNF Decompositions]
+  - [7.3 BCNF Verification]
+  - [7.5 Third Normal Form and Dependency Preservation]
+  - [7.6 Fourth Normal Form and Multivalued Dependencies]
+  - [7.7 Projecting FDs and Minimal Bases]
 - [8. Implementation]
 - [9. Known Limitations]
 - [10. Next Sprint Goals]
@@ -76,7 +84,7 @@ This project redesigns that database properly, the way it should be done in indu
 5. Normalize to BCNF.
 6. Implement the result in MySQL with hand-written DDL.
 
-The original application has about 35 Prisma models. This sprint covers the operational core of the system; the remaining subsystems are planned for later sprints (see Section 10).
+The original application has about 35 Prisma models. This sprint covers the operational core of the system; This sprint completes the design for all parts of the system; the next sprints focus on querying the database (see Section 10).
 
 ## 2. Sprint 1 Goals
 
@@ -88,15 +96,15 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 
 | Goal | Limitation it fixes | Competency | Success criterion (measurable) | Status | Evidence |
 |---|---|---|---|---|---|
-| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts were not in the ERD and the database was never adjusted for the machine learning features | DM L2: maps requirements onto schemata; DM L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check | **Mostly met** | ERD v2 (Section 4): 13 new entity sets for labour, kitchen tickets, marketing, and analytics (weather, insights); all 31 relations pass the BCNF check (Section 7.3). Requirements for the new parts: see 2.2 |
-| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD was not final and relationships only showed arrowheads | DM L2: minimal and complete design; DM L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items | **Partially met** | Whole ERD reviewed and corrected (typos, duplicate attributes, subclass identifiers, ServedBy moved to DineInOrder); (min, max) labels: see 2.2 |
-| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for Role and OrderItem | Attributes that are NULL by design (Section 9, item 2) | DM L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | Attributes that must be NULL for some rows go from **6** (4 delivery columns + 2 pay columns) to **0**; Role and OrderItem drawn as weak entity sets | **Met** | Section 5: Staff → HourlyStaff / SalariedStaff and CustomerOrder → DineInOrder / DeliveryOrder (6 → **0** NULL-by-design attributes); Role, OrderItem, and WeatherObservation are weak entity sets (Sections 4–6) |
-| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, the remaining decompositions of the original schema, **projecting FDs and minimal bases** for each decomposition, and the alternative normal forms **3NF and 4NF** | Only D1 and D2 were written up; the plan did not name minimal bases, projecting FDs, or 4NF (Kickoff feedback) | DM L2: eliminates anomalies; DM L3: applies alternative normal forms (3NF, 4NF), projects FDs and finds minimal bases | All decompositions written with closures; projected FDs for 100% of decompositions; **100%** of relations in the BCNF verification table; every relation checked for 3NF and 4NF | **Met** | Section 7.2: **8** decompositions (D1–D8) with closures; Section 7.7: projected FDs and minimal bases for **8/8** decompositions; Sections 6, 7.1, 7.3: keys, FDs, and BCNF check for all 31 relations; Sections 7.5–7.6: **28 in BCNF, 2 in 3NF on purpose, 1 to fix in Sprint 2**, no 4NF violations |
-| **G5.** Write the SQL DDL for the new relations and revise the implementation, **declaring every foreign key** | The DDL covered only 18 relations and had no FOREIGN KEY constraints (Kickoff feedback, S6) | DM L1: writes SQL that implements a relational design; BE L1: database never enters an inconsistent state | `schema.sql` runs with **0** errors and creates every relation in Section 5; every ID column that refers to another relation has a FOREIGN KEY; invalid references are **rejected** | **Met** | `schema.sql`: **31/31** tables, **42** FOREIGN KEY constraints, **0** errors; `fk_tests.sql`: **6/6** invalid statements rejected (Section 8) |
-| **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9, item 1) | DM L3: assesses incongruity between conceptual and relational schemata | Both options compared and one chosen; a test adding another restaurant's menu item to an order is **rejected** (or scheduled for Sprint 2 if a trigger is chosen) | **Not met (moved to Sprint 2)** | See 2.2 |
-| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | **Met** | Section 2.5: **3/3** feedback items resolved |
-| **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty (Section 9, item 4) | DM L1: writes SQL that implements a relational design, selects appropriate data types; BE L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** | **Partially met** | Data types reviewed (Section 5: every money and quantity value DECIMAL(10,2), fixed value sets as ENUM, TIME for time slots); NOT NULL and CHECK: see 2.2 |
-| **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | **Partially met** | Sections 5–7 updated to match the ERD (superkey cells fixed, Role weak entity, closures written with ⁺); TA questions: see 2.2 |
+| **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts were missing from the ERD, and the database was never updated for the machine learning features | DM L2: maps requirements onto schemata; DM L4: designs for extensibility | Every out-of-scope part from the Kickoff's Section 3.4 has requirements in Section 3 and shows up in the ERD; every new relation passes the BCNF check | **Met** | I wrote the requirements for the new parts (Sections 3.1, 3.3, 3.4) and added **13** new entity sets to the ERD, which cover all **9/9** parts that were out of scope in the Kickoff (payroll, time clock, time off, kitchen tickets, labour analytics, campaigns, announcements, weather, insights). All the new relations are in BCNF (Section 7.3), except TimeClockEvent, which I kept in 3NF on purpose (Section 7.5, N2). While checking, I found that Announcement broke 3NF, so I fixed it (N3) |
+| **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD was not final, and the relationships only showed arrowheads | DM L2: minimal and complete design; DM L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items | **Met** | I went through the whole ERD and fixed what was wrong: typos, duplicate attributes, subclass identifiers, ServedBy moved to DineInOrder, DecidesTimeOff added, `fulfillment` removed, `line_no` as OrderItem's partial key, and the extra *Posts* relationship removed. All **35/35** relationships have their (min, max) in the Section 4 tables (the figure shows the arrowheads), and they match NOT NULL / NULL in `schema.sql`. The checklist in Section 4.5 matches **30/30** data requirements, with **0** left unmatched |
+| **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for Role and OrderItem | Some attributes were NULL by design (Kickoff, Section 9, item 2) | DM L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | Attributes that have to be NULL for some rows go from **6** (4 delivery columns + 2 pay columns) to **0**; Role and OrderItem drawn as weak entity sets | **Met** | I split Staff into HourlyStaff / SalariedStaff and CustomerOrder into DineInOrder / DeliveryOrder (Section 5), so no attribute is empty by design anymore (**6 → 0**). Role, OrderItem, and WeatherObservation are weak entity sets (Sections 4–6) |
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, the remaining decompositions of the original schema, **projecting FDs and minimal bases** for each decomposition, and the alternative normal forms **3NF and 4NF** | Only D1 and D2 were written up, and the plan did not mention minimal bases, projecting FDs, or 4NF (Kickoff feedback) | DM L2: eliminates anomalies; DM L3: applies alternative normal forms (3NF, 4NF), projects FDs and finds minimal bases | Every decomposition written with closures; projected FDs for 100% of decompositions; **100%** of relations in the BCNF verification table; every relation checked for 3NF and 4NF | **Met** | I wrote all **8** decompositions (D1–D8) with closures (Section 7.2), and the projected FDs and minimal bases for **8/8** decompositions and all **31/31** relations (Section 7.7). Every relation has its keys, FDs, and BCNF check (Sections 6, 7.1, 7.3). In the end, **29** relations are in BCNF and **2** are in 3NF on purpose, none are below 3NF, and there are no 4NF violations (Sections 7.5–7.6) |
+| **G5.** Write the SQL DDL for the new relations and revise the implementation, **declaring every foreign key** | The DDL only covered 18 relations and had no FOREIGN KEY constraints (Kickoff feedback, S6) | DM L1: writes SQL that implements a relational design; BE L1: database never enters an inconsistent state | `schema.sql` runs with **0** errors and creates every relation in Section 5; every ID column that refers to another relation has a FOREIGN KEY; invalid references are **rejected** | **Met** | `schema.sql` creates all **31/31** tables with **41** FOREIGN KEY constraints and **0** errors. `fk_tests.sql` tries 6 invalid references, and all **6/6** are rejected (Section 8) |
+| **G6.** Fix the cross-restaurant limitation | Rows that mix two restaurants are accepted (Section 9, item 1) | DM L3: assesses incongruity between conceptual and relational schemata | Both options compared and one chosen; a test that adds another restaurant's menu item to an order is **rejected** (or scheduled for Sprint 2 if a trigger is chosen) | **Not met (moved to Sprint 2)** | See 2.2 |
+| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | **Met** | All **3/3** feedback items are listed with how I fixed them (Section 2.5) |
+| **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns could be left empty (Kickoff, Section 9, item 4) | DM L1: writes SQL that implements a relational design, selects appropriate data types; BE L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** | **Partially met** | I reviewed the data types (Section 5): all money and quantity values are DECIMAL(10,2), fixed value sets are ENUMs, and time slots use TIME. Every required column is NOT NULL, and every optional column is marked NULL with a reason (Section 8). Both NOT NULL tests are rejected (**2/2**, error 1048). The CHECK constraints are moved to Sprint 2 (see 2.2) |
+| **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | **Partially met** | I updated Sections 5–7 to match the ERD (fixed the superkey cells, made Role a weak entity, wrote the closures with ⁺). The ERD, Section 5, and `schema.sql` all have the same 31 relations, with **0** mismatches. I answered **2/4** of the Kickoff questions (Section 2.6); the other 2 are moved to Sprint 2 (see 2.2) |
 
 *DM = Data Modelling, BE = Back-end Engineering.*
 
@@ -104,13 +112,12 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 
 ### 2.2 Missed or Partially Met Goals
 
+
 | Goal | What is not finished | Technical reason | Effect on learning goals | Plan |
 |---|---|---|---|---|
-| G1 | Written requirements (Section 3) for the 13 new entity sets | The ERD was redrawn first, because the new parts changed existing entity sets too (Staff and CustomerOrder became superclasses), so the requirements had to wait until the design settled | Small: every new entity set is designed, keyed, and verified in BCNF; only the written requirement lists are missing | Add requirement tables for Labour, Kitchen, Marketing, and Analytics at the start of Sprint 2 |
-| G2 | (min, max) labels on the relationships | The ERD grew from 21 to 35 relationships, and several changed (new subclasses, weak entities), so the labels were left until the structure was final | None: multiplicity is shown with arrowheads and listed for every relationship in Section 4 | Add the labels at the start of Sprint 2, together with the requirement ↔ ERD checklist |
-| G6 | The cross-restaurant check | Of the two options, adding restaurant_id to child tables breaks BCNF (it brings back the violations removed in D1 and D6), and the BCNF-preserving option needs a **trigger**, which is covered in the Advanced SQL module | Partial: the trade-off is analysed (Section 9); the fix itself needs Sprint 2 material | Implemented as a trigger in Sprint 2 (S2-G4) |
-| G8 | NOT NULL and CHECK constraints | The schema changed from 18 to 31 relations with composite keys and subclasses this sprint, so constraints were left until the final structure; CHECK constraints are part of the Advanced SQL module | Partial: data types were reviewed; consistency rules move to the module that covers them | Part of Sprint 2 (S2-G4) |
-| G9 | Consistency with `schema.sql`, and the TA's answers to Section 10.1 | `schema.sql` depends on G5; the TA questions are waiting for the TA-client meeting | Partial: the document sections are consistent with each other and the ERD | Finish after G5 and the TA meeting |
+| G6 | The cross-restaurant check | Of the two options, adding restaurant_id to child tables breaks BCNF (it brings back the violations removed in D1 and D6), and the BCNF-preserving option needs a **trigger**, which is covered in the Advanced SQL module | Partial: the trade-off is analysed (Section 9); the fix itself needs Sprint 2 material | Implemented as a trigger in Sprint 2 (S2-G6) |
+| G8 | CHECK constraints for business rules (e.g., rating between 1 and 5, a shift ends after it starts) | The schema changed from 18 to 31 relations with composite keys and subclasses this sprint, so the business rules were left until the final structure; CHECK constraints are part of the Advanced SQL module, together with the triggers for G6 | Small: data types and NOT NULL are done, so required values can no longer be left empty; only the business-rule checks move to the module that covers them | Part of Sprint 2 (S2-G6) |
+| G9 | Kickoff questions 3 and 4: listing the FDs that do not hold, and documenting the anomalies of the original schema in more detail | The questions are waiting for the TA-client's answer on how much detail is needed; the related work is partly done (every decomposition D1–D8 names the violating FD that caused the anomalies) | Small: the keys and FDs that do hold are complete and verified (Sections 6, 7.1, 7.3) | Part of Sprint 2 (S2-G8), after the TA meeting |
 
 
 ### 2.3 Competency Mapping
@@ -118,7 +125,7 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 | Competency bullet | Covered by |
 |---|---|
 | DM L1: Selects appropriate data types for tables | [Section 5](#5-relational-schema), G8 |
-| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation) (`schema.sql`: 31 tables, 42 foreign keys), G5, G8 |
+| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation) (`schema.sql`: 31 tables, 41 foreign keys), G5, G8 |
 | DM L1: Documents relationships with correct ERDs | [Section 4](#4-entity-relationship-diagram), G2 |
 | DM L2: Identifies dependencies among attributes and appropriate keys | [Section 6](#6-keys), [Section 7.1](#71-functional-dependencies), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (FDs read from the ERD) |
 | DM L2: Eliminates data anomalies with effective normalisation | [Section 7.2](#72-bcnf-decompositions), G4 |
@@ -149,6 +156,17 @@ The full Kickoff version can be seen at the commit linked in the Version History
 | 1 | The plan did not name minimal bases, projecting FDs, or 4NF | Added to G4; projected FDs and minimal bases for every decomposition; 3NF and 4NF checks | G4, Sections 7.5–7.7 |
 | 2 | The missing foreign keys were not acknowledged as an unmet goal | Acknowledged in the Kickoff recap as S6 not met | Section 2.4 |
 | 3 | No FOREIGN KEY constraints, so invalid data was accepted (S6 not met) | Every relationship column now has FOREIGN KEY ... REFERENCES; tests show invalid rows are rejected | G5, Section 8, `schema.sql`, `fk_tests.sql` |
+
+### 2.6 Kickoff Questions
+
+| # | Question (Kickoff, Section 10.1) | Status | Answer |
+|---|---|---|---|
+| 1 | Are the superkeys and candidate keys of DiningTable and Review correct? | Answered | Yes. DiningTable: {table_id}⁺ and {restaurant_id, label}⁺ are all attributes, and neither restaurant_id nor label alone is a superkey, so both are candidate keys. Review: *About* is one-one, so order_id → review_id and {order_id} is a second candidate key, enforced with UNIQUE (order_id) (Sections 6, 7.3) |
+| 2 | Is the SwapRequest decomposition (D2) correct? | Answered | Yes, after correcting the FD to shift_id → requester_id. The requester is always the owner of the shift, so it is removed from SwapRequest and comes from Shift.staff_id. The decomposition is dependency preserving (Sections 7.2, 7.5) |
+| 3 | Should we also list functional dependencies that do not hold? | Moved to Sprint 2 (S2-G8) | Waiting for the TA-client |
+| 4 | Should we document the anomalies of the original schema in more detail? | Moved to Sprint 2 (S2-G8) | Partly done: each decomposition D1–D8 names the violating FD; the full update / insertion / deletion examples wait for the TA-client |
+
+
 ---
 ## 3. Requirements
 
@@ -288,7 +306,7 @@ The requirements are grouped into the four parts of the system. For each part, t
 <ul>
 <li>Campaigns: restaurant, name, start and end date, budget</li>
 <li>Which menu items each campaign promotes</li>
-<li>Announcements: restaurant, author, message, type, active status, time</li>
+<li>Announcements: author (the restaurant comes from the author), message, type, active status, time</li>
 <li>Weather observations: restaurant, date, max and min temperature, condition, precipitation</li>
 <li>Insights: restaurant, title, message, type, created and expiry time</li>
 </ul>
@@ -298,9 +316,7 @@ The requirements are grouped into the four parts of the system. For each part, t
 
 ### 3.5 Out of Scope
 
-**Not covered this sprint:** the cross-restaurant check (moved to Sprint 2, see Section 2.2, G6), and NOT NULL and CHECK constraints (Sprint 2, G8). Payment processing itself (card transactions) is handled by an outside provider, so the database only stores the payment type.
-
-NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA 
+**Not covered this sprint:** the cross-restaurant check (moved to Sprint 2, see Section 2.2, G6), and CHECK constraints (Sprint 2, G8). Payment processing itself (card transactions) is handled by an outside provider, so the database only stores the payment type.
 
 
 ---
@@ -319,14 +335,18 @@ NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA
 | Arrowhead into an entity set | "At most one" on that side of the relationship |
 | No arrowhead | "Many" on that side |
 | Arrowheads on both sides | One-one relationship |
+| (min, max) on a line | How many times **one** entity of that entity set takes part in the relationship |
 
-Each relationship will also be described with its (min, max) participation in the next sprint (see Section 2.2, G2).
+Each relationship is described with its (min, max) participation. The values follow the requirements in Section 3 and match `schema.sql`:
+- a foreign key that is NOT NULL gives **(1,1)** on that side
+- a foreign key that can be NULL gives **(0,1)**
+- the other side is **(0,n)**, unless a requirement says "at least one", which gives **(1,n)**
 
 The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relationships**, and **2 isa hierarchies**. The two many-many relationships (*Uses* and *Promotes*) become the mapping relations RecipeLine and CampaignItem, so the ERD maps to the **31 relations** in Section 5.
 
 ### 4.1 Staff and Labour
 
-**Requirements covered:** [Section 3.1] (requirements for the new labour parts: see Section 2.2, G1)
+**Requirements covered:** [Section 3.1]
 
 **Entity sets**
 
@@ -347,21 +367,22 @@ The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relation
 
 **Relationships**
 
-| Relationship | Reads as | Multiplicity |
-|---|---|---|
-| Defines *(weak entity)* | A restaurant defines roles | many-one |
-| Holds | A staff member holds a role | many-one |
-| isa | A staff member is either hourly or salaried | isa |
-| HasLogin | A staff member has a login | one-one |
-| Works | A shift is worked by a staff member | many-one |
-| Offers | A swap request offers a shift | many-one |
-| Covers | A staff member covers a swap request | many-one |
-| DecidesSwap | A manager approves or denies a swap request | many-one |
-| Clocks | A staff member logs time clock events | many-one |
-| Punches | A time clock event is punched for a shift | many-one |
-| Requests | A staff member makes time-off requests | many-one |
-| PaidTo | A pay record is paid to a staff member | many-one |
-| Needs | A restaurant needs staffing requirements | many-one |
+| Relationship | Reads as | Multiplicity | (min, max) |
+|---|---|---|---|
+| Defines *(weak entity)* | A restaurant defines roles | many-one | Role (1,1) · Restaurant (0,n) |
+| Holds | A staff member holds a role | many-one | Staff (1,1) · Role (0,n) |
+| isa | A staff member is either hourly or salaried | isa | — |
+| HasLogin | A staff member has a login | one-one | StaffCredential (1,1) · Staff (0,1) |
+| Works | A shift is worked by a staff member | many-one | Shift (1,1) · Staff (0,n) |
+| Offers | A swap request offers a shift | many-one | SwapRequest (1,1) · Shift (0,n) |
+| Covers | A staff member covers a swap request | many-one | SwapRequest (0,1) · Staff (0,n) |
+| DecidesSwap | A manager approves or denies a swap request | many-one | SwapRequest (0,1) · Staff (0,n) |
+| Clocks | A staff member logs time clock events | many-one | TimeClockEvent (1,1) · Staff (0,n) |
+| Punches | A time clock event is punched for a shift | many-one | TimeClockEvent (0,1) · Shift (0,n) |
+| Requests | A staff member makes time-off requests | many-one | TimeOffRequest (1,1) · Staff (0,n) |
+| DecidesTimeOff | A manager approves or rejects a time-off request | many-one | TimeOffRequest (0,1) · Staff (0,n) |
+| PaidTo | A pay record is paid to a staff member | many-one | PayRecord (1,1) · Staff (0,n) |
+| Needs | A restaurant needs staffing requirements | many-one | StaffingRequirement (1,1) · Restaurant (0,n) |
 
 ### 4.2 Menu and Inventory
 
@@ -378,17 +399,17 @@ The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relation
 
 **Relationships**
 
-| Relationship | Reads as | Multiplicity |
-|---|---|---|
-| HasMenu | A restaurant has menu categories | many-one |
-| InCategory | A menu item is in a category | many-one |
-| HasInventory | A restaurant has inventory items | many-one |
-| Uses | A menu item uses inventory items (attribute: `qty_per_serving`) | many-many |
-| Moves | A stock movement changes an inventory item | many-one |
+| Relationship | Reads as | Multiplicity | (min, max) |
+|---|---|---|---|
+| HasMenu | A restaurant has menu categories | many-one | MenuCategory (1,1) · Restaurant (0,n) |
+| InCategory | A menu item is in a category | many-one | MenuItem (1,1) · MenuCategory (0,n) |
+| HasInventory | A restaurant has inventory items | many-one | InventoryItem (1,1) · Restaurant (0,n) |
+| Uses | A menu item uses inventory items (attribute: `qty_per_serving`) | many-many | MenuItem (0,n) · InventoryItem (0,n) |
+| Moves | A stock movement changes an inventory item | many-one | StockMovement (1,1) · InventoryItem (0,n) |
 
 ### 4.3 Front of House
 
-**Requirements covered:** [Section 3.3] (requirements for kitchen tickets: see Section 2.2, G1)
+**Requirements covered:** [Section 3.3]
 
 **Entity sets**
 
@@ -406,25 +427,25 @@ The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relation
 
 **Relationships**
 
-| Relationship | Reads as | Multiplicity |
-|---|---|---|
-| HasTable | A restaurant has tables | many-one |
-| BookedBy | A reservation is booked by a customer | many-one |
-| BookedAt | A reservation is booked at a table | many-one |
-| Receives | A restaurant receives orders | many-one |
-| Orders | A customer places an order | many-one |
-| isa | An order can be a dine-in order or a delivery order (pickup orders need no extra attributes) | isa |
-| SeatedAt | A dine-in order is seated at a table (attribute: `party_size`) | many-one |
-| ServedBy | A dine-in order is served by a staff member | many-one |
-| Contains *(weak entity)* | An order contains order items | many-one |
-| OfItem | An order item is of a menu item | many-one |
-| ForOrder | A kitchen ticket is for an order | many-one |
-| OnTicket | An order item is on a kitchen ticket | many-one |
-| About | A review is about an order | one-one |
+| Relationship | Reads as | Multiplicity | (min, max) |
+|---|---|---|---|
+| HasTable | A restaurant has tables | many-one | DiningTable (1,1) · Restaurant (0,n) |
+| BookedBy | A reservation is booked by a customer | many-one | Reservation (1,1) · Customer (0,n) |
+| BookedAt | A reservation is booked at a table | many-one | Reservation (1,1) · DiningTable (0,n) |
+| Receives | A restaurant receives orders | many-one | CustomerOrder (1,1) · Restaurant (0,n) |
+| Orders | A customer places an order | many-one | CustomerOrder (0,1) · Customer (0,n) |
+| isa | An order can be a dine-in order or a delivery order (pickup orders need no extra attributes) | isa | — |
+| SeatedAt | A dine-in order is seated at a table (attribute: `party_size`) | many-one | DineInOrder (1,1) · DiningTable (0,n) |
+| ServedBy | A dine-in order is served by a staff member | many-one | DineInOrder (0,1) · Staff (0,n) |
+| Contains *(weak entity)* | An order contains order items | many-one | OrderItem (1,1) · CustomerOrder (1,n) |
+| OfItem | An order item is of a menu item | many-one | OrderItem (1,1) · MenuItem (0,n) |
+| ForOrder | A kitchen ticket is for an order | many-one | KitchenTicket (1,1) · CustomerOrder (0,n) |
+| OnTicket | An order item is on a kitchen ticket | many-one | OrderItem (0,1) · KitchenTicket (1,n) |
+| About | A review is about an order | one-one | Review (1,1) · CustomerOrder (0,1) |
 
 ### 4.4 Marketing and Analytics
 
-**Requirements covered:** requirements for this part will be added in Sprint 2 (see Section 2.2, G1)
+**Requirements covered:** [Section 3.4]
 
 **Entity sets**
 
@@ -437,14 +458,13 @@ The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relation
 
 **Relationships**
 
-| Relationship | Reads as | Multiplicity |
-|---|---|---|
-| Runs | A restaurant runs campaigns | many-one |
-| Promotes | A campaign promotes menu items | many-many |
-| Posts | A restaurant posts announcements | many-one |
-| PostedBy | An announcement is posted by a staff member | many-one |
-| RecordedFor *(weak entity)* | A weather observation is recorded for a restaurant | many-one |
-| Generates | Insights are generated for a restaurant | many-one |
+| Relationship | Reads as | Multiplicity | (min, max) |
+|---|---|---|---|
+| Runs | A restaurant runs campaigns | many-one | Campaign (1,1) · Restaurant (0,n) |
+| Promotes | A campaign promotes menu items | many-many | Campaign (1,n) · MenuItem (0,n) |
+| PostedBy | An announcement is posted by a staff member | many-one | Announcement (1,1) · Staff (0,n) |
+| RecordedFor *(weak entity)* | A weather observation is recorded for a restaurant | many-one | WeatherObservation (1,1) · Restaurant (0,n) |
+| Generates | Insights are generated for a restaurant | many-one | Insight (1,1) · Restaurant (0,n) |
 
 **Design decisions**
 
@@ -455,6 +475,47 @@ The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relation
 - **Derived values are not stored.** Stock levels, order totals, and gross pay are calculated from other data instead of being stored.
 - **Kitchen tickets.** An order can be sent to the kitchen in more than one batch, so KitchenTicket is its own entity set and each order item points to the ticket it is on.
 - **Analytics data.** WeatherObservation and Insight store the data the machine learning features in the backend already use, so the database now matches the backend.
+- **No *Posts* relationship.** An announcement is connected to its restaurant through its author (*PostedBy* → Staff → Restaurant). A direct *Posts* relationship would store the same fact twice and was a 3NF violation, so it was removed.
+
+
+### 4.5 Requirement ↔ ERD Checklist
+
+Every data requirement in Section 3 is matched to the ERD, and every entity set and relationship is used by at least one requirement.
+
+| Section | Data requirement | Entity sets | Relationships |
+|---|---|---|---|
+| 3.1 | Restaurants with id's | Restaurant | — |
+| 3.1 | Roles of each restaurant, with their department | Role | Defines |
+| 3.1 | Staff with id's, contact details, hire date, and active status | Staff | Holds |
+| 3.1 | Hourly staff with their hourly rate; salaried staff with their monthly salary | HourlyStaff, SalariedStaff | isa |
+| 3.1 | Login credentials for staff who use the app | StaffCredential | HasLogin |
+| 3.1 | Shifts: who works, start and end time | Shift | Works |
+| 3.1 | Swap requests: which shift, who covers, who decided, status | SwapRequest | Offers, Covers, DecidesSwap |
+| 3.1 | Time clock events: who, which shift, event type, time | TimeClockEvent | Clocks, Punches |
+| 3.1 | Time-off requests: who, dates, hours, reason, who decided, status | TimeOffRequest | Requests, DecidesTimeOff |
+| 3.1 | Pay records: who, pay period, hours worked, rate at that time, bonus, deductions | PayRecord | PaidTo |
+| 3.1 | Staffing requirements: date, time slot, department, number of staff needed | StaffingRequirement | Needs |
+| 3.2 | Menu categories with display order | MenuCategory | HasMenu |
+| 3.2 | Menu items with price and availability | MenuItem | InCategory |
+| 3.2 | Inventory items with unit, par level, and lead time | InventoryItem | HasInventory |
+| 3.2 | Recipes: quantity of each ingredient per dish | — | Uses (`qty_per_serving`) |
+| 3.2 | Stock movements: type, amount, cost, reason, time | StockMovement | Moves |
+| 3.3 | Dining tables with label, seats, and section | DiningTable | HasTable |
+| 3.3 | Customers with id's and a unique phone number | Customer | — |
+| 3.3 | Reservations: who, which table, when, party size | Reservation | BookedBy, BookedAt |
+| 3.3 | Orders: restaurant, channel, status, payment, tip, timestamps | CustomerOrder | Receives, Orders |
+| 3.3 | Dine-in details: table, server, party size | DineInOrder | isa, SeatedAt, ServedBy |
+| 3.3 | Delivery details: address, notes, courier, external reference | DeliveryOrder | isa |
+| 3.3 | Kitchen tickets: which order, batch number, status, priority, timestamps | KitchenTicket | ForOrder |
+| 3.3 | Order lines: dish, quantity, price at time of sale, notes, which ticket | OrderItem | Contains, OfItem, OnTicket |
+| 3.3 | Reviews: rating and comment, at most one per order | Review | About |
+| 3.4 | Campaigns: restaurant, name, start and end date, budget | Campaign | Runs |
+| 3.4 | Which menu items each campaign promotes | — | Promotes |
+| 3.4 | Announcements: author (the restaurant comes from the author), message, type, active status, time | Announcement | PostedBy |
+| 3.4 | Weather observations: restaurant, date, max and min temperature, condition, precipitation | WeatherObservation | RecordedFor |
+| 3.4 | Insights: restaurant, title, message, type, created and expiry time | Insight | Generates |
+
+**Result:** 30/30 data requirements matched; 29/29 entity sets and 35/35 relationships used by at least one requirement.
 
 ---
 
@@ -512,6 +573,7 @@ The ERD in Section 4 maps to **31 relations**.
 - Campaign(<ins>campaign_id</ins>: INT, restaurant_id: INT → Restaurant, name: VARCHAR(100), start_date: DATE, end_date: DATE, budget: DECIMAL(10,2))
 - CampaignItem(<ins>campaign_id</ins>: INT → Campaign, <ins>menu_item_id</ins>: INT → MenuItem)
 - Announcement(<ins>announcement_id</ins>: INT, restaurant_id: INT → Restaurant, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
+- Announcement(<ins>announcement_id</ins>: INT, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
 - WeatherObservation(<ins>restaurant_id</ins>: INT → Restaurant, <ins>observed_date</ins>: DATE, temp_max: DECIMAL(10,2), temp_min: DECIMAL(10,2), condition: ENUM('SUNNY', 'CLOUDY', 'RAIN', 'SNOW'), precipitation_mm: DECIMAL(10,2))
 - Insight(<ins>insight_id</ins>: INT, restaurant_id: INT → Restaurant, title: VARCHAR(100), message: TEXT, insight_type: ENUM('INFO', 'ALERT', 'SUCCESS'), created_at: DATETIME, expires_at: DATETIME)
 
@@ -538,10 +600,12 @@ The ERD in Section 4 maps to **31 relations**.
 | StaffCredential | {staff_id}, {username} | staff_id | any set containing staff_id *or* username | password_hash, force_reset, last_login_at |
 | Shift | {shift_id} | shift_id | any set containing shift_id | staff_id, start_at, end_at, notes |
 | SwapRequest | {swap_id} | swap_id | any set containing swap_id | shift_id, cover_staff_id, decided_by, status, created_at |
-| TimeClockEvent | {event_id} | event_id | any set containing event_id | staff_id, shift_id, event_type, occurred_at, note |
+| TimeClockEvent | {event_id}, {staff_id, occurred_at} | event_id | any set containing event_id, *or* containing both staff_id and occurred_at | shift_id, event_type, note |
 | TimeOffRequest | {request_id} | request_id | any set containing request_id | staff_id, decided_by, start_date, end_date, hours, reason, status, created_at |
 | PayRecord | {pay_record_id}, {staff_id, period_start} | pay_record_id | any set containing pay_record_id, *or* containing both staff_id and period_start | period_end, hours_worked, rate_snapshot, bonus, deductions |
 | StaffingRequirement | {requirement_id}, {restaurant_id, work_date, department, start_time} | requirement_id | any set containing requirement_id, *or* containing all of restaurant_id, work_date, department, and start_time | end_time, required_count |
+
+
 
 ### Menu and Inventory
 
@@ -573,7 +637,7 @@ The ERD in Section 4 maps to **31 relations**.
 |---|---|---|---|---|
 | Campaign | {campaign_id} | campaign_id | any set containing campaign_id | restaurant_id, name, start_date, end_date, budget |
 | CampaignItem (from the "Promotes" relationship) | {campaign_id, menu_item_id} | (campaign_id, menu_item_id) | the key itself | none |
-| Announcement | {announcement_id} | announcement_id | any set containing announcement_id | restaurant_id, author_id, message, announcement_type, is_active, created_at |
+| Announcement | {announcement_id} | announcement_id | any set containing announcement_id | author_id, message, announcement_type, is_active, created_at |
 | WeatherObservation | {restaurant_id, observed_date} | (restaurant_id, observed_date) | any set containing both restaurant_id and observed_date | temp_max, temp_min, condition, precipitation_mm |
 | Insight | {insight_id} | insight_id | any set containing insight_id | restaurant_id, title, message, insight_type, created_at, expires_at |
 ---
@@ -631,13 +695,11 @@ The non-trivial functional dependencies of each relation, in the notation X → 
 |---|---|
 | Campaign | campaign_id → restaurant_id, name, start_date, end_date, budget |
 | CampaignItem (from the "Promotes" relationship) | none (only the trivial FD campaign_id, menu_item_id → campaign_id, menu_item_id) |
-| Announcement | announcement_id → restaurant_id, author_id, message, announcement_type, is_active, created_at |
+| Announcement | announcement_id → author_id, message, announcement_type, is_active, created_at |
 | WeatherObservation | restaurant_id, observed_date → temp_max, temp_min, condition, precipitation_mm |
 | Insight | insight_id → restaurant_id, title, message, insight_type, created_at, expires_at |
 
-ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
-
-ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
+FDs that do not hold and the anomalies of the original schema are planned for Sprint 2 (Section 2.6, S2-G8).
 
 ### 7.2 BCNF Decompositions
 
@@ -788,10 +850,11 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 | StaffCredential | {staff_id}⁺ = all attributes<br>{username}⁺ = all attributes | ✓ |
 | Shift | {shift_id}⁺ = all attributes | ✓ |
 | SwapRequest | {swap_id}⁺ = all attributes | ✓ |
-| TimeClockEvent | {event_id}⁺ = all attributes | ✓ |
+| TimeClockEvent | {event_id}⁺ = all attributes<br>{staff_id, occurred_at}⁺ = all attributes<br>{shift_id}⁺ = {shift_id, staff_id} | 3NF |
 | TimeOffRequest | {request_id}⁺ = all attributes | ✓ |
 | PayRecord | {pay_record_id}⁺ = all attributes<br>{staff_id, period_start}⁺ = all attributes | ✓ |
 | StaffingRequirement | {requirement_id}⁺ = all attributes<br>{restaurant_id, work_date, department, start_time}⁺ = all attributes | ✓ |
+
 
 **Menu and Inventory**
 
@@ -814,7 +877,7 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 | DineInOrder | {order_id}⁺ = all attributes | ✓ |
 | DeliveryOrder | {order_id}⁺ = all attributes | ✓ |
 | KitchenTicket | {ticket_id}⁺ = all attributes<br>{order_id, batch_no}⁺ = all attributes | ✓ |
-| OrderItem | {order_id, line_no}⁺ = all attributes | ✓ |
+| OrderItem | {order_id, line_no}⁺ = all attributes<br>{ticket_id}⁺ = {ticket_id, order_id} (hidden FD from the ERD) | 3NF  |
 | Review | {review_id}⁺ = all attributes<br>{order_id}⁺ = all attributes | ✓ |
 
 **Marketing and Analytics**
@@ -843,7 +906,7 @@ Every relation in BCNF is also in 3NF. All decompositions D1–D8 are dependency
 |---|---|---|---|
 | OrderItem | ticket_id → order_id | *ForOrder* | In 3NF (N1) |
 | TimeClockEvent | shift_id → staff_id | *Works* | In 3NF (N2) |
-| Announcement | author_id → restaurant_id | Staff → Restaurant | Not in 3NF (N3) |
+| Announcement | author_id → restaurant_id | Staff → Restaurant | Not in 3NF, fixed |
 
 #### N1: OrderItem (kept in 3NF)
 
@@ -880,7 +943,7 @@ Every relation in BCNF is also in 3NF. All decompositions D1–D8 are dependency
   - The FD B, E → A is lost, and so is staff_id. A staff member who clocks in without a scheduled shift (shift_id is empty) could not be recorded at all.
 - **Decision:** keep TimeClockEvent in 3NF, because unscheduled clock-ins are a real case in the restaurant.
 
-#### N3: Announcement (3NF synthesis)
+#### N3: Announcement (3NF synthesis, fixed)
 
 | Letter | A | B | C | D | E | F | G |
 |---|---|---|---|---|---|---|---|
@@ -896,9 +959,9 @@ Every relation in BCNF is also in 3NF. All decompositions D1–D8 are dependency
   2. **One relation per left side:** R1 = {A, C, D, E, F, G} and R2 = {C, B}.
   3. **Key check:** R1 contains the key A, so no extra relation is needed.
   4. R2 = {author_id, restaurant_id} is already in Staff (staff_id → restaurant_id).
-- **After:** **Announcement**(announcement_id, author_id, message, announcement_type, is_active, created_at). restaurant_id and the *Posts* relationship are removed, because the restaurant comes from the author. Planned for Sprint 2 (`schema.sql` and Sections 4–6).
+- **After:** **Announcement**(announcement_id, author_id, message, announcement_type, is_active, created_at). restaurant_id and the *Posts* relationship are removed, because the restaurant comes from the author. Done in Sprint 1.
 
-**Summary:** 28 relations in BCNF, 2 relations (OrderItem, TimeClockEvent) in 3NF on purpose, and 1 relation (Announcement) to be fixed in Sprint 2.
+**Summary:** 29 relations in BCNF and 2 relations (OrderItem, TimeClockEvent) in 3NF on purpose. All 31 relations are at least in 3NF.
 
 ### 7.6 Fourth Normal Form and Multivalued Dependencies
 
@@ -971,7 +1034,7 @@ This FD is easy to miss: E, F, G → H cannot be used directly in R2 because E i
 - {C, D, F, G}⁺ in R2 = {C, D, F, G, H}, not all attributes, so it is a BCNF violation
 - Decompose: R21 = {C, D, F, G, H} (total pay is arithmetic, so it is not stored) and R22 = {A, B, C, D, F, G}
 - R22 is the final **PayRecord**. R1 (gross pay) is also arithmetic and is not stored.
-- 
+  
 #### Minimal bases of all relations
 
 
@@ -1022,7 +1085,7 @@ This FD is easy to miss: E, F, G → H cannot be used directly in R2 because E i
 |---|---|---|---|---|
 | Campaign | A = campaign_id, B = restaurant_id, C = name, D = start_date, E = end_date, F = budget | A → B, C, D, E, F | none | single attribute |
 | CampaignItem | A = campaign_id, B = menu_item_id | ∅ (no non-trivial FDs) | — | — |
-| Announcement | A = announcement_id, B = restaurant_id, C = author_id, D = message, E = announcement_type, F = is_active, G = created_at | A → C, D, E, F, G<br>C → B | A → B (given by A → C and C → B) | single attributes |
+| Announcement | A = announcement_id, B = author_id, C = message, D = announcement_type, E = is_active, F = created_at | A → B, C, D, E, F | none (restaurant_id was removed in Section 7.5, N3) | single attribute |
 | WeatherObservation | A = restaurant_id, B = observed_date, C = temp_max, D = temp_min, E = condition, F = precipitation_mm | A, B → C, D, E, F | none | A or B alone does not determine C, D, E, F (the weather depends on both the restaurant and the date) |
 | Insight | A = insight_id, B = restaurant_id, C = title, D = message, E = insight_type, F = created_at, G = expires_at | A → B, C, D, E, F, G | none | single attribute |
 
@@ -1035,7 +1098,7 @@ Note: Might get revised!
 
 | File | Contents |
 |---|---|
-| `sql/schema.sql` | DDL for the 18 relations |
+| `sql/schema.sql` | DDL for the 31 relations with 41 foreign key and required NULL columns |
 | `sql/seed.sql` | Sample data for two restaurants (Possibly in the next sprint) |
 | `sql/demo.sql` | to test to meet with the rubric (Possibly in the next sprint) |
 
@@ -1043,19 +1106,14 @@ Note: Might get revised!
 
 ## 9. Known Limitations
 
-#ASK TO TA FOR THE NEXT SPRINT
-
 1. **Cross-restaurant consistency.** Every row belongs to one restaurant, so each restaurant's data stays separate. However, the database does not check that connected data belongs to the *same* restaurant. For example, an order from Harbour Grill could contain a menu item from Kebab Corner, because OrderItem only checks that the menu item exists.
    - **How it is handled now:** the application always filters by the logged-in restaurant, so users only ever see and select their own restaurant's menu items, tables, and staff.
-   - **How we will fix it:** next sprint we will compare two options:
-     - **Add restaurant_id to the connecting tables** 
-     - **Keep the tables in BCNF and add a check** 
+   - **How we will fix it:** two options were compared. Adding restaurant_id to the connecting tables breaks BCNF, so the tables stay in BCNF and the check is added as a **trigger** in Sprint 2 (S2-G6).
 
 
 Note: The Limitations will be updated in the next sprints. 
 
 ---
-## 10. Next Sprint Goals (Sprint 2)
 
 ## 10. Next Sprint Goals
 
@@ -1070,41 +1128,36 @@ The design is complete (31 relations, every relation at least in 3NF). Sprint 2 
 | **S2-G3.** Create `seed.sql` with realistic data for two restaurants | Queries cannot be tested on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors; every query returns at least 1 row; the expected output of each query is written in the document and matches the real output |
 | **S2-G4.** Use advanced SQL features where the requirement needs them | Only simple SELECTs are possible now | DA: joins, aggregation, subqueries, set operations | Each feature appears in at least one query, with the reason it is needed: inner join, outer join, GROUP BY + HAVING, subquery (IN / EXISTS / NOT EXISTS), set operation (UNION / set difference), ORDER BY + LIMIT, at least one aggregate per part |
 | **S2-G5.** Add views for the four dashboards (Owner, Employee, Order-system, Kitchen Display) | The app would repeat the same long queries in many places | DA; BE L1 | At least **4** views in `schema.sql`, one per dashboard, each built from one of the S2-G1 queries |
-| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), and their RA form | Business rules and the cross-restaurant rule are not enforced (Sections 2.2, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | Every rule written as "query = ∅" in RA; every CHECK and the trigger have a failing test; `tests.sql` reports **0** unexpected results |
-| **S2-G7.** Close the design checks from this sprint's modules | Announcement is not in 3NF (7.5, N3); ERD-implied FDs are not cross-checked for all relationships; the isa style and ERD quality were not compared formally | DM L2, DM L3: ERDs to FDs, 3NF, inheritance, improving conceptual designs | Announcement in BCNF with **0** mismatches between the ERD, Sections 4–7, and `schema.sql`; **35/35** relationships mapped to their FD; 2 isa hierarchies compared in 3 styles; all 8 Batini criteria evaluated with evidence |
+| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" participation triggers (Section 4), and their RA form | Business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written as "query = ∅" in RA; every CHECK and trigger has a failing test; `tests.sql` reports **0** unexpected results |
+| **S2-G7.** Close the design checks from this sprint's modules | ERD-implied FDs are not cross-checked for all relationships; the isa style and ERD quality were not compared formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | **35/35** relationships mapped to their FD; 2 isa hierarchies compared in 3 styles; all 8 Batini criteria evaluated with evidence; every relation added in Sprint 2 checked for BCNF/3NF |
+| **S2-G8.** Answer the remaining Kickoff questions: FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, at least 1 FD that does **not** hold is listed with the reason; update, insertion, and deletion anomalies shown for at least **3** original models (e.g., D1, D5, D7); **4/4** Kickoff questions answered |
+
+**Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
 **Module coverage.** Each module competency from Sprint 1 is developed further in Sprint 2:
 
 | Module | Sprint 2 goal |
 |---|---|
 | Constraints in Relational Algebra | S2-G2, S2-G6 |
-| Weak Entity Sets & Inheritance | S2-G7 (isa comparison); queries over subclasses in S2-G1 (e.g., dine-in vs. delivery) |
+| Weak Entity Sets & Inheritance | S2-G7 (isa comparison); queries over subclasses in S2-G1 |
 | Improving Conceptual Designs | S2-G7  |
 | ERDs to FDs | S2-G7 (35/35) |
-| Projecting FDs and minimal bases | S2-G7 (Announcement decomposition shows projected FDs as a minimal basis) |
-| 3NF | S2-G7 (Announcement via 3NF synthesis) |
-| 4NF and MVDs | S2-G7 (every new view and query output checked for MVD-style repetition) |
+| Projecting FDs and minimal bases | S2-G7  |
+| 3NF | S2-G7 |
+| 4NF and MVDs | S2-G7  |
 
-
-
-The Final plan is written in full at the end of Sprint 2, once the Sprint 2 module topics are covered.
 
 ### 10.3 Questions for the TA-client
-1. …
-**Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
-### Questions for the TA-client
-
-1. Are the superkeys and candidate keys of DiningTable and Review
-2. SwapRequest decomposition (D2) 
-3. Should we also list functional dependencies that do not hold?
-4. Should we document the anomalies of the original schema in more detail? ... Look notes for more
+1. Should we also list functional dependencies that do not hold? (Kickoff question 3, S2-G8)
+2. Should we document the anomalies of the original schema in more detail? (Kickoff question 4, S2-G8)
+3. Which staff data is sensitive (password_hash, phone, email, pay), and should access to it be restricted in the database?
 
 ---
 
 ## 11. Use of Generative AI and Prior Work
 
-**Prior work.** The original Prisma schema and application were written organically by Caner Kaan Balseven during an entrepreneurship co-op term, before this course. Everything in this document and repository is a redesign done for CSC 370. In Addition, 'schema.sql' was kind of already implemented in my co-op work term; I only converted the tables Prisma ORM to SQL also did not focus on NULL values, etc. in this sprint. I will be focusing on these in the next sprint. 
+**Prior work.** The original Prisma schema and application were written organically by Caner Kaan Balseven during an entrepreneurship co-op term, before this course. Everything in this document and repository is a redesign done for CSC 370. In Addition, 'schema.sql' was kind of already implemented in my co-op work term; I only converted the tables Prisma ORM to SQL also did not focus on NULL values at first; NOT NULL / NULL were added in Sprint 1. I will be focusing on these in the next sprint. 
 
 **Generative AI.**
 
@@ -1116,7 +1169,7 @@ The Final plan is written in full at the end of Sprint 2, once the Sprint 2 modu
 
 ## 12. References
 
-- Chester, S. (2026). *CSC 370 lecture slides:* Storing Data with SQL; Retrieving Data with SQL; Conceptual Design; Multiplicity; FDs and Keys; BCNF Decomposition. University of Victoria.
+- Chester, S. (2026). *CSC 370 lecture slides:* Storing Data with SQL; Retrieving Data with SQL; Conceptual Design; Multiplicity; FDs and Keys; BCNF Decomposition. Storing Data with SQL; Retrieving Data with SQL; Conceptual Design; Multiplicity; FDs and Keys; BCNF Decomposition; Constraints in Relational Algebra; Weak Entity Sets & Inheritance; Improving Conceptual Designs; ERDs to FDs; Projecting FDs; Third Normal Form; 4NF & Multivalued Dependencies. University of Victoria.
 
   **Videos**
 
