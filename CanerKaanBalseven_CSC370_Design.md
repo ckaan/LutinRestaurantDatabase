@@ -91,10 +91,10 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 | **G1.** Complete the ERD: add the out-of-scope part and the data needed by the recommendation (machine learning) features that already exist in the backend | These parts were not in the ERD and the database was never adjusted for the machine learning features | DM L2: maps requirements onto schemata; DM L4: designs for extensibility | Every out-of-scope part in Section 3.4 has requirements in Section 3 and appears in the ERD; every new relation passes the BCNF check | **Mostly met** | ERD v2 (Section 4): 13 new entity sets for labour, kitchen tickets, marketing, and analytics (weather, insights); all 31 relations pass the BCNF check (Section 7.3). Requirements for the new parts: see 2.2 |
 | **G2.** Double-check the whole ERD and add (min, max) participation to every relationship | The ERD was not final and relationships only showed arrowheads | DM L2: minimal and complete design; DM L3: systematically evaluates a schema | 100% of relationships have (min, max) labels; a requirement ↔ ERD checklist with 0 unmatched items | **Partially met** | Whole ERD reviewed and corrected (typos, duplicate attributes, subclass identifiers, ServedBy moved to DineInOrder); (min, max) labels: see 2.2 |
 | **G3.** Apply Level 3 design techniques: inheritance for CustomerOrder (dine-in, pickup, delivery) and Staff (hourly, salaried); weak entity sets for Role and OrderItem | Attributes that are NULL by design (Section 9, item 2) | DM L3: uses inheritance and weak entity sets; considers the impact of NULL values on FDs | Attributes that must be NULL for some rows go from **6** (4 delivery columns + 2 pay columns) to **0**; Role and OrderItem drawn as weak entity sets | **Met** | Section 5: Staff → HourlyStaff / SalariedStaff and CustomerOrder → DineInOrder / DeliveryOrder (6 → **0** NULL-by-design attributes); Role, OrderItem, and WeatherObservation are weak entity sets (Sections 4–6) |
-| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, plus the remaining decompositions of the original schema | Only D1 and D2 were written up | DM L2: eliminates anomalies; DM L3: applies alternative normal forms | All five decompositions (D1–D5) written with closures; **100%** of relations in the BCNF verification table | **Met** | Section 7.2: **8** decompositions (D1–D8) with closures, plus 6 original models removed as derived values; Sections 6, 7.1, 7.3: keys, FDs, and BCNF check for **31/31** relations |
-| **G5.** Write the SQL DDL for the new relations and revise the implementation | The DDL covered only 18 relations | DM L1: writes SQL that implements a relational design | `schema.sql` runs with **0** errors and creates every relation in Section 5 | *[Met / Not met]* | *[schema.sql: number of tables created]* |
+| **G4.** Complete the normalisation: keys, FDs, and BCNF check for the new relations, the remaining decompositions of the original schema, **projecting FDs and minimal bases** for each decomposition, and the alternative normal forms **3NF and 4NF** | Only D1 and D2 were written up; the plan did not name minimal bases, projecting FDs, or 4NF (Kickoff feedback) | DM L2: eliminates anomalies; DM L3: applies alternative normal forms (3NF, 4NF), projects FDs and finds minimal bases | All decompositions written with closures; projected FDs for 100% of decompositions; **100%** of relations in the BCNF verification table; every relation checked for 3NF and 4NF | **Met** | Section 7.2: **8** decompositions (D1–D8) with closures; Section 7.7: projected FDs and minimal bases for **8/8** decompositions; Sections 6, 7.1, 7.3: keys, FDs, and BCNF check for all 31 relations; Sections 7.5–7.6: **28 in BCNF, 2 in 3NF on purpose, 1 to fix in Sprint 2**, no 4NF violations |
+| **G5.** Write the SQL DDL for the new relations and revise the implementation, **declaring every foreign key** | The DDL covered only 18 relations and had no FOREIGN KEY constraints (Kickoff feedback, S6) | DM L1: writes SQL that implements a relational design; BE L1: database never enters an inconsistent state | `schema.sql` runs with **0** errors and creates every relation in Section 5; every ID column that refers to another relation has a FOREIGN KEY; invalid references are **rejected** | **Met** | `schema.sql`: **31/31** tables, **42** FOREIGN KEY constraints, **0** errors; `fk_tests.sql`: **6/6** invalid statements rejected (Section 8) |
 | **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9, item 1) | DM L3: assesses incongruity between conceptual and relational schemata | Both options compared and one chosen; a test adding another restaurant's menu item to an order is **rejected** (or scheduled for Sprint 2 if a trigger is chosen) | **Not met (moved to Sprint 2)** | See 2.2 |
-| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | *[Met / Not met]* | *[list the feedback items and fixes]* |
+| **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | **Met** | Section 2.5: **3/3** feedback items resolved |
 | **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty (Section 9, item 4) | DM L1: writes SQL that implements a relational design, selects appropriate data types; BE L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** | **Partially met** | Data types reviewed (Section 5: every money and quantity value DECIMAL(10,2), fixed value sets as ENUM, TIME for time slots); NOT NULL and CHECK: see 2.2 |
 | **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | **Partially met** | Sections 5–7 updated to match the ERD (superkey cells fixed, Role weak entity, closures written with ⁺); TA questions: see 2.2 |
 
@@ -113,28 +113,42 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 | G9 | Consistency with `schema.sql`, and the TA's answers to Section 10.1 | `schema.sql` depends on G5; the TA questions are waiting for the TA-client meeting | Partial: the document sections are consistent with each other and the ERD | Finish after G5 and the TA meeting |
 
 
-
 ### 2.3 Competency Mapping
 
 | Competency bullet | Covered by |
 |---|---|
 | DM L1: Selects appropriate data types for tables | [Section 5](#5-relational-schema), G8 |
-| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation), G5, G8 |
+| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation) (`schema.sql`: 31 tables, 42 foreign keys), G5, G8 |
 | DM L1: Documents relationships with correct ERDs | [Section 4](#4-entity-relationship-diagram), G2 |
-| DM L2: Identifies dependencies among attributes and appropriate keys | [Section 6](#6-keys), [Section 7.1](#71-functional-dependencies) |
+| DM L2: Identifies dependencies among attributes and appropriate keys | [Section 6](#6-keys), [Section 7.1](#71-functional-dependencies), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (FDs read from the ERD) |
 | DM L2: Eliminates data anomalies with effective normalisation | [Section 7.2](#72-bcnf-decompositions), G4 |
-| DM L2: Justifies the quality of a schema through a theoretical lens | [Section 7.3](#73-bcnf-verification), G9 |
+| DM L2: Justifies the quality of a schema through a theoretical lens | [Section 7.3](#73-bcnf-verification), [Section 7.5](#75-third-normal-form-and-dependency-preservation), [Section 7.6](#76-fourth-normal-form-and-multivalued-dependencies), G9 |
 | DM L2: Maps requirements onto schemata and vice versa | [Section 3](#3-requirements), [Section 4](#4-entity-relationship-diagram), G1, G2 |
-| DM L3: Uses inheritance and weak entity sets when they are more expressive | G3, [Section 5](#5-relational-schema) |
-| DM L3: Considers the impact of NULL values and inheritance on FDs | G3, [Section 7.2](#72-bcnf-decompositions) (D7) |
-| DM L3: Assesses incongruity between conceptual and relational schemata | G6, [Section 7.2](#72-bcnf-decompositions) (D4, D7) |
-| DM L3: Systematically evaluates strengths and weaknesses of a schema | G2, G9 |
-| BE L1: Ensures a database never enters an inconsistent state | G8 |
+| DM L3: Uses inheritance and weak entity sets when they are more expressive | G3, [Section 4](#4-entity-relationship-diagram), [Section 5](#5-relational-schema) |
+| DM L3: Considers the impact of NULL values and inheritance on FDs | G3, [Section 7.2](#72-bcnf-decompositions) (D7), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (N2: clock-ins without a shift) |
+| DM L3: Assesses incongruity between conceptual and relational schemata | G6, [Section 7.2](#72-bcnf-decompositions) (D4, D7), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (N1–N3: hidden FDs from ERD relationships) |
+| DM L3: Applies alternative normal forms (3NF, 4NF) | G4, [Section 7.5](#75-third-normal-form-and-dependency-preservation) (N1–N3), [Section 7.6](#76-fourth-normal-form-and-multivalued-dependencies) (M1–M2) |
+| DM L3: Projects FDs onto sub-relations and finds minimal bases | G4, [Section 7.7](#77-projecting-fds-and-minimal-bases), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (N3: 3NF synthesis) |
+| DM L3: Systematically evaluates strengths and weaknesses of a schema | G2, G9, [Section 7.5](#75-third-normal-form-and-dependency-preservation) (BCNF vs. 3NF decisions) |
+| BE L1: Ensures a database never enters an inconsistent state | G5 (foreign keys reject invalid references, [Section 8](#8-implementation)), G8 |
+
 
 ### 2.4 Previous Sprint (Kickoff) Recap
 
-The Kickoff (version 1.0) delivered the requirements, the first ERD, the relational schema, keys, FDs, two BCNF decompositions, and `schema.sql`. Two things were only partially met: (min, max) participation on the ERD (now G2) and the remaining decompositions (now G4). The full Kickoff version can be seen at the commit linked in the Version History.
+The Kickoff (version 1.0) delivered the requirements, the first ERD, the relational schema, keys, FDs, two BCNF decompositions, and `schema.sql`. Three things were not fully met:
+- (min, max) participation on the ERD (now G2)
+- the remaining decompositions (now G4)
+- **success criterion S6 ("the schema rejects invalid data") was not met**: `schema.sql` represented relationships with ID columns (e.g., OrderItem.order_id) but did not declare FOREIGN KEY constraints, so an order item for a non-existent order was accepted. This was missed in the Kickoff's list of partially met goals. It is fixed in this sprint (G5).
 
+The full Kickoff version can be seen at the commit linked in the Version History.
+
+### 2.5 Kickoff Feedback and Fixes
+
+| # | Feedback | Fix | Where |
+|---|---|---|---|
+| 1 | The plan did not name minimal bases, projecting FDs, or 4NF | Added to G4; projected FDs and minimal bases for every decomposition; 3NF and 4NF checks | G4, Sections 7.5–7.7 |
+| 2 | The missing foreign keys were not acknowledged as an unmet goal | Acknowledged in the Kickoff recap as S6 not met | Section 2.4 |
+| 3 | No FOREIGN KEY constraints, so invalid data was accepted (S6 not met) | Every relationship column now has FOREIGN KEY ... REFERENCES; tests show invalid rows are rejected | G5, Section 8, `schema.sql`, `fk_tests.sql` |
 ---
 ## 3. Requirements
 
@@ -924,6 +938,93 @@ If the two many-many relationships *Uses* and *Promotes* were stored in one tabl
 - So the correct model is an FD, not an MVD: each order line points to its ticket, order_id, line_no → ticket_id (*OnTicket*). This is why KitchenTicket is its own entity set instead of a list inside the order.
 
 **4NF check:** apart from the case avoided in M1, no relation in Section 5 stores two independent multi-valued facts about the same key, so there are no non-trivial MVDs. Every relation in BCNF is therefore also in 4NF.
+
+### 7.7 Projecting FDs and Minimal Bases
+
+**Definitions**
+
+- **Projecting FDs:** after splitting R into R1 and R2, the FDs of each Ri are found by computing the closure of every subset of Ri's attributes (using *all* the original FDs), keeping only the attributes that are in Ri, and removing trivial FDs.
+- **Minimal basis:** a set of FDs where (1) every right side is a single attribute, (2) no FD can be removed, and (3) no attribute can be removed from a left side, without changing the closures.
+
+#### Worked example: D4 PayRecord
+
+R(A, B, C, D, E, F, G, H) with FDs A → B, C, D, E, F, G, H and C, D → E and E, F, G → H.
+
+**Step 1: decompose on C, D → E**
+- R1 = {C, D}⁺ = {C, D, E}
+- R2 = {A, B, C, D, F, G, H}
+
+**Step 2: project the FDs onto R2**
+- {A}⁺ = all attributes → A → B, C, D, F, G, H
+- {C, D}⁺ = {C, D, E} → only {C, D} is in R2, so it is trivial
+- {C, D, F, G}⁺ = {C, D, E, F, G, H} → in R2 this gives **C, D, F, G → H**
+- No smaller set determines H ({C, D, F}⁺, {D, F, G}⁺, … do not contain E, so H cannot be reached)
+
+This FD is easy to miss: E, F, G → H cannot be used directly in R2 because E is gone, but projecting finds it through C, D → E.
+
+**Step 3: minimal basis of R2**
+- Split: A → B, A → C, A → D, A → F, A → G, A → H, C, D, F, G → H
+- A → H can be removed, because A → C, A → D, A → F, A → G and C, D, F, G → H already give it
+- F2 = {A → B, A → C, A → D, A → F, A → G, C, D, F, G → H}
+
+**Step 4: check R2 again**
+- {C, D, F, G}⁺ in R2 = {C, D, F, G, H}, not all attributes, so it is a BCNF violation
+- Decompose: R21 = {C, D, F, G, H} (total pay is arithmetic, so it is not stored) and R22 = {A, B, C, D, F, G}
+- R22 is the final **PayRecord**. R1 (gross pay) is also arithmetic and is not stored.
+- 
+#### Minimal bases of all relations
+
+
+**Staff and Labour**
+
+| Relation | Letters | Minimal basis | Removed as redundant | Left sides reduced? |
+|---|---|---|---|---|
+| Restaurant | A = restaurant_id, B = name, C = address, D = phone, E = currency | A → B, C, D, E | none | single attribute |
+| Role | A = restaurant_id, B = role_name, C = department | A, B → C | none | A or B alone does not determine C |
+| Staff | A = staff_id, B = restaurant_id, C = role_name, D = name, E = email, F = phone, G = hire_date, H = is_active | A → B, C, D, E, F, G, H | none | single attribute |
+| HourlyStaff | A = staff_id, B = hourly_rate | A → B | none | single attribute |
+| SalariedStaff | A = staff_id, B = monthly_salary | A → B | none | single attribute |
+| StaffCredential | A = staff_id, B = username, C = password_hash, D = force_reset, E = last_login_at | A → B, C, D, E<br>B → A | B → C, D, E (given by B → A and A → C, D, E) | single attributes |
+| Shift | A = shift_id, B = staff_id, C = start_at, D = end_at, E = notes | A → B, C, D, E | none | single attribute |
+| SwapRequest | A = swap_id, B = shift_id, C = cover_staff_id, D = decided_by, E = status, F = created_at | A → B, C, D, E, F | none | single attribute |
+| TimeClockEvent | A = event_id, B = staff_id, C = shift_id, D = event_type, E = occurred_at, F = note | A → C, D, E, F<br>C → B<br>B, E → A | A → B (given by A → C and C → B) | B or E alone does not determine A |
+| TimeOffRequest | A = request_id, B = staff_id, C = decided_by, D = start_date, E = end_date, F = hours, G = reason, H = status, I = created_at | A → B, C, D, E, F, G, H, I | none | single attribute |
+| PayRecord | A = pay_record_id, B = staff_id, C = period_start, D = period_end, E = hours_worked, F = rate_snapshot, G = bonus, H = deductions | A → B, C, D, E, F, G, H<br>B, C → A | B, C → D, E, F, G, H (given by B, C → A) | B or C alone does not determine A |
+| StaffingRequirement | A = requirement_id, B = restaurant_id, C = work_date, D = start_time, E = end_time, F = department, G = required_count | A → B, C, D, E, F, G<br>B, C, D, F → A | B, C, D, F → E, G (given by B, C, D, F → A) | no subset of {B, C, D, F} determines A |
+
+**Menu and Inventory**
+
+| Relation | Letters | Minimal basis | Removed as redundant | Left sides reduced? |
+|---|---|---|---|---|
+| MenuCategory | A = category_id, B = restaurant_id, C = name, D = sort_order | A → B, C, D<br>B, C → A | B, C → D (given by B, C → A) | B or C alone does not determine A |
+| MenuItem | A = menu_item_id, B = category_id, C = name, D = price, E = is_available | A → B, C, D, E<br>B, C → A | B, C → D, E (given by B, C → A) | B or C alone does not determine A |
+| InventoryItem | A = inventory_item_id, B = restaurant_id, C = name, D = unit, E = par_level, F = lead_time_days | A → B, C, D, E, F<br>B, C → A | B, C → D, E, F (given by B, C → A) | B or C alone does not determine A |
+| RecipeLine | A = menu_item_id, B = inventory_item_id, C = qty_per_serving | A, B → C | none | A or B alone does not determine C (the quantity depends on both the dish and the ingredient) |
+| StockMovement | A = movement_id, B = inventory_item_id, C = movement_type, D = quantity_delta, E = unit_cost, F = reason, G = occurred_at | A → B, C, D, E, F, G | none | single attribute |
+
+**Front of House**
+
+| Relation | Letters | Minimal basis | Removed as redundant | Left sides reduced? |
+|---|---|---|---|---|
+| DiningTable | A = table_id, B = restaurant_id, C = label, D = seats, E = section | A → B, C, D, E<br>B, C → A | B, C → D, E (given by B, C → A) | B or C alone does not determine A |
+| Customer | A = customer_id, B = name, C = phone, D = email | A → B, C, D<br>C → A | C → B, D (given by C → A) | single attributes |
+| Reservation | A = reservation_id, B = table_id, C = customer_id, D = reserved_for, E = party_size, F = status | A → B, C, D, E, F<br>B, D → A | B, D → C, E, F (given by B, D → A) | B or D alone does not determine A |
+| CustomerOrder | A = order_id, B = restaurant_id, C = customer_id, D = channel, E = status, F = payment_type, G = tip, H = created_at, I = started_at, J = finished_at | A → B, C, D, E, F, G, H, I, J | none | single attribute |
+| DineInOrder | A = order_id, B = table_id, C = server_id, D = party_size | A → B, C, D | none | single attribute |
+| DeliveryOrder | A = order_id, B = delivery_address, C = delivery_notes, D = courier, E = external_order_ref | A → B, C, D, E | none | single attribute |
+| KitchenTicket | A = ticket_id, B = order_id, C = batch_no, D = status, E = is_priority, F = created_at, G = completed_at | A → B, C, D, E, F, G<br>B, C → A | B, C → D, E, F, G (given by B, C → A) | B or C alone does not determine A |
+| OrderItem | A = order_id, B = line_no, C = menu_item_id, D = ticket_id, E = quantity, F = unit_price, G = notes | A, B → C, D, E, F, G<br>D → A | none | A or B alone does not determine the line |
+| Review | A = review_id, B = order_id, C = rating, D = comment, E = created_at | A → B, C, D, E<br>B → A | B → C, D, E (given by B → A) | single attributes |
+
+**Marketing and Analytics**
+
+| Relation | Letters | Minimal basis | Removed as redundant | Left sides reduced? |
+|---|---|---|---|---|
+| Campaign | A = campaign_id, B = restaurant_id, C = name, D = start_date, E = end_date, F = budget | A → B, C, D, E, F | none | single attribute |
+| CampaignItem | A = campaign_id, B = menu_item_id | ∅ (no non-trivial FDs) | — | — |
+| Announcement | A = announcement_id, B = restaurant_id, C = author_id, D = message, E = announcement_type, F = is_active, G = created_at | A → C, D, E, F, G<br>C → B | A → B (given by A → C and C → B) | single attributes |
+| WeatherObservation | A = restaurant_id, B = observed_date, C = temp_max, D = temp_min, E = condition, F = precipitation_mm | A, B → C, D, E, F | none | A or B alone does not determine C, D, E, F (the weather depends on both the restaurant and the date) |
+| Insight | A = insight_id, B = restaurant_id, C = title, D = message, E = insight_type, F = created_at, G = expires_at | A → B, C, D, E, F, G | none | single attribute |
 
 ---
 
