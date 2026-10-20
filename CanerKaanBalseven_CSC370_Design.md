@@ -262,39 +262,54 @@ NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA
 | Rectangle | Entity set |
 | Ellipse | Attribute; an **underlined** attribute is the entity set's identifier |
 | Diamond | Relationship; an ellipse attached to a diamond is a relationship attribute |
+| Triangle (ISA) | Inheritance; the subclass gets the superclass identifier and adds its own attributes |
+| "Weak Entity" label on a diamond | Identifying relationship of a weak entity set |
 | Arrowhead into an entity set | "At most one" on that side of the relationship |
 | No arrowhead | "Many" on that side |
 | Arrowheads on both sides | One-one relationship |
 
-Each relationship will also described with its (min, max) participation in the next sprint. 
+Each relationship will also be described with its (min, max) participation in the next sprint (see Section 2.2, G2).
 
-The diagram has **16 entity sets** and **21 relationships**.
-### 4.1 Staff
+The diagram has **29 entity sets** (16 from the Kickoff + 13 new), **35 relationships**, and **2 isa hierarchies**. The two many-many relationships (*Uses* and *Promotes*) become the mapping relations RecipeLine and CampaignItem, so the ERD maps to the **31 relations** in Section 5.
 
-**Requirements covered:** [Section 3.1]
+### 4.1 Staff and Labour
+
+**Requirements covered:** [Section 3.1] (requirements for the new labour parts: see Section 2.2, G1)
 
 **Entity sets**
 
 | Entity set | Identifier | Represents |
 |---|---|---|
-| Restaurant | restaurant_id | A restaurant using the system ) |
-| Role | role_id | A job title defined by a restaurant, such as Server or Line Cook |
+| Restaurant | restaurant_id | A restaurant using the system |
+| Role *(weak)* | restaurant_id + role_name | A job title defined by a restaurant, such as Server or Line Cook |
 | Staff | staff_id | An employee of a restaurant |
+| HourlyStaff *(isa Staff)* | staff_id (inherited) | A staff member paid by the hour |
+| SalariedStaff *(isa Staff)* | staff_id (inherited) | A staff member paid a monthly salary |
 | StaffCredential | username | The login details of a staff member who uses the app |
-| Shift | shift_id | A scheduled block of work for one staff member) |
+| Shift | shift_id | A scheduled block of work for one staff member |
 | SwapRequest | swap_id | An offer to give away a shift, possibly covered by someone else |
+| TimeClockEvent | event_id | One clock-in, clock-out, or break punch |
+| TimeOffRequest | request_id | A staff member's request for days off |
+| PayRecord | pay_record_id | The pay of one staff member for one pay period |
+| StaffingRequirement | requirement_id | How many staff a department needs for a time slot on a date |
 
 **Relationships**
 
 | Relationship | Reads as | Multiplicity |
 |---|---|---|
-| Defines | A restaurant defines roles | many-one |
+| Defines *(weak entity)* | A restaurant defines roles | many-one |
 | Holds | A staff member holds a role | many-one |
+| isa | A staff member is either hourly or salaried | isa |
 | HasLogin | A staff member has a login | one-one |
 | Works | A shift is worked by a staff member | many-one |
 | Offers | A swap request offers a shift | many-one |
 | Covers | A staff member covers a swap request | many-one |
-
+| DecidesSwap | A manager approves or denies a swap request | many-one |
+| Clocks | A staff member logs time clock events | many-one |
+| Punches | A time clock event is punched for a shift | many-one |
+| Requests | A staff member makes time-off requests | many-one |
+| PaidTo | A pay record is paid to a staff member | many-one |
+| Needs | A restaurant needs staffing requirements | many-one |
 
 ### 4.2 Menu and Inventory
 
@@ -304,7 +319,7 @@ The diagram has **16 entity sets** and **21 relationships**.
 
 | Entity set | Identifier | Represents |
 |---|---|---|
-| MenuCategory | category_id | A section of a restaurant's menu, such as Mains or Drink |
+| MenuCategory | category_id | A section of a restaurant's menu, such as Mains or Drinks |
 | MenuItem | menu_item_id | A dish or drink that can be ordered |
 | InventoryItem | inventory_item_id | An ingredient or supply the restaurant keeps in stock |
 | StockMovement | movement_id | One logged change to the quantity of an inventory item |
@@ -321,7 +336,7 @@ The diagram has **16 entity sets** and **21 relationships**.
 
 ### 4.3 Front of House
 
-**Requirements covered:** [Section 3.3]
+**Requirements covered:** [Section 3.3] (requirements for kitchen tickets: see Section 2.2, G1)
 
 **Entity sets**
 
@@ -329,9 +344,12 @@ The diagram has **16 entity sets** and **21 relationships**.
 |---|---|---|
 | DiningTable | table_id | A physical table in a restaurant |
 | Customer | customer_id | A person who orders or reserves |
-| Reservation | reservation_id | A booking of a table for a date and time and name |
+| Reservation | reservation_id | A booking of a table for a date, time, and name |
 | CustomerOrder | order_id | An order placed at a restaurant |
-| OrderItem | order_item_id | One line of an order |
+| DineInOrder *(isa CustomerOrder)* | order_id (inherited) | An order eaten at a table |
+| DeliveryOrder *(isa CustomerOrder)* | order_id (inherited) | An order delivered to an address, in-house or by Uber Eats |
+| KitchenTicket | ticket_id | One batch of an order sent to the kitchen display |
+| OrderItem *(weak)* | order_id + line_no | One line of an order |
 | Review | review_id | A customer's rating of an order |
 
 **Relationships**
@@ -342,16 +360,49 @@ The diagram has **16 entity sets** and **21 relationships**.
 | BookedBy | A reservation is booked by a customer | many-one |
 | BookedAt | A reservation is booked at a table | many-one |
 | Receives | A restaurant receives orders | many-one |
-| Orders | A customer orders an order | many-one |
+| Orders | A customer places an order | many-one |
+| isa | An order can be a dine-in order or a delivery order (pickup orders need no extra attributes) | isa |
 | SeatedAt | A dine-in order is seated at a table (attribute: `party_size`) | many-one |
 | ServedBy | A dine-in order is served by a staff member | many-one |
-| Contains | An order contains order items | many-one |
+| Contains *(weak entity)* | An order contains order items | many-one |
 | OfItem | An order item is of a menu item | many-one |
+| ForOrder | A kitchen ticket is for an order | many-one |
+| OnTicket | An order item is on a kitchen ticket | many-one |
 | About | A review is about an order | one-one |
+
+### 4.4 Marketing and Analytics
+
+**Requirements covered:** requirements for this part will be added in Sprint 2 (see Section 2.2, G1)
+
+**Entity sets**
+
+| Entity set | Identifier | Represents |
+|---|---|---|
+| Campaign | campaign_id | A marketing campaign run by a restaurant |
+| Announcement | announcement_id | A message posted to the staff dashboard |
+| WeatherObservation *(weak)* | restaurant_id + observed_date | The weather at a restaurant on one day, used by the recommendation features |
+| Insight | insight_id | A recommendation generated for the owner/manager |
+
+**Relationships**
+
+| Relationship | Reads as | Multiplicity |
+|---|---|---|
+| Runs | A restaurant runs campaigns | many-one |
+| Promotes | A campaign promotes menu items | many-many |
+| Posts | A restaurant posts announcements | many-one |
+| PostedBy | An announcement is posted by a staff member | many-one |
+| RecordedFor *(weak entity)* | A weather observation is recorded for a restaurant | many-one |
+| Generates | Insights are generated for a restaurant | many-one |
 
 **Design decisions**
 
-For all entities, relationships, and attributes this is not the final version of it. When we finalize our whole ERD in the next sprint, all of them will be double-checked and we will create new logic (attributes, relationships, etc) to meet with machine learning aspect of this project, which was already implemented in the backend but the database was not adjusted. 
+- **Inheritance (isa).** Staff is split into HourlyStaff and SalariedStaff, and CustomerOrder into DineInOrder and DeliveryOrder. Each subclass only holds its own attributes, so the 6 attributes that had to be NULL for some rows are gone (G3). Pickup orders have no extra attributes, so they stay as plain CustomerOrder rows.
+- **SeatedAt and ServedBy** belong to DineInOrder, because only dine-in orders have a table and a server.
+- **Weak entity sets.** A role name (Server) is only unique inside one restaurant, an order line number is only unique inside one order, and there is one weather observation per restaurant per day. So Role, OrderItem, and WeatherObservation are identified through their owner.
+- **Staff in two roles.** SwapRequest is connected to Staff twice (*Covers* and *DecidesSwap*), so the foreign keys get different names: cover_staff_id and decided_by.
+- **Derived values are not stored.** Stock levels, order totals, and gross pay are calculated from other data instead of being stored.
+- **Kitchen tickets.** An order can be sent to the kitchen in more than one batch, so KitchenTicket is its own entity set and each order item points to the ticket it is on.
+- **Analytics data.** WeatherObservation and Insight store the data the machine learning features in the backend already use, so the database now matches the backend.
 
 ---
 
