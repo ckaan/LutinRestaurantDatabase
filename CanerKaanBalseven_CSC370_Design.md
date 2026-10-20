@@ -134,12 +134,11 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 The Kickoff (version 1.0) delivered the requirements, the first ERD, the relational schema, keys, FDs, two BCNF decompositions, and `schema.sql`. Two things were only partially met: (min, max) participation on the ERD (now G2) and the remaining decompositions (now G4). The full Kickoff version can be seen at the commit linked in the Version History.
 
 ---
-
 ## 3. Requirements
 
-The requirements are grouped into the three parts of the system. For each part, the left column lists what the system must let people do, and the right column lists the data the database must store to support it. The ERD excerpt below each part shows the entity sets and relationships those data requirements produced.
+The requirements are grouped into the four parts of the system. For each part, the left column lists what the system must let people do, and the right column lists the data the database must store to support it. The ERD in Section 4 shows the entity sets and relationships those data requirements produced.
 
-### 3.1 Staff
+### 3.1 Staff and Labour
 
 <table>
 <tr><th>Requirements / Features</th><th>Corresponding Data Requirements</th></tr>
@@ -150,28 +149,37 @@ The requirements are grouped into the three parts of the system. For each part, 
 <li>Managers create roles (Server, Line Cook, …) and assign each to a department</li>
 <li>Managers add, edit, and deactivate staff</li>
 <li>Show which department each staff member works in</li>
+<li>Staff are paid either hourly or with a monthly salary</li>
 <li>Staff log in to the app; new accounts must reset their password</li>
 <li>Managers schedule shifts</li>
 <li>Staff view their own schedule</li>
 <li>Staff offer a shift for a swap</li>
 <li>A coworker volunteers to cover an offered shift</li>
 <li>Managers approve or deny swaps</li>
+<li>Staff clock in and out of their shifts and log their breaks</li>
+<li>Staff request time off; managers approve or reject it</li>
+<li>Calculate each staff member's pay for a pay period, including bonuses and deductions</li>
+<li>Managers set how many staff each department needs for a time slot</li>
+<li>Warn when a shift has fewer staff than needed</li>
 </ul>
 </td>
 <td valign="top">
 <ul>
 <li>Restaurants with id's</li>
 <li>Roles of each restaurant, with their department</li>
-<li>Staff with id's, contact details, hire date, pay type, and pay rate</li>
+<li>Staff with id's, contact details, hire date, and active status</li>
+<li>Hourly staff with their hourly rate; salaried staff with their monthly salary</li>
 <li>Login credentials for staff who use the app</li>
 <li>Shifts: who works, start and end time</li>
-<li>Swap requests: which shift, who covers, status</li>
+<li>Swap requests: which shift, who covers, who decided, status</li>
+<li>Time clock events: who, which shift, event type, time</li>
+<li>Time-off requests: who, dates, hours, reason, who decided, status</li>
+<li>Pay records: who, pay period, hours worked, rate at that time, bonus, deductions</li>
+<li>Staffing requirements: date, time slot, department, number of staff needed</li>
 </ul>
 </td>
 </tr>
 </table>
-
-
 
 ### 3.2 Menu and Inventory
 
@@ -204,8 +212,6 @@ The requirements are grouped into the three parts of the system. For each part, 
 </tr>
 </table>
 
-
-
 ### 3.3 Front of House
 
 <table>
@@ -220,6 +226,8 @@ The requirements are grouped into the three parts of the system. For each part, 
 <li>Seat dine-in orders at a table and assign a server</li>
 <li>Handle pickup and delivery orders, including Uber Eats</li>
 <li>Add dishes to an order with notes ("no onions")</li>
+<li>Send orders to the kitchen display as tickets, in one or more batches</li>
+<li>Mark a ticket as priority and track it from new to ready</li>
 <li>Track order status from pending to fulfilled</li>
 <li>Record the payment type and tip</li>
 <li>Calculate order totals</li>
@@ -233,20 +241,48 @@ The requirements are grouped into the three parts of the system. For each part, 
 <li>Dining tables with label, seats, and section</li>
 <li>Customers with id's and a unique phone number</li>
 <li>Reservations: who, which table, when, party size</li>
-<li>Orders: restaurant, channel, fulfilment type, status, payment, tip, timestamps</li>
+<li>Orders: restaurant, channel, status, payment, tip, timestamps</li>
 <li>Dine-in details: table, server, party size</li>
 <li>Delivery details: address, notes, courier, external reference</li>
-<li>Order lines: dish, quantity, price at time of sale, notes</li>
+<li>Kitchen tickets: which order, batch number, status, priority, timestamps</li>
+<li>Order lines: dish, quantity, price at time of sale, notes, which ticket</li>
 <li>Reviews: rating and comment, at most one per order</li>
 </ul>
 </td>
 </tr>
 </table>
 
+### 3.4 Marketing and Analytics
 
-### 3.4 Out of Scope
+<table>
+<tr><th>Requirements / Features</th><th>Corresponding Data Requirements</th></tr>
+<tr>
+<td valign="top">
+<ul>
+<li>Managers create marketing campaigns with a budget and dates</li>
+<li>A campaign promotes one or more menu items</li>
+<li>Managers post announcements (info, warning, promo) to the staff dashboard</li>
+<li>Hide announcements that are no longer active</li>
+<li>Store the daily weather for each restaurant</li>
+<li>Use sales, labour, and weather data to generate recommendations for the owner/manager</li>
+<li>Show recommendations until they expire</li>
+</ul>
+</td>
+<td valign="top">
+<ul>
+<li>Campaigns: restaurant, name, start and end date, budget</li>
+<li>Which menu items each campaign promotes</li>
+<li>Announcements: restaurant, author, message, type, active status, time</li>
+<li>Weather observations: restaurant, date, max and min temperature, condition, precipitation</li>
+<li>Insights: restaurant, title, message, type, created and expiry time</li>
+</ul>
+</td>
+</tr>
+</table>
 
-**Not covered this sprint:** payroll, attendance and time clock, time-off requests, kitchen display tickets, labour and operations analytics, marketing campaigns, announcements, weather logs, and AI insights.
+### 3.5 Out of Scope
+
+**Not covered this sprint:** the cross-restaurant check (moved to Sprint 2, see Section 2.2, G6), and NOT NULL and CHECK constraints (Sprint 2, G8). Payment processing itself (card transactions) is handled by an outside provider, so the database only stores the payment type.
 
 NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA 
 
