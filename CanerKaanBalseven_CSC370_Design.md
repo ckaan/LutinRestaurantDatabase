@@ -1055,10 +1055,42 @@ Note: Might get revised!
 Note: The Limitations will be updated in the next sprints. 
 
 ---
+## 10. Next Sprint Goals (Sprint 2)
 
 ## 10. Next Sprint Goals
 
+### 10.1 Sprint 2 (November 8): Querying the database
 
+The design is complete (31 relations, every relation at least in 3NF). Sprint 2 uses it: every feature in Section 3 that reads data gets a query requirement, a relational algebra expression, and an SQL query, tested on sample data.
+
+| Goal | Limitation it fixes | Competency | Success criterion (measurable) |
+|---|---|---|---|
+| **S2-G1.** Write query requirements from the features in Section 3 | The features say what the app shows, but no query has been written or tested | DA: translates requirements into queries | At least **15** query requirements, each linked to one feature in Section 3; every part (Staff and Labour, Menu and Inventory, Front of House, Marketing and Analytics) has at least 3 |
+| **S2-G2.** Write every query in relational algebra first, then in SQL | RA has only been used for constraints, not for answering questions | DA: relational algebra; DM L3: constraints in RA | **15/15** queries have an RA expression and an SQL version; both give the same rows on the seed data |
+| **S2-G3.** Create `seed.sql` with realistic data for two restaurants | Queries cannot be tested on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors; every query returns at least 1 row; the expected output of each query is written in the document and matches the real output |
+| **S2-G4.** Use advanced SQL features where the requirement needs them | Only simple SELECTs are possible now | DA: joins, aggregation, subqueries, set operations | Each feature appears in at least one query, with the reason it is needed: inner join, outer join, GROUP BY + HAVING, subquery (IN / EXISTS / NOT EXISTS), set operation (UNION / set difference), ORDER BY + LIMIT, at least one aggregate per part |
+| **S2-G5.** Add views for the four dashboards (Owner, Employee, Order-system, Kitchen Display) | The app would repeat the same long queries in many places | DA; BE L1 | At least **4** views in `schema.sql`, one per dashboard, each built from one of the S2-G1 queries |
+| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), and their RA form | Business rules and the cross-restaurant rule are not enforced (Sections 2.2, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | Every rule written as "query = ∅" in RA; every CHECK and the trigger have a failing test; `tests.sql` reports **0** unexpected results |
+| **S2-G7.** Close the design checks from this sprint's modules | Announcement is not in 3NF (7.5, N3); ERD-implied FDs are not cross-checked for all relationships; the isa style and ERD quality were not compared formally | DM L2, DM L3: ERDs to FDs, 3NF, inheritance, improving conceptual designs | Announcement in BCNF with **0** mismatches between the ERD, Sections 4–7, and `schema.sql`; **35/35** relationships mapped to their FD; 2 isa hierarchies compared in 3 styles; all 8 Batini criteria evaluated with evidence |
+
+**Module coverage.** Each module competency from Sprint 1 is developed further in Sprint 2:
+
+| Module | Sprint 2 goal |
+|---|---|
+| Constraints in Relational Algebra | S2-G2, S2-G6 |
+| Weak Entity Sets & Inheritance | S2-G7 (isa comparison); queries over subclasses in S2-G1 (e.g., dine-in vs. delivery) |
+| Improving Conceptual Designs | S2-G7  |
+| ERDs to FDs | S2-G7 (35/35) |
+| Projecting FDs and minimal bases | S2-G7 (Announcement decomposition shows projected FDs as a minimal basis) |
+| 3NF | S2-G7 (Announcement via 3NF synthesis) |
+| 4NF and MVDs | S2-G7 (every new view and query output checked for MVD-style repetition) |
+
+
+
+The Final plan is written in full at the end of Sprint 2, once the Sprint 2 module topics are covered.
+
+### 10.3 Questions for the TA-client
+1. …
 **Note: Sprint Goals are subject to change even though %80 of them aimed to meet in the next sprint.**
 
 ### Questions for the TA-client
