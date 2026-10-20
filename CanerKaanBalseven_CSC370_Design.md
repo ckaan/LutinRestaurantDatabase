@@ -103,7 +103,7 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 | **G6.** Fix the cross-restaurant limitation | Mixed-restaurant rows are accepted (Section 9, item 1) | DM L3: assesses incongruity between conceptual and relational schemata | Both options compared and one chosen; a test adding another restaurant's menu item to an order is **rejected** (or scheduled for Sprint 2 if a trigger is chosen) | **Not met (moved to Sprint 2)** | See 2.2 |
 | **G7.** Fix the problems obtained via feedback | Feedback from the TA-client on the Kickoff | All of the above | Every feedback item is listed with its fix; 100% resolved or explained | **Met** | Section 2.5: **3/3** feedback items resolved |
 | **G8.** Improve the SQL implementation: add NOT NULL to required columns, add CHECK constraints for business rules, and review the data types | Required columns can be left empty (Section 9, item 4) | DM L1: writes SQL that implements a relational design, selects appropriate data types; BE L1: database never enters an inconsistent state | Every required column is NOT NULL; inserting a row with a missing required value is **rejected** | **Partially met** | Data types reviewed (Section 5: every money and quantity value DECIMAL(10,2), fixed value sets as ENUM, TIME for time slots); every required column NOT NULL, optional columns marked NULL with a reason (Section 8); **2/2** NOT NULL tests rejected (error 1048); CHECK constraints moved to Sprint 2: see 2.2 |
-| **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | **Partially met** | Sections 5–7 updated to match the ERD (superkey cells fixed, Role weak entity, closures written with ⁺); ERD, Section 5, and `schema.sql`: 31 relations, **0** mismatches; Kickoff questions: **2/4** answered , 2 moved to Sprint 2: see 2.2 |
+| **G9.** Review and fix the Kickoff deliverables | Parts of the Kickoff work still needed to be confirmed | DM L2: justifies the quality of a schema through a theoretical lens; maps requirements onto schemata | A consistency check between the ERD, Section 5, and `schema.sql` with **0** mismatches; every question in Section 10.1 answered | **Partially met** | Sections 5–7 updated to match the ERD (superkey cells fixed, Role weak entity, closures written with ⁺); ERD, Section 5, and `schema.sql`: 31 relations |
 
 *DM = Data Modelling, BE = Back-end Engineering.*
 
@@ -124,7 +124,7 @@ These goals were planned at the end of the Kickoff (version 1.0, Section 10). In
 | Competency bullet | Covered by |
 |---|---|
 | DM L1: Selects appropriate data types for tables | [Section 5](#5-relational-schema), G8 |
-| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation) (`schema.sql`: 31 tables, 42 foreign keys), G5, G8 |
+| DM L1: Writes SQL code that implements a relational design | [Section 8](#8-implementation) (`schema.sql`: 31 tables, 41 foreign keys), G5, G8 |
 | DM L1: Documents relationships with correct ERDs | [Section 4](#4-entity-relationship-diagram), G2 |
 | DM L2: Identifies dependencies among attributes and appropriate keys | [Section 6](#6-keys), [Section 7.1](#71-functional-dependencies), [Section 7.5](#75-third-normal-form-and-dependency-preservation) (FDs read from the ERD) |
 | DM L2: Eliminates data anomalies with effective normalisation | [Section 7.2](#72-bcnf-decompositions), G4 |
@@ -305,8 +305,6 @@ The requirements are grouped into the four parts of the system. For each part, t
 ### 3.5 Out of Scope
 
 **Not covered this sprint:** the cross-restaurant check (moved to Sprint 2, see Section 2.2, G6), and CHECK constraints (Sprint 2, G8). Payment processing itself (card transactions) is handled by an outside provider, so the database only stores the payment type.
-
-NEXT SPRINT: ASK ABOUT SENSITIVE DATA TO TA 
 
 
 ---
@@ -529,7 +527,6 @@ The ERD in Section 4 maps to **31 relations**.
 - Role(<ins>restaurant_id</ins>: INT → Restaurant, <ins>role_name</ins>: VARCHAR(50), department: ENUM('FRONT_OF_HOUSE', 'KITCHEN', 'MANAGEMENT'))
 - Staff(<ins>staff_id</ins>: INT, (restaurant_id: INT, role_name: VARCHAR(50)) → Role, name: VARCHAR(100), email: VARCHAR(255), phone: VARCHAR(20), hire_date: DATE, is_active: BOOLEAN)
 - HourlyStaff(<ins>staff_id</ins>: INT → Staff, hourly_rate: DECIMAL(10,2))
-- Announcement(<ins>announcement_id</ins>: INT, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
 - SalariedStaff(<ins>staff_id</ins>: INT → Staff, monthly_salary: DECIMAL(10,2))
 - StaffCredential(<ins>staff_id</ins>: INT → Staff, username: VARCHAR(50), password_hash: CHAR(60), force_reset: BOOLEAN, last_login_at: DATETIME)
 - Shift(<ins>shift_id</ins>: INT, staff_id: INT → Staff, start_at: DATETIME, end_at: DATETIME, notes: VARCHAR(255))
@@ -564,6 +561,7 @@ The ERD in Section 4 maps to **31 relations**.
 - Campaign(<ins>campaign_id</ins>: INT, restaurant_id: INT → Restaurant, name: VARCHAR(100), start_date: DATE, end_date: DATE, budget: DECIMAL(10,2))
 - CampaignItem(<ins>campaign_id</ins>: INT → Campaign, <ins>menu_item_id</ins>: INT → MenuItem)
 - Announcement(<ins>announcement_id</ins>: INT, restaurant_id: INT → Restaurant, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
+- Announcement(<ins>announcement_id</ins>: INT, author_id: INT → Staff, message: TEXT, announcement_type: ENUM('INFO', 'WARNING', 'PROMO'), is_active: BOOLEAN, created_at: DATETIME)
 - WeatherObservation(<ins>restaurant_id</ins>: INT → Restaurant, <ins>observed_date</ins>: DATE, temp_max: DECIMAL(10,2), temp_min: DECIMAL(10,2), condition: ENUM('SUNNY', 'CLOUDY', 'RAIN', 'SNOW'), precipitation_mm: DECIMAL(10,2))
 - Insight(<ins>insight_id</ins>: INT, restaurant_id: INT → Restaurant, title: VARCHAR(100), message: TEXT, insight_type: ENUM('INFO', 'ALERT', 'SUCCESS'), created_at: DATETIME, expires_at: DATETIME)
 
@@ -654,7 +652,6 @@ The non-trivial functional dependencies of each relation, in the notation X → 
 | TimeOffRequest | request_id → staff_id, decided_by, start_date, end_date, hours, reason, status, created_at |
 | PayRecord | pay_record_id → staff_id, period_start, period_end, hours_worked, rate_snapshot, bonus, deductions<br>staff_id, period_start → pay_record_id, period_end, hours_worked, rate_snapshot, bonus, deductions |
 | StaffingRequirement | requirement_id → restaurant_id, work_date, start_time, end_time, department, required_count<br>restaurant_id, work_date, department, start_time → requirement_id, end_time, required_count |
-| Announcement | announcement_id → author_id, message, announcement_type, is_active, created_at |
 
 **Menu and Inventory**
 
@@ -686,13 +683,11 @@ The non-trivial functional dependencies of each relation, in the notation X → 
 |---|---|
 | Campaign | campaign_id → restaurant_id, name, start_date, end_date, budget |
 | CampaignItem (from the "Promotes" relationship) | none (only the trivial FD campaign_id, menu_item_id → campaign_id, menu_item_id) |
-| Announcement | announcement_id → restaurant_id, author_id, message, announcement_type, is_active, created_at |
+| Announcement | announcement_id → author_id, message, announcement_type, is_active, created_at |
 | WeatherObservation | restaurant_id, observed_date → temp_max, temp_min, condition, precipitation_mm |
 | Insight | insight_id → restaurant_id, title, message, insight_type, created_at, expires_at |
 
-ASK FOR NEXT SPRINT: Do we need dependencies that do not hold?
-
-ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
+FDs that do not hold and the anomalies of the original schema are planned for Sprint 2 (Section 2.6, S2-G8).
 
 ### 7.2 BCNF Decompositions
 
@@ -1091,7 +1086,7 @@ Note: Might get revised!
 
 | File | Contents |
 |---|---|
-| `sql/schema.sql` | DDL for the 18 relations |
+| `sql/schema.sql` | DDL for the 31 relations with 41 foreign key and required NULL columns |
 | `sql/seed.sql` | Sample data for two restaurants (Possibly in the next sprint) |
 | `sql/demo.sql` | to test to meet with the rubric (Possibly in the next sprint) |
 
@@ -1147,10 +1142,9 @@ The design is complete (31 relations, every relation at least in 3NF). Sprint 2 
 
 ### 10.3 Questions for the TA-client
 
-1. Are the superkeys and candidate keys of DiningTable and Review
-2. SwapRequest decomposition (D2) 
-3. Should we also list functional dependencies that do not hold?
-4. Should we document the anomalies of the original schema in more detail? 
+1. Should we also list functional dependencies that do not hold? (Kickoff question 3, S2-G8)
+2. Should we document the anomalies of the original schema in more detail? (Kickoff question 4, S2-G8)
+3. Which staff data is sensitive (password_hash, phone, email, pay), and should access to it be restricted in the database?
 
 ---
 
