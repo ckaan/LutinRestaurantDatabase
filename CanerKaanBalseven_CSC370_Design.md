@@ -51,6 +51,8 @@
   - [7.2 Anomalies in the Original Schema]
   - [7.3 BCNF Decompositions]
   - [7.4 BCNF Verification]
+  - [7.5 3NF]
+  - [7.6 4NF]
 - [8. Implementation]
 - [9. Known Limitations]
 - [10. Next Sprint Goals]
@@ -811,6 +813,117 @@ ASK FOR NEXT SPRINT: Do we need to identify anomalies in the Original Schema?
 | WeatherObservation | {restaurant_id, observed_date}⁺ = all attributes | ✓ |
 | Insight | {insight_id}⁺ = all attributes | ✓ |
 
+### 7.5 Third Normal Form and Dependency Preservation
+
+**Definitions**
+
+- **Prime attribute:** an attribute that is part of some candidate key (a key, not just a superkey).
+- **3NF:** an FD X → Y is in 3NF if X is a superkey, *or* every attribute in Y is prime. A relation is in 3NF if all of its FDs are in 3NF.
+- **Dependency preserving:** after a decomposition, every original FD can still be checked inside one relation, without a join.
+
+Every relation in BCNF is also in 3NF. All decompositions D1–D8 are dependency preserving: in each one, the violating FD goes into R1, where its left side becomes the key, and the original key stays in R2 with everything it determines. So no FD was lost.
+
+**FDs read from the ERD.** Every many-one relationship from E to F gives the FD E's identifier → F's identifier. When a relation holds both E's identifier and F's identifier but is not E itself, this FD can be a hidden BCNF violation. Checking every relation this way found three FDs that are not in 7.1:
+
+| Relation | Hidden FD | Comes from | Result |
+|---|---|---|---|
+| OrderItem | ticket_id → order_id | *ForOrder* | In 3NF (N1) |
+| TimeClockEvent | shift_id → staff_id | *Works* | In 3NF (N2) |
+| Announcement | author_id → restaurant_id | Staff → Restaurant | Not in 3NF (N3) |
+
+#### N1: OrderItem (kept in 3NF)
+
+| Letter | A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| Attribute | order_id | line_no | menu_item_id | ticket_id | quantity | unit_price | notes |
+
+- **FDs:** A, B → C, D, E, F, G and D → A (a kitchen ticket belongs to one order)
+- **Closures:**
+  - {A, B}⁺ = {A, B, C, D, E, F, G}, so {A, B} is a key
+  - {D}⁺ = {D, A}, not all attributes, so **D → A is a BCNF violation**
+- **3NF check:** A (order_id) is part of the key {A, B}, so A is prime. So **D → A is in 3NF**.
+- **What BCNF decomposition would do:**
+  - R1 = {D}⁺ = {D, A}
+  - R2 = {B, C, D, E, F, G}
+  - The FD A, B → C, D, E, F, G is lost, because A and B are no longer in the same relation. The rule "a line number is unique inside an order" could then only be checked with a join.
+- **Decision:** keep OrderItem in 3NF. The redundancy is small (order_id is repeated once per line, and it is already part of the key), and the key stays enforceable with a PRIMARY KEY.
+
+#### N2: TimeClockEvent (kept in 3NF)
+
+| Letter | A | B | C | D | E | F |
+|---|---|---|---|---|---|---|
+| Attribute | event_id | staff_id | shift_id | event_type | occurred_at | note |
+
+- **FDs:** A → B, C, D, E, F and C → B (a shift is worked by one staff member) and B, E → A (a staff member cannot punch twice at the same moment)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F}, so A is a key
+  - {B, E}⁺ = {B, E, A, C, D, F}, so {B, E} is also a key
+  - {C}⁺ = {C, B}, not all attributes, so **C → B is a BCNF violation**
+- **3NF check:** B (staff_id) is part of the key {B, E}, so B is prime. So **C → B is in 3NF**.
+- **What BCNF decomposition would do:**
+  - R1 = {C}⁺ = {C, B}, which is already in Shift
+  - R2 = {A, C, D, E, F}
+  - The FD B, E → A is lost, and so is staff_id. A staff member who clocks in without a scheduled shift (shift_id is empty) could not be recorded at all.
+- **Decision:** keep TimeClockEvent in 3NF, because unscheduled clock-ins are a real case in the restaurant.
+
+#### N3: Announcement (3NF synthesis)
+
+| Letter | A | B | C | D | E | F | G |
+|---|---|---|---|---|---|---|---|
+| Attribute | announcement_id | restaurant_id | author_id | message | announcement_type | is_active | created_at |
+
+- **FDs:** A → B, C, D, E, F, G and C → B (a staff member works at one restaurant)
+- **Closures:**
+  - {A}⁺ = {A, B, C, D, E, F, G}, so A is the only key
+  - {C}⁺ = {C, B}, not all attributes, so **C → B is a BCNF violation**
+- **3NF check:** B (restaurant_id) is not part of any key, so B is not prime. So **C → B is a 3NF violation too**.
+- **3NF synthesis:**
+  1. **Minimal basis:** split the right sides into single attributes: A → B, A → C, A → D, A → E, A → F, A → G, C → B. A → B can be removed, because A → C and C → B already give it. Minimal basis G = {A → C, A → D, A → E, A → F, A → G, C → B}.
+  2. **One relation per left side:** R1 = {A, C, D, E, F, G} and R2 = {C, B}.
+  3. **Key check:** R1 contains the key A, so no extra relation is needed.
+  4. R2 = {author_id, restaurant_id} is already in Staff (staff_id → restaurant_id).
+- **After:** **Announcement**(announcement_id, author_id, message, announcement_type, is_active, created_at). restaurant_id and the *Posts* relationship are removed, because the restaurant comes from the author. Planned for Sprint 2 (`schema.sql` and Sections 4–6).
+
+**Summary:** 28 relations in BCNF, 2 relations (OrderItem, TimeClockEvent) in 3NF on purpose, and 1 relation (Announcement) to be fixed in Sprint 2.
+
+### 7.6 Fourth Normal Form and Multivalued Dependencies
+
+**Definitions**
+
+- **Multivalued dependency (MVD):** X ↠ Y means that for one value of X, the set of Y values does not depend on the other attributes.
+- **4NF:** for every non-trivial MVD X ↠ Y, X is a superkey. A relation in 4NF is also in BCNF.
+
+#### M1: Uses + Promotes in one table (4NF violation avoided)
+
+If the two many-many relationships *Uses* and *Promotes* were stored in one table:
+
+| menu_item_id | inventory_item_id | campaign_id |
+|---|---|---|
+| 1 (Burger) | 10 (Beef) | 100 (Summer) |
+| 1 (Burger) | 10 (Beef) | 101 (Student) |
+| 1 (Burger) | 11 (Bun) | 100 (Summer) |
+| 1 (Burger) | 11 (Bun) | 101 (Student) |
+
+- There are no non-trivial FDs, so the table is in BCNF, but **menu_item_id ↠ inventory_item_id** and **menu_item_id ↠ campaign_id**.
+- Every ingredient has to be repeated for every campaign (2 × 2 = 4 rows). Adding a third campaign adds 2 rows instead of 1.
+- **4NF decomposition on menu_item_id ↠ inventory_item_id:**
+  - R1 = {menu_item_id, inventory_item_id}, which becomes RecipeLine
+  - R2 = {menu_item_id, campaign_id}, which becomes CampaignItem
+- **After:** **RecipeLine**(menu_item_id, inventory_item_id, qty_per_serving) and **CampaignItem**(campaign_id, menu_item_id), the design in Section 5.
+
+#### M2: Order items and prep batches (looks like an MVD, but is not)
+
+| order_id | menu_item_id | batch_no |
+|---|---|---|
+| 50 | Burger | 1 |
+| 50 | Fries | 1 |
+| 50 | Dessert | 2 |
+
+- An order has many items and many batches, so it looks like order_id ↠ menu_item_id and order_id ↠ batch_no.
+- **But this is not an MVD.** For an MVD, every item would have to appear with every batch (Dessert in batch 1 *and* 2). In a real kitchen, each item is cooked in **one specific** batch, so the two facts are not independent.
+- So the correct model is an FD, not an MVD: each order line points to its ticket, order_id, line_no → ticket_id (*OnTicket*). This is why KitchenTicket is its own entity set instead of a list inside the order.
+
+**4NF check:** apart from the case avoided in M1, no relation in Section 5 stores two independent multi-valued facts about the same key, so there are no non-trivial MVDs. Every relation in BCNF is therefore also in 4NF.
 
 ---
 
