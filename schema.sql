@@ -339,14 +339,12 @@ CREATE TABLE CampaignItem (
 
 CREATE TABLE Announcement (
     announcement_id    INT AUTO_INCREMENT,
-    restaurant_id      INT NOT NULL,
     author_id          INT NOT NULL,
     message            TEXT NOT NULL,
     announcement_type  ENUM('INFO', 'WARNING', 'PROMO') NOT NULL DEFAULT 'INFO',
     is_active          BOOLEAN NOT NULL DEFAULT TRUE,
     created_at         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (announcement_id),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
     FOREIGN KEY (author_id) REFERENCES Staff (staff_id)
 );
 
