@@ -103,30 +103,36 @@ These goals were planned at the end of Sprint 1 (version 2.0, Section 11). They 
 
 | Goal | From | Limitation it fixes | Competency | Success criterion (measurable) | Status | Evidence |
 |---|---|---|---|---|---|---|
-| **S2-G1.** Turn the features in Section 3 into query requirements | New (Sprint 1 plan) | Section 3 says what the app shows, but I have not written or tested any query for it yet | DA: translates requirements into queries | I write at least **15** query requirements, each one linked to a feature in Section 3, with at least 3 for every part (Staff and Labour, Menu and Inventory, Front of House, Marketing and Analytics) | *[Met / Not met]* | *[ ]* |
-| **S2-G2.** Write each query in relational algebra first, then in SQL | New (Sprint 1 plan) | So far I have only used RA for constraints, not to answer questions about the data | DA: relational algebra; DM L3: constraints in RA | All **15/15** queries have an RA version and an SQL version, and both return the same rows on the sample data | *[Met / Not met]* | *[ ]* |
-| **S2-G3.** Create `seed.sql` with realistic data for two restaurants | New (Sprint 1 plan) | I cannot test queries on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors, every query returns at least 1 row, and the expected output of each query is written in the document and matches what the query really returns | *[Met / Not met]* | *[ ]* |
-| **S2-G4.** Use advanced SQL where a requirement needs it | New (Sprint 1 plan) | Right now I can only show simple SELECTs | DA: joins, aggregation, subqueries, set operations | Each of these is used in at least one query, with a short reason why it is needed: inner join, outer join, GROUP BY + HAVING, a subquery (IN / EXISTS / NOT EXISTS), a set operation (UNION / set difference), and ORDER BY + LIMIT; every part has at least one aggregate | *[Met / Not met]* | *[ ]* |
+| **S2-G1.** Turn the features in Section 3 into query requirements | New (Sprint 1 plan) | Section 3 says what the app shows, but I have not written or tested any query for it yet | DA: translates requirements into queries | I write at least **15** query requirements, each one linked to a feature in Section 3, with at least 3 for every part (Staff and Labour, Menu and Inventory, Front of House, Marketing and Analytics) | **Met** | **73** query requirements (Section 8), each linked to a feature in Section 3: Staff and Labour **17**, Menu and Inventory **17**, Front of House **24**, Marketing and Analytics **15** |
+| **S2-G2.** Write each query in relational algebra first, then in SQL | New (Sprint 1 plan) | So far I have only used RA for constraints, not to answer questions about the data | DA: relational algebra; DM L3: constraints in RA | All **15/15** queries have an RA version and an SQL version, and both return the same rows on the sample data | **Partially met** | **17** queries (Q1–Q17, Staff and Labour) have an RA version and an SQL version (Section 8.1, `staff_query.sql`), which is more than 15. The other three parts (Q18–Q73) have requirements but no RA or SQL yet |
+| **S2-G3.** Create `seed.sql` with realistic data for two restaurants | New (Sprint 1 plan) | I cannot test queries on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors, every query returns at least 1 row, and the expected output of each query is written in the document and matches what the query really returns | **Partially met** | `seed.sql` has two restaurants (Harbour Grill, Kebab Corner) and loads with **0** unexpected errors. **17/17** staff queries return at least 1 row and the result I expected. Only Staff and Labour data is in it so far, and the expected outputs were left out of the document to keep Section 8 short |
+| **S2-G4.** Use advanced SQL where a requirement needs it | New (Sprint 1 plan) | Right now I can only show simple SELECTs | DA: joins, aggregation, subqueries, set operations | Each of these is used in at least one query, with a short reason why it is needed: inner join, outer join, GROUP BY + HAVING, a subquery (IN / EXISTS / NOT EXISTS), a set operation (UNION / set difference), and ORDER BY + LIMIT; every part has at least one aggregate | **Partially met** | **5/6** features used with a reason (Section 8.2): inner join (Q1), outer join (Q4, Q7), GROUP BY + HAVING (Q7, Q17), subqueries (Q2, Q12, Q14), UNION (Q13). Not yet: ORDER BY + LIMIT (planned in Q29, Q49, Q68), and aggregates in **1/4** parts (Staff and Labour: Q7, Q8, Q13, Q17) |
 | **S2-G5.** Add views for the four dashboards (Owner, Employee, Order-system, Kitchen Display) | New (Sprint 1 plan) | Without views, the app would repeat the same long queries in many places | DA; BE L1 | `schema.sql` has at least **4** views, one for each dashboard, and each one is built from an S2-G1 query | **Removed (moved to Final submission)** | See 2.2 |
-| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" triggers (Section 4), and the RA version of each rule | **Sprint 1, G6** (not met), **Sprint 1, G8** (partially met: CHECK constraints), Sprint 1, G5 (test file planned) | The business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced yet (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written in RA as "query = ∅"; each CHECK and trigger has a test that breaks it, and `tests.sql` shows **0** unexpected results | *[Met / Not met]* | *[ ]* |
-| **S2-G7.** Finish the design checks from this sprint's lectures | New (Sprint 1 plan) | I have not checked the FDs implied by every ERD relationship, compared isa styles, or rated the ERD's quality formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | All **35/35** relationships are matched to the FD they imply; both isa hierarchies are compared in 3 styles; the ERD is rated on all 8 Batini criteria with evidence; any new relation added in Sprint 2 is checked for BCNF/3NF | *[Met / Not met]* | *[ ]* |
-| **S2-G8.** Answer the last two Kickoff questions: FDs that do not hold, and anomalies of the original schema | **Sprint 1, G9** (partially met: Kickoff questions 3 and 4) | Kickoff questions 3 and 4 are still open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, at least 1 FD that does **not** hold is listed with the reason; update, insertion, and deletion anomalies are shown for at least **3** original models (e.g., D1, D5, D7); all **4/4** Kickoff questions are answered | *[Met / Not met]* | *[ ]* |
+| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" triggers (Section 4), and the RA version of each rule | **Sprint 1, G6** (not met), **Sprint 1, G8** (partially met: CHECK constraints), Sprint 1, G5 (test file planned) | The business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced yet (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written in RA as "query = ∅"; each CHECK and trigger has a test that breaks it, and `tests.sql` shows **0** unexpected results | **Partially met** | **34** CHECK constraints in `schema.sql`. **118/118** keys, foreign keys and CHECKs written in RA as "query = ∅" (Section 8.3: 43 keys, 41 foreign keys, 34 CHECKs). The tests are in the test section of `seed.sql`: **54/54** bad statements rejected (6 foreign key, 2 NOT NULL, 34 CHECK, 6 edge CHECK, 5 duplicate key, 1 ENUM), **13/13** valid edge cases accepted, **0** unexpected results. Not done: the triggers (see 2.2) |
+| **S2-G7.** Finish the design checks from this sprint's lectures | New (Sprint 1 plan) | I have not checked the FDs implied by every ERD relationship, compared isa styles, or rated the ERD's quality formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | All **35/35** relationships are matched to the FD they imply; both isa hierarchies are compared in 3 styles; the ERD is rated on all 8 Batini criteria with evidence; any new relation added in Sprint 2 is checked for BCNF/3NF | **Met** | The FDs from all **35** relationships are covered by the multiplicities in Sections 4.1–4.4 and the "FDs read from the ERD" check in Section 7.5 (3 hidden FDs found: N1–N3). **2/2** isa hierarchies compared in **3** styles (Section 4.6). **8/8** Batini criteria rated with evidence (Section 4.7). **0** new relations in Sprint 2 (only CHECKs were added), so no new BCNF/3NF check was needed |
+| **S2-G8.** Answer the last two Kickoff questions: FDs that do not hold, and anomalies of the original schema | **Sprint 1, G9** (partially met: Kickoff questions 3 and 4) | Kickoff questions 3 and 4 are still open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, at least 1 FD that does **not** hold is listed with the reason; update, insertion, and deletion anomalies are shown for at least **3** original models (e.g., D1, D5, D7); all **4/4** Kickoff questions are answered | **Not met** | Kickoff questions 3 and 4 are still waiting for the TA-client's answer (Section 2.6), so this goal was moved to the Final submission (see 2.2) |
 
 *DM = Data Modelling, BE = Back-end Engineering.*
 
 **Note:** Sprint goals are subject to change; about 80% of them are aimed to be met in this sprint.
 
-### 2.2 Goals Carried Over from Sprint 1
+### 2.2 Missed, Partially Met, and Removed Goals
 
-| S2-G5 | Views for the four dashboards | Views are not covered in this sprint's lectures (SELECT-FROM-WHERE, Grouping and Aggregation, Subqueries), so the sprint focuses on writing and testing the queries the views would be built from (S2-G1 to S2-G4) | None: each planned view is already a tested query in Section 8 (e.g., Q3 for the Employee dashboard, Q13 for the Owner dashboard), so it can become a view without changes | Planned for the Final submission, if views are covered |
+| Goal | What was not finished | Why | Impact | Plan |
+|---|---|---|---|---|
+| S2-G2, S2-G3, S2-G4 | RA, SQL and sample data for Menu and Inventory (Q18–Q34), Front of House (Q35–Q58), and Marketing and Analytics (Q59–Q73); ORDER BY + LIMIT; aggregates in 3 parts | I worked module by module and finished Staff and Labour first, with tested queries and data, instead of writing all 73 without testing them | Medium: the requirements are written (S2-G1), but 56 queries are not tested yet | Finish one module at a time in the Final submission (F-G1) |
+| S2-G5 | Views for the four dashboards | Views are not covered in this sprint's lectures (SELECT-FROM-WHERE, Grouping and Aggregation, Subqueries), so the sprint focuses on writing and testing the queries the views would be built from (S2-G1 to S2-G4) | None: each planned view is already a tested query in Section 8 (e.g., Q3 for the Employee dashboard, Q13 for the Owner dashboard), so it can become a view without changes | Planned for the Final submission, if views are covered (F-G2) |
+| S2-G6 (part) | The triggers for the cross-restaurant rule (Sprint 1, G6) and the three "at least one" minimums (Section 4) | Triggers are not covered in this sprint's lectures | Small: the rules are known (Sections 4, 10), and Q58 will check the cross-restaurant rule (it must return 0 rows) | Planned for the Final submission, if triggers are covered (F-G3) |
+| S2-G8 | FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are still waiting for the TA-client | Small: every decomposition D1–D8 already names the FD that causes the problem | Final submission (F-G4) |
 
+**Goals carried over from Sprint 1**
 
-| Sprint 1 goal | What was not finished | Sprint 2 goal |
-|---|---|---|
-| G6 (not met) | The cross-restaurant check | S2-G7 (trigger), checked with Q58 |
-| G8 (partially met) | CHECK constraints for business rules | S2-G6 |
-| G9 (partially met) | Kickoff questions 3 and 4 | S2-G9 |
-| G5 (met, with a follow-up) | A test file for all constraints | S2-G8 |
+| Sprint 1 goal | What was not finished | Sprint 2 goal | Status now |
+|---|---|---|---|
+| G6 (not met) | The cross-restaurant check | S2-G6 (trigger), checked with Q58 | Moved to Final (F-G3) |
+| G8 (partially met) | CHECK constraints for business rules | S2-G6 | Done: 34 CHECKs |
+| G9 (partially met) | Kickoff questions 3 and 4 | S2-G8 | Moved to Final (F-G4) |
+| G5 (met, with a follow-up) | A test file for all constraints | S2-G6 | Done: test section of `seed.sql` |
 
 ### 2.3 Competency Mapping
 
@@ -526,6 +532,50 @@ Every data requirement in Section 3 is matched to the ERD, and every entity set 
 **Result:** 30/30 data requirements matched; 29/29 entity sets and 35/35 relationships used by at least one requirement.
 
 ---
+### 4.6 Inheritance: Three Styles Compared (S2-G7)
+
+The Inheritance lecture gives three ways to turn an isa hierarchy into relations. Both hierarchies are compared below. The subclasses are **disjoint**: a staff member is hourly *or* salaried, and an order is dine-in *or* delivery *or* neither (pickup).
+
+**Staff → HourlyStaff, SalariedStaff**
+
+| Style | Relations | NULLs | Foreign keys to Staff (10 in the schema) | "List all staff with their pay" |
+|---|---|---|---|---|
+| **E/R** (chosen) | Staff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active), HourlyStaff(staff_id, hourly_rate), SalariedStaff(staff_id, monthly_salary) | 0 | All 10 point to one table, Staff | 2 LEFT JOINs |
+| **Object-oriented** | HourlyStaff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, hourly_rate), SalariedStaff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, monthly_salary) | 0 | Cannot be declared: a foreign key can only point to one table, but a staff member is in one of two | UNION of 2 tables |
+| **NULLs** | Staff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, hourly_rate, monthly_salary) | 1 per row (9 in `seed.sql`) | All 10 point to Staff | No join |
+
+**CustomerOrder → DineInOrder, DeliveryOrder**
+
+| Style | Relations | NULLs | Foreign keys to CustomerOrder (OrderItem, KitchenTicket, Review) | "List all orders of a restaurant" |
+|---|---|---|---|---|
+| **E/R** (chosen) | CustomerOrder(order_id, restaurant_id, customer_id, channel, status, payment_type, tip, created_at, started_at, finished_at), DineInOrder(order_id, table_id, server_id, party_size), DeliveryOrder(order_id, delivery_address, delivery_notes, courier, external_order_ref) | 0 | All 3 point to one table | One table |
+| **Object-oriented** | PickupOrder(all CustomerOrder attributes), DineInOrder(all CustomerOrder attributes + table_id, server_id, party_size), DeliveryOrder(all CustomerOrder attributes + delivery_address, delivery_notes, courier, external_order_ref) | 0 | Cannot be declared (an order is in one of three tables) | UNION of 3 tables |
+| **NULLs** | CustomerOrder(all attributes + table_id, server_id, party_size, delivery_address, delivery_notes, courier, external_order_ref) | 4 per dine-in, 3 per delivery, 7 per pickup | All 3 point to CustomerOrder | One table |
+
+**Decision: E/R style for both.**
+- The object-oriented style breaks 13 foreign keys (10 to Staff, 3 to CustomerOrder), so `schema.sql` could no longer stop, for example, a shift for a staff member that does not exist.
+- The NULL style is easier to query, but it brings back the NULL attributes removed in Sprint 1 (G3). It would also need extra CHECKs, for example "exactly one of hourly_rate and monthly_salary is NOT NULL".
+- The E/R style keeps every foreign key and has no NULLs. Its cost is one join when the subclass attributes are needed (Q6, Q13).
+
+### 4.7 ERD Quality: Batini Criteria (S2-G7)
+
+The ERD is rated on the 8 design criteria from the Improving Conceptual Designs lecture (Batini et al., 1992, §6.1).
+
+| Criterion | What it asks | Rating | Evidence |
+|---|---|---|---|
+| Completeness | Every requirement is in the ERD | Met | Every requirement in Section 3 maps to an entity set or relationship (Section 4.5). All 73 query requirements in Section 8 can be written on the schema |
+| Correctness | The ER concepts are used correctly: no attribute that should be an entity set, no missing inheritance, no relationship with the wrong number of entity sets, no missing identifier or min/max | Met | Every entity set has an identifier. Inheritance is used for both staff types and order types. Every relationship connects the right entity sets and has a (min, max) (Sections 4.1–4.4). Customer, Role and KitchenTicket are entity sets, not attributes, because they have their own attributes and relationships. `schema.sql` built from the ERD loads, and 54/54 bad statements are rejected (S2-G6) |
+| Minimality | Every fact is stored once | Partly met | *Posts* and the `fulfillment` attribute were removed because they repeated other facts (N3), and derived values are not stored. One overlap is left: a dine-in order reaches its restaurant two ways (*Receives*, and *SeatedAt* → DiningTable → *HasTable*). It is kept so that every order has a restaurant, and Q58 will check that both paths agree |
+| Expressiveness | Requirements are shown naturally | Met | isa for the two kinds of staff and orders, weak entity sets for Role, OrderItem and WeatherObservation, and relationship attributes (`qty_per_serving`, `party_size`) |
+| Readability | Drawn on a grid, few line crossings and bends, parents above children | [Met / Partly met] | One diagram per module (4.1–4.4), the same naming style everywhere. [Check your figure: straight lines on a grid? few crossings? Staff and CustomerOrder above their subclasses?] |
+| Self-explanation | The diagram explains itself without extra text | Partly met | Keys, weak entities, isa and arrowheads are in the figure. The (min, max) values and the CHECK rules (S2-G6) are only in tables and `schema.sql`, not in the figure |
+| Extensibility | Easy to change for new requirements | Met | Every module hangs off Restaurant, so a new restaurant needs only new rows. A new kind of order or staff is a new subclass. A new courier or channel needs an ENUM change |
+| Normality | The relations fit BCNF, 3NF or 4NF | Met | 29/31 relations in BCNF and 2 in 3NF on purpose (N1, N2), no 4NF violations (Sections 7.3–7.6) |
+
+**Result:** [6] of 8 met, [2] partly met. The gaps are known: Q58 will check the double restaurant path, and the (min, max) values can be added to the figure in the Final submission.
+
+---
+
 
 ## 5. Relational Schema
 
@@ -1246,33 +1296,28 @@ Note: The Limitations will be updated in the next sprints.
 
 ## 11. Next Sprint Goals
 
-### 11.1 Sprint 2 (November 8): Querying the database
+### 11.1 Final Submission (November 29): Finishing the Queries and the Rules
 
-The design is complete (31 relations, every relation at least in 3NF). Sprint 2 uses it: every feature in Section 3 that reads data gets a query requirement, a relational algebra expression, and an SQL query, tested on sample data.
+Sprint 2 finished the constraints and the design checks, and tested all Staff and Labour queries. The Final submission finishes the other three parts and the goals that were moved out of Sprint 2.
 
-| Goal | Limitation it fixes | Competency | Success criterion (measurable) |
-|---|---|---|---|
-| **S2-G1.** Turn the features in Section 3 into query requirements | Section 3 says what the app shows, but I have not written or tested any query for it yet | DA: translates requirements into queries | I write at least **15** query requirements, each one linked to a feature in Section 3, with at least 3 for every part (Staff and Labour, Menu and Inventory, Front of House, Marketing and Analytics) |
-| **S2-G2.** Write each query in relational algebra first, then in SQL | So far I have only used RA for constraints, not to answer questions about the data | DA: relational algebra; DM L3: constraints in RA | All **15/15** queries have an RA version and an SQL version, and both return the same rows on the sample data |
-| **S2-G3.** Create `seed.sql` with realistic data for two restaurants | I cannot test queries on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors, every query returns at least 1 row, and the expected output of each query is written in the document and matches what the query really returns |
-| **S2-G4.** Use advanced SQL where a requirement needs it | Right now I can only show simple SELECTs | DA: joins, aggregation, subqueries, set operations | Each of these is used in at least one query, with a short reason why it is needed: inner join, outer join, GROUP BY + HAVING, a subquery (IN / EXISTS / NOT EXISTS), a set operation (UNION / set difference), and ORDER BY + LIMIT; every part has at least one aggregate |
-| **S2-G5.** Add views for the four dashboards (Owner, Employee, Order-system, Kitchen Display) | Without views, the app would repeat the same long queries in many places | DA; BE L1 | `schema.sql` has at least **4** views, one for each dashboard, and each one is built from an S2-G1 query |
-| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" triggers (Section 4), and the RA version of each rule | The business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced yet (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written in RA as "query = ∅"; each CHECK and trigger has a test that breaks it, and `tests.sql` shows **0** unexpected results |
-| **S2-G7.** Finish the design checks from this sprint's lectures | I have not checked the FDs implied by every ERD relationship, compared isa styles, or rated the ERD's quality formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | All **35/35** relationships are matched to the FD they imply; both isa hierarchies are compared in 3 styles; the ERD is rated on all 8 Batini criteria with evidence; any new relation added in Sprint 2 is checked for BCNF/3NF |
-| **S2-G8.** Answer the last two Kickoff questions: FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are still open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, at least 1 FD that does **not** hold is listed with the reason; update, insertion, and deletion anomalies are shown for at least **3** original models (e.g., D1, D5, D7); all **4/4** Kickoff questions are answered |
+| Goal | From | Limitation it fixes | Competency | Success criterion (measurable) |
+|---|---|---|---|---|
+| **F-G1.** Finish the queries for the other three parts | S2-G2, S2-G3, S2-G4 (partially met) | Q18–Q73 have requirements but no RA, SQL, or sample data | DA: relational algebra, joins, aggregation, subqueries; BE L1 | **73/73** queries have an RA version and an SQL version; `seed.sql` has data for every part and loads with **0** unexpected errors; every query returns at least 1 row (Q58 returns 0, on purpose); ORDER BY + LIMIT is used (Q29, Q49, Q68); every part has at least one aggregate |
+| **F-G2.** Add views for the four dashboards | S2-G5 (removed) | The app would repeat the same long queries in many places | DA; BE L1 | If views are covered: at least **4** views, one per dashboard, each built from a tested query in Section 8 |
+| **F-G3.** Add the triggers | S2-G6 (partially met), Sprint 1 G6 | The cross-restaurant rule and the three "at least one" minimums are not enforced by the database | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | If triggers are covered: **4** triggers (cross-restaurant + 3 minimums), each written in RA as "query = ∅" and each with a test that breaks it, **0** unexpected results; Q58 still returns 0 rows |
+| **F-G4.** Answer the last two Kickoff questions | S2-G8 (not met) | Kickoff questions 3 and 4 are still open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | At least 1 FD that does **not** hold for every relation with a composite or second key, with the reason; update, insertion, and deletion anomalies for at least **3** original models (e.g., D1, D5, D7); **4/4** Kickoff questions answered |
+| **F-G5.** Fix the ERD gaps found by the Batini check | S2-G7 (Section 4.7) | The (min, max) values are only in tables, not in the figure | DM L1: documents relationships with correct ERDs | Every relationship in the figure shows its (min, max); Self-explanation (and Readability, if it was partly met) is rated Met in Section 4.7 |
 
+**Module coverage.**
 
-**Module coverage.** Each module competency from Sprint 1 is developed further in Sprint 2:
-
-| Module | Sprint 2 goal |
+| Module | Final goal |
 |---|---|
-| Constraints in Relational Algebra | S2-G2, S2-G6 |
-| Weak Entity Sets & Inheritance | S2-G7 (isa comparison); queries over subclasses in S2-G1 |
-| Improving Conceptual Designs | S2-G7  |
-| ERDs to FDs | S2-G7 (35/35) |
-| Projecting FDs and minimal bases | S2-G7  |
-| 3NF | S2-G7 |
-| 4NF and MVDs | S2-G7  |
+| SELECT-FROM-WHERE, Grouping and Aggregation, Subqueries | F-G1 |
+| Constraints in Relational Algebra | F-G1 (RA), F-G3 |
+| Weak Entity Sets & Inheritance | F-G1 (queries over subclasses, e.g., Q54) |
+| Improving Conceptual Designs | F-G5 |
+| FDs and Keys, BCNF Decomposition | F-G4 |
+| Views, Triggers (if covered) | F-G2, F-G3 |
 
 
 ### 11.3 Questions for the TA-client
