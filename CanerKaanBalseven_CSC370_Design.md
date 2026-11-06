@@ -1198,6 +1198,25 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 
 ---
 
+### 8.2 SQL Features Used (S2-G4)
+
+| Feature | Query | Why the query needs it |
+|---|---|---|
+| Inner join | Q1 | The department is stored in Role, not in Staff, so Staff must be joined with Role on (restaurant_id, role_name) |
+| Outer join | Q4 | A swap request may not have a cover yet; an inner join would drop those requests, a LEFT JOIN keeps them with NULL |
+| Outer join | Q7 | A time slot with nobody scheduled must still be counted (as 0); an inner join would drop it |
+| GROUP BY + HAVING | Q7 | The number of scheduled staff is counted per time slot (GROUP BY), and only slots with fewer than needed are kept (HAVING, a condition on the group, not on a row) |
+| GROUP BY + HAVING | Q17 | Hours are summed per staff member, and HAVING … >= ALL keeps only the one with the most |
+| Subquery (NOT EXISTS) | Q2 | "No shift next week" means no matching row exists in Shift, which is a set difference; NOT EXISTS checks this for each staff member |
+| Subquery (NOT IN) | Q12 | Staff without a login are the staff_ids not in StaffCredential |
+| Subquery (tuple NOT IN) | Q14 | Role's key is (restaurant_id, role_name), so the pair must be compared, not role_name alone |
+| Set operation (UNION) | Q13 | Hourly and salaried pay are calculated differently (one per isa subclass), so the two results are calculated separately and combined |
+| Self-join | Q8, Q15 | Q8 pairs a clock-in with a clock-out from the same table; Q15 compares two shifts from the same table |
+| ORDER BY + LIMIT | *[Q29 / Q49 / Q68]* | *[next module]* |
+| Aggregate in every part | Staff and Labour: Q7, Q8, Q13, Q17; Menu and Inventory: *[ ]*; Front of House: *[ ]*; Marketing and Analytics: *[ ]* | *[fill in after each module]* |
+
+---
+
 ## 9. Implementation
 
 Note: Might get revised!
