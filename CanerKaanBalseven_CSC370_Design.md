@@ -1151,9 +1151,9 @@ This FD is easy to miss: E, F, G → H cannot be used directly in R2 because E i
 
 ---
 
-### 8. SQL Queries as Requirements
+## 8. SQL Queries as Requirements
 
-### Query Requirements (S2-G1)
+### 8.1 Query Requirements (S2-G1)
 
 Each query requirement is written as a sentence and linked to the feature in Section 3 that needs it. To turn a requirement into a query, I follow the What / Where / How steps from the lectures: **what** the output should show (SELECT / π), **where** the data comes from (FROM / JOIN / ⋈), and **how** the rows are chosen and grouped (WHERE / HAVING / σ, GROUP BY / γ). The last column names the technique from the lectures that the query needs.
 
@@ -1168,7 +1168,7 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 | Q5 | Show the time-off requests that are still pending, oldest first, with the staff member's name. | Staff request time off; managers approve or reject it | TimeOffRequest, Staff | Join (⋈), WHERE (σ), ORDER BY |
 | Q6 | Calculate the pay of each staff member for a pay period (hours worked × rate + bonus − deductions). | Calculate each staff member's pay for a pay period | PayRecord, Staff | Arithmetic expression in SELECT (π) |
 | Q7 | For each department and time slot on a given date, compare how many staff are needed with how many are scheduled, and show only the slots that are short. | Warn when a shift has fewer staff than needed | StaffingRequirement, Shift, Staff, Role | Join on overlapping times, GROUP BY + COUNT (γ), HAVING (σ on groups) |
-| Q8 | For each staff member, calculate the hours they actually worked in a week from their clock-in and clock-out times. | Staff clock in and out of their shifts and log their breaks | TimeClockEvent | TimeClockEvent joined with itself (renaming), correlated subquery to find the next clock-out, SUM (γ) |
+| Q8 | For each staff member, calculate the hours they actually worked in a week from their clock-in and clock-out times. | Staff clock in and out of their shifts and log their breaks | TimeClockEvent | TimeClockEvent joined with itself (renaming) on the same shift, SUM (γ) |
 | Q9 | Find the staff members who clocked in more than 10 minutes after their shift started. | Staff clock in and out of their shifts | TimeClockEvent, Shift, Staff | Join (⋈), WHERE with a time difference (σ) |
 | Q10 | List the clock-ins that are not linked to any scheduled shift. | Staff clock in and out of their shifts | TimeClockEvent, Staff | WHERE shift_id IS NULL (the unscheduled case from Section 7.5, N2) |
 | Q11 | Show the staff members who still have to reset their password, and those who have never logged in. | Staff log in to the app; new accounts must reset their password | StaffCredential, Staff | Join (⋈), WHERE with OR and IS NULL |
@@ -1183,72 +1183,50 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 
 | # | Query requirement | Feature (Section 3.2) | Tables | Technique |
 |---|---|---|---|---|
-| Q18 | Show a restaurant's menu grouped by category, in display order, with only the items that are available. | Show the menu grouped by category, in a chosen order | MenuCategory, MenuItem | Join (⋈), WHERE (σ), ORDER BY two attributes |
-| Q19 | Calculate the ingredient cost of each dish, using the average delivery cost of each ingredient. | Calculate the ingredient cost of a dish | MenuItem, RecipeLine, StockMovement | Subquery in FROM (average cost per ingredient), join, SUM (γ) |
-| Q20 | Show the current stock of every ingredient, including ingredients that have never had a stock movement. | Show the current stock of each ingredient | InventoryItem, StockMovement | LEFT JOIN, SUM (γ), COALESCE for items with no rows |
-| Q21 | List the ingredients whose current stock is below their par level. | Warn when stock falls below the par level | InventoryItem, StockMovement | GROUP BY (γ), HAVING SUM(quantity_delta) < par_level |
-| Q22 | Show the total cost of wasted stock for each ingredient last month, from the highest to the lowest. | Log waste and stock-count adjustments | StockMovement, InventoryItem | WHERE movement_type = 'WASTE' (σ), SUM (γ), ORDER BY |
-| Q23 | Find the menu items that do not have a recipe yet. | Define a recipe for each dish | MenuItem, RecipeLine | NOT IN subquery (set difference ∖) |
-| Q24 | Show the menu items that are currently hidden from customers. | Managers add, edit, and hide menu items | MenuItem, MenuCategory | Join (⋈), WHERE is_available = FALSE |
-| Q25 | List the supplier deliveries of the last 7 days with the total cost of each one. | Log supplier deliveries with their cost | StockMovement, InventoryItem | WHERE on type and date (σ), arithmetic in SELECT |
-| Q26 | For each ingredient, compare how much should have been used based on the dishes sold with how much was logged as consumed. | Deduct ingredients when dishes are sold | OrderItem, RecipeLine, StockMovement | Two subqueries in FROM joined together, SUM (γ) |
-| Q27 | Suggest which ingredients to reorder: those that will run out before a new delivery can arrive (days of stock left ≤ lead time), using the average daily use of the last 14 days. | Suggest when to reorder, using the supplier's lead time | InventoryItem, StockMovement | Subquery in FROM (daily use), arithmetic, WHERE on the derived columns |
-| Q28 | Show the profit margin of each dish (price minus ingredient cost), lowest margin first. | Calculate the ingredient cost of a dish | MenuItem, RecipeLine, StockMovement | Subquery in FROM (Q19 as a table), arithmetic, ORDER BY |
-| Q29 | Find the 5 best-selling menu items of the last 30 days by quantity sold. | Show the menu grouped by category | OrderItem, CustomerOrder, MenuItem | GROUP BY, SUM (γ), ORDER BY + LIMIT |
-| Q30 | Find the menu items that nobody ordered in the last 30 days. | Managers add, edit, and hide menu items | MenuItem, OrderItem, CustomerOrder | Correlated NOT EXISTS |
-| Q31 | Find the best-selling menu item in each category. | Show the menu grouped by category | MenuItem, OrderItem | Correlated subquery with >= ALL (each item is only compared with items in its own category) |
-| Q32 | Find the menu items whose name contains a given word (e.g., "vegan"). | Show the menu grouped by category | MenuItem, MenuCategory | LIKE '%vegan%' (σ) |
-| Q33 | Count how many different customers ordered each menu item last month. | Show the menu grouped by category | OrderItem, CustomerOrder, MenuItem | COUNT(DISTINCT customer_id) (γ) |
-| Q34 | Find the order lines that were sold at a different price than the item's current price (the price changed since). | Managers change prices | OrderItem, MenuItem | Tuple NOT IN: (menu_item_id, unit_price) NOT IN (SELECT menu_item_id, price …) |
+| Q18 | Show the current stock of every ingredient, including ingredients that have never had a stock movement. | Show the current stock of each ingredient | InventoryItem, StockMovement | LEFT JOIN, SUM (γ), COALESCE for items with no rows |
+| Q19 | List the ingredients whose current stock is below their par level. | Warn when stock falls below the par level | InventoryItem, StockMovement | GROUP BY (γ), HAVING SUM(quantity_delta) < par_level |
+| Q20 | Show the total cost of wasted stock for each ingredient last month, from the highest to the lowest. | Log waste and stock-count adjustments | StockMovement, InventoryItem | WHERE movement_type = 'WASTE' (σ), SUM (γ), ORDER BY |
+| Q21 | Find the menu items that do not have a recipe yet. | Define a recipe for each dish | MenuItem, RecipeLine | NOT IN subquery (set difference ∖) |
+| Q22 | Show the menu items that are currently hidden from customers. | Managers add, edit, and hide menu items | MenuItem, MenuCategory | Join (⋈), WHERE is_available = FALSE |
+| Q23 | List the supplier deliveries of the last 7 days with the total cost of each one. | Log supplier deliveries with their cost | StockMovement, InventoryItem | WHERE on type and date (σ), arithmetic in SELECT |
+| Q24 | Show the profit margin of each dish (price minus ingredient cost), lowest margin first. | Calculate the ingredient cost of a dish | MenuItem, RecipeLine, StockMovement | Subquery in FROM (average cost per ingredient, then cost per dish), arithmetic, ORDER BY |
+| Q25 | Find the 5 best-selling menu items of the last 30 days by quantity sold. | Show the menu grouped by category | OrderItem, CustomerOrder, MenuItem | GROUP BY, SUM (γ), ORDER BY + LIMIT |
+| Q26 | Find the menu items that nobody ordered in the last 30 days. | Managers add, edit, and hide menu items | MenuItem, OrderItem, CustomerOrder | Correlated NOT EXISTS |
+| Q27 | Find the best-selling menu item in each category. | Show the menu grouped by category | MenuItem, OrderItem | Correlated subquery with >= ALL (each item is only compared with items in its own category) |
+| Q28 | Find the order lines that were sold at a different price than the item's current price (the price changed since). | Managers change prices | OrderItem, MenuItem | Tuple NOT IN: (menu_item_id, unit_price) NOT IN (SELECT menu_item_id, price …) |
 
 #### Front of House
 
 | # | Query requirement | Feature (Section 3.3) | Tables | Technique |
 |---|---|---|---|---|
-| Q35 | Show a restaurant's tables grouped by section, with the number of tables and seats in each section. | Show the restaurant's tables by section | DiningTable | GROUP BY, COUNT, SUM (γ) |
-| Q36 | Find the tables of a restaurant that are free at a given date and time and have enough seats for the party. | Customers reserve a table; prevent double-booking a table | DiningTable, Reservation | WHERE seats ≥ party size (σ), NOT IN subquery (∖) |
-| Q37 | List the sections that have at least one booked table tonight. | Show the restaurant's tables by section | DiningTable, Reservation | Join (⋈), DISTINCT (δ) |
-| Q38 | Calculate the total of each order (quantity × price of every line, plus the tip). | Calculate order totals | CustomerOrder, OrderItem | GROUP BY, SUM (γ), arithmetic |
-| Q39 | Show the orders that are still not fulfilled more than 30 minutes after they were created. | Track order status from pending to fulfilled | CustomerOrder | WHERE with date arithmetic (σ) |
-| Q40 | Count the orders and the revenue for each channel (in person, phone, online) on each day of the last week. | Take orders in person, by phone, or online | CustomerOrder, OrderItem | GROUP BY two attributes (γ), COUNT, SUM |
-| Q41 | Show the average tip for each payment type. | Record the payment type and tip | CustomerOrder | GROUP BY, AVG (γ) |
-| Q42 | List the order lines with special notes (e.g., "no onions") on the tickets that are cooking right now. | Add dishes to an order with notes | OrderItem, KitchenTicket, MenuItem | Join (⋈), WHERE notes IS NOT NULL |
-| Q43 | Show the average preparation time (from start to finish) for each order channel. | Measure how long orders take to prepare | CustomerOrder | AVG of a time difference, GROUP BY (γ) |
-| Q44 | Compare the average time from ticket creation to completion for priority tickets and normal tickets. | Mark a ticket as priority and track it from new to ready | KitchenTicket | GROUP BY is_priority, AVG (γ) |
-| Q45 | Find the orders that were sent to the kitchen in more than one batch. | Send orders to the kitchen display as tickets, in one or more batches | KitchenTicket | GROUP BY order_id, HAVING COUNT(*) > 1 |
-| Q46 | Show the kitchen tickets that are not ready yet with their order items, priority tickets first and then the oldest. | Mark a ticket as priority and track it from new to ready | KitchenTicket, OrderItem, MenuItem | Join (⋈), WHERE (σ), ORDER BY two attributes |
-| Q47 | Show the order history of a returning customer, found by their phone number, newest first. | Look up a returning customer's order history | Customer, CustomerOrder | Scalar subquery (phone is a key, so it returns exactly one customer_id), ORDER BY |
-| Q48 | Find the customers whose name contains a given text. | Look up a returning customer's order history | Customer | LIKE (σ) |
-| Q49 | Show the 10 customers who spent the most in total. | Look up a returning customer's order history | Customer, CustomerOrder, OrderItem | GROUP BY, SUM (γ), ORDER BY + LIMIT |
-| Q50 | Find the customers who did not show up for 2 or more reservations. | Customers reserve a table for a date and time | Reservation, Customer | WHERE status = 'NO_SHOW', GROUP BY, HAVING COUNT(*) >= 2 |
-| Q51 | Find the customers who have both reserved a table and placed a delivery order. | Customers reserve a table; handle delivery orders | Reservation, CustomerOrder, DeliveryOrder | IN subquery (intersection ∩) |
-| Q52 | Find the customers whose orders were all deliveries. | Handle pickup and delivery orders | Customer, CustomerOrder, DeliveryOrder | Correlated NOT EXISTS ("for all": no order of theirs is outside DeliveryOrder) |
-| Q53 | Find the customers who have ordered every item in a category (e.g., tried all the desserts). | Look up a returning customer's order history | Customer, CustomerOrder, OrderItem, MenuItem | Relational division: NOT EXISTS inside NOT EXISTS |
-| Q54 | Count the orders of each type: dine-in, delivery, and pickup (an order that is in neither subclass). | Handle pickup and delivery orders | CustomerOrder, DineInOrder, DeliveryOrder | Three counts combined with UNION (∪); pickup found with NOT EXISTS in both subclasses |
-| Q55 | Compare Uber Eats and in-house deliveries: number of orders and average preparation time. | Handle pickup and delivery orders, including Uber Eats | DeliveryOrder, CustomerOrder | Join (⋈), GROUP BY courier, COUNT, AVG |
-| Q56 | Rank the servers by the average rating of the dine-in orders they served, only for servers with at least 5 reviews. | Seat dine-in orders and assign a server; customers review an order | Review, DineInOrder, Staff | GROUP BY, HAVING COUNT(*) >= 5, AVG, ORDER BY |
-| Q57 | List last week's reviews with a rating of 2 or less, with the order and, for dine-in orders, the server. | Customers review an order | Review, CustomerOrder, DineInOrder, Staff | LEFT JOIN (not every order is dine-in) |
-| Q58 | Find the order lines whose menu item belongs to a different restaurant than the order (should return 0 rows). | Several restaurants use the same system, each seeing only its own data | OrderItem, CustomerOrder, MenuItem, MenuCategory | Joins with renaming, WHERE o.restaurant_id <> c.restaurant_id (the same check as the G6 trigger) |
+| Q29 | Show a restaurant's tables grouped by section, with the number of tables and seats in each section. | Show the restaurant's tables by section | DiningTable | GROUP BY, COUNT, SUM (γ) |
+| Q30 | Find the tables of a restaurant that are free at a given date and time and have enough seats for the party. | Customers reserve a table; prevent double-booking a table | DiningTable, Reservation | WHERE seats ≥ party size (σ), NOT IN subquery (∖) |
+| Q31 | Show the orders that are still not fulfilled more than 30 minutes after they were created. | Track order status from pending to fulfilled | CustomerOrder | WHERE with date arithmetic (σ) |
+| Q32 | Count the orders and the revenue for each channel (in person, phone, online) on each day of the last week. | Take orders in person, by phone, or online | CustomerOrder, OrderItem | GROUP BY two attributes (γ), COUNT, SUM |
+| Q33 | Show the average tip for each payment type. | Record the payment type and tip | CustomerOrder | GROUP BY, AVG (γ) |
+| Q34 | Show the average preparation time (from start to finish) for each order channel. | Measure how long orders take to prepare | CustomerOrder | AVG of a time difference, GROUP BY (γ) |
+| Q35 | Show the order history of a returning customer, found by their phone number, newest first. | Look up a returning customer's order history | Customer, CustomerOrder | Scalar subquery (phone is a key, so it returns exactly one customer_id), ORDER BY |
+| Q36 | Find the customers whose name contains a given text. | Look up a returning customer's order history | Customer | LIKE (σ) |
+| Q37 | Show the 10 customers who spent the most in total last month. | Look up a returning customer's order history | Customer, CustomerOrder, OrderItem | GROUP BY, SUM (γ), ORDER BY + LIMIT |
+| Q38 | Find the customers who did not show up for 2 or more reservations. | Customers reserve a table for a date and time | Reservation, Customer | WHERE status = 'NO_SHOW', GROUP BY, HAVING COUNT(*) >= 2 |
+| Q39 | Find the customers who have ordered every item in a category (e.g., tried all the desserts). | Look up a returning customer's order history | Customer, CustomerOrder, OrderItem, MenuItem | Relational division: NOT EXISTS inside NOT EXISTS |
+| Q40 | Count the orders of each type: dine-in, delivery, and pickup (an order that is in neither subclass). | Handle pickup and delivery orders | CustomerOrder, DineInOrder, DeliveryOrder | Three counts combined with UNION (∪); pickup found with NOT EXISTS in both subclasses |
+| Q41 | Rank the servers by the average rating of the dine-in orders they served, only for servers with at least 5 reviews. | Seat dine-in orders and assign a server; customers review an order | Review, DineInOrder, Staff | GROUP BY, HAVING COUNT(*) >= 5, AVG, ORDER BY |
 
 #### Marketing and Analytics
 
 | # | Query requirement | Feature (Section 3.4) | Tables | Technique |
 |---|---|---|---|---|
-| Q59 | List the campaigns that are running today with the menu items each one promotes. | A campaign promotes one or more menu items | Campaign, CampaignItem, MenuItem | Join (⋈), WHERE on a date range (end_date can be NULL) |
-| Q60 | Show how much revenue each promoted menu item made during its campaign's dates. | Managers create marketing campaigns with a budget and dates | Campaign, CampaignItem, OrderItem, CustomerOrder | Join with a date range, SUM (γ) |
-| Q61 | For each campaign, compare the revenue of its promoted items during the campaign with its budget. | Managers create marketing campaigns with a budget and dates | Campaign, CampaignItem, OrderItem, CustomerOrder | GROUP BY, SUM (γ), arithmetic |
-| Q62 | Find the menu items that were never promoted in any campaign. | A campaign promotes one or more menu items | MenuItem, CampaignItem | NOT IN subquery (∖) |
-| Q63 | Find the orders that include any item promoted by a campaign running today. | A campaign promotes one or more menu items | OrderItem, CampaignItem, Campaign | = ANY (subquery) |
-| Q64 | Show the active announcements for a restaurant, newest first (the restaurant comes from the author). | Managers post announcements; hide announcements that are no longer active | Announcement, Staff | Join (⋈), WHERE (σ), ORDER BY |
-| Q65 | Show which staff members posted the most announcements. | Managers post announcements to the staff dashboard | Announcement, Staff | GROUP BY, COUNT (γ), ORDER BY |
-| Q66 | Show the average daily revenue for each weather condition. | Use sales and weather data to generate recommendations | WeatherObservation, CustomerOrder, OrderItem | Subquery in FROM (daily revenue), join, AVG (γ) |
-| Q67 | For each weather condition, show what share of the orders were deliveries. | Use sales and weather data to generate recommendations | WeatherObservation, CustomerOrder, DeliveryOrder | LEFT JOIN, COUNT with a condition |
-| Q68 | Count the orders for each hour of the day over the last 30 days to find the busiest hours. | Use sales and labour data to generate recommendations | CustomerOrder | GROUP BY HOUR(created_at), COUNT (γ), ORDER BY + LIMIT |
-| Q69 | For each hour of a day, compare the number of staff on shift with the number of orders, to spot hours with too many or too few staff. | Use sales and labour data to generate recommendations | Shift, CustomerOrder | Two subqueries in FROM joined, GROUP BY |
-| Q70 | Show the recommendations for a restaurant that have not expired yet, newest first. | Show recommendations until they expire | Insight | WHERE expires_at > NOW() OR expires_at IS NULL |
-| Q71 | Count the recommendations of each type that were created last month. | Use sales, labour, and weather data to generate recommendations | Insight | GROUP BY, COUNT (γ) |
-| Q72 | For every restaurant, show its name with last month's revenue, number of orders, and average review rating. | Several restaurants use the same system | Restaurant, CustomerOrder, OrderItem, Review | Several joins, LEFT JOIN, GROUP BY (γ) |
-| Q73 | Find the restaurants that had more orders last month than the average restaurant. | Several restaurants use the same system | Restaurant, CustomerOrder | HAVING COUNT(*) > scalar subquery (AVG over a subquery in FROM) |
+| Q42 | List the campaigns that are running today with the menu items each one promotes. | A campaign promotes one or more menu items | Campaign, CampaignItem, MenuItem | Join (⋈), WHERE on a date range (end_date can be NULL) |
+| Q43 | Show how much revenue each promoted menu item made during its campaign's dates. | Managers create marketing campaigns with a budget and dates | Campaign, CampaignItem, OrderItem, CustomerOrder | Join with a date range, SUM (γ) |
+| Q44 | Find the menu items that were never promoted in any campaign. | A campaign promotes one or more menu items | MenuItem, CampaignItem | NOT IN subquery (∖) |
+| Q45 | Show the active announcements for a restaurant, newest first (the restaurant comes from the author). | Managers post announcements; hide announcements that are no longer active | Announcement, Staff | Join (⋈), WHERE (σ), ORDER BY |
+| Q46 | Show the average daily revenue for each weather condition. | Use sales and weather data to generate recommendations | WeatherObservation, CustomerOrder, OrderItem | Subquery in FROM (daily revenue), join, AVG (γ) |
+| Q47 | For each weather condition, show what share of the orders were deliveries. | Use sales and weather data to generate recommendations | WeatherObservation, CustomerOrder, DeliveryOrder | LEFT JOIN, COUNT with a condition |
+| Q48 | Count the orders for each hour of the day over the last 30 days to find the busiest hours. | Use sales and labour data to generate recommendations | CustomerOrder | GROUP BY HOUR(created_at), COUNT (γ), ORDER BY + LIMIT |
+| Q49 | For each hour of a day, compare the number of staff on shift with the number of orders, to spot hours with too many or too few staff. | Use sales and labour data to generate recommendations | Shift, CustomerOrder | Two subqueries in FROM joined, GROUP BY |
+| Q50 | Show the recommendations for a restaurant that have not expired yet, newest first. | Show recommendations until they expire | Insight | WHERE expires_at > the current time OR expires_at IS NULL |
+| Q51 | For every restaurant, show its name with last month's revenue, number of orders, and average review rating. | Several restaurants use the same system | Restaurant, CustomerOrder, OrderItem, Review | Several joins, LEFT JOIN, GROUP BY (γ) |
 
 ---
 
@@ -1259,17 +1237,23 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 | Inner join | Q1 | The department is stored in Role, not in Staff, so Staff must be joined with Role on (restaurant_id, role_name) |
 | Outer join | Q4 | A swap request may not have a cover yet; an inner join would drop those requests, a LEFT JOIN keeps them with NULL |
 | Outer join | Q7 | A time slot with nobody scheduled must still be counted (as 0); an inner join would drop it |
+| Outer join + COALESCE | Q18 | An ingredient with no stock movements must still be listed; COALESCE shows its stock as 0 instead of NULL |
 | GROUP BY + HAVING | Q7 | The number of scheduled staff is counted per time slot (GROUP BY), and only slots with fewer than needed are kept (HAVING, a condition on the group, not on a row) |
 | GROUP BY + HAVING | Q17 | Hours are summed per staff member, and HAVING … >= ALL keeps only the one with the most |
-| Subquery (NOT EXISTS) | Q2 | "No shift next week" means no matching row exists in Shift, which is a set difference; NOT EXISTS checks this for each staff member |
-| Subquery (NOT IN) | Q12 | Staff without a login are the staff_ids not in StaffCredential |
-| Subquery (tuple NOT IN) | Q14 | Role's key is (restaurant_id, role_name), so the pair must be compared, not role_name alone |
+| GROUP BY + HAVING | Q19, Q38, Q41 | Stock is summed per ingredient, no-shows counted per customer, reviews counted per server; HAVING keeps only the groups that pass the limit |
+| Subquery (NOT EXISTS) | Q2, Q26 | "No shift next week" / "nobody ordered it" means no matching row exists, which is a set difference; NOT EXISTS checks this for each row |
+| Subquery (NOT IN) | Q12, Q21, Q44 | The rows we want are the ids that are not in the other table (no login, no recipe, never promoted) |
+| Subquery (tuple NOT IN) | Q14, Q28 | The pair must be compared: Role's key is (restaurant_id, role_name); a price change means the pair (menu_item_id, unit_price) is not in MenuItem |
+| Scalar subquery | Q35 | Phone is a key, so the subquery returns exactly one customer_id, which can be compared with = |
+| Correlated subquery with ALL | Q27 | Each item is compared only with the items of its own category |
+| Subquery in FROM | Q24, Q46, Q49, Q51 | A value per group (average cost, daily revenue, orders per hour) must be calculated first, then joined like a table |
+| Relational division | Q39 | "Ordered every dessert" is a "for all" question, written as NOT EXISTS inside NOT EXISTS |
 | Set operation (UNION) | Q13 | Hourly and salaried pay are calculated differently (one per isa subclass), so the two results are calculated separately and combined |
+| Set operation (UNION) | Q40 | Dine-in, delivery, and pickup orders are counted separately (one per subclass, and pickup is in neither), then combined |
 | Self-join | Q8, Q15 | Q8 pairs a clock-in with a clock-out from the same table; Q15 compares two shifts from the same table |
-| ORDER BY + LIMIT | *[Q29 / Q49 / Q68]* | *[next module]* |
-| Aggregate in every part | Staff and Labour: Q7, Q8, Q13, Q17; Menu and Inventory: *[ ]*; Front of House: *[ ]*; Marketing and Analytics: *[ ]* | *[fill in after each module]* |
-
----
+| LIKE | Q36 | The search text can be anywhere in the name, so '%Lee%' is used |
+| ORDER BY + LIMIT | Q25, Q37, Q48 | Only the top rows are needed (5 best sellers, 10 best customers, 3 busiest hours), so the rows are sorted and LIMIT keeps the first ones |
+| Aggregate in every part | Staff and Labour: Q7, Q8, Q13, Q17; Menu and Inventory: Q18, Q19, Q20, Q24, Q25, Q27; Front of House: Q29, Q32, Q33, Q34, Q37, Q38, Q40, Q41; Marketing and Analytics: Q43, Q46, Q47, Q48, Q49, Q51 | Every part has questions about totals, counts, or averages per group (SUM, COUNT, AVG, MAX) |
 
 ## 9. Implementation
 
