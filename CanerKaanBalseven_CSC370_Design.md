@@ -1395,13 +1395,13 @@ mysql -u root -t < null_check.sql > null_output.txt
 | File | Contents | Expected result |
 |---|---|---|
 | `schema.sql` | DDL for the 31 relations: 41 foreign keys, NOT NULL, 34 named CHECK constraints, 4 views (S2-G5), and 6 triggers (S2-G6) | Loads with 0 errors |
-| `seed.sql` | Sample data for two restaurants (Harbour Grill, Kebab Corner) in all four parts, a rule check, and the constraint tests (inside a transaction that is rolled back, so the sample data stays the same). Run with `--force` | 62 errors, all from the test section; the counts rows are 0 0 0 0 / 2 9 10 3 3 1 1 1 1 0 0 / 2 2 4 8 2 1 1 1 1 4 2 4 1 1 / 1 1 1 1 3 3 |
+| `seed.sql` | Sample data for two restaurants (Harbour Grill, Kebab Corner) in all four parts, a rule check, and the constraint tests (inside a transaction that is rolled back, so the sample data stays the same). Run with `--force` | 62 errors, all from the test section |
 | `staff_query.sql` | Q1–Q17 (Staff and Labour), each with its RA as a comment | Every query returns at least 1 row |
 | `menu_query.sql` | Q18–Q28 (Menu and Inventory) | Every query returns at least 1 row |
 | `foh_query.sql` | Q29–Q41 (Front of House) | Every query returns at least 1 row |
 | `marketing_query.sql` | Q42–Q51 (Marketing and Analytics) | Every query returns at least 1 row |
 | `view_query.sql` | Reads the 4 dashboard views (V1–V4) | Each view returns the same rows as its query (Q32, Q3, Q31, Q19) |
-| `null_check.sql` | Sprint 1, G3: NULLs in the old one-table design vs. the new subclass tables (N1–N8) | 2, 7, 14, 20, then 0, 0, 0, 0 |
+| `null_check.sql` | Sprint 1, G3: NULLs in the old one-table design vs. the new subclass tables (N1–N8) | --- |
 | `*_output.txt` | The saved output of each file above | — |
  
 ---
@@ -1409,36 +1409,33 @@ mysql -u root -t < null_check.sql > null_output.txt
 ## 10. Known Limitations
  
 1. **Cross-restaurant consistency.** Every row belongs to one restaurant, so each restaurant's data stays separate. Two options were compared: adding restaurant_id to the connecting tables breaks BCNF, so the tables stay in BCNF and the rule is enforced by **triggers T1–T4** (Sprint 2): an order line must use a menu item of the order's restaurant, and a dine-in order must use a table and a server of the order's restaurant. Other connections (for example, a reservation's table and customer, or a shift's staff member and a staffing requirement) are still only checked by the application, which always filters by the logged-in restaurant.
-2. **"At least one" rules for new rows.** Triggers T5–T6 stop the last item of an order, a kitchen ticket, or a campaign from being deleted. They cannot stop a new order, ticket, or campaign from being empty for a moment, because the parent row is inserted before its children. The application inserts the parent and its children together, and the rule check in `seed.sql` shows that the sample data has no empty parents.
-3. **Fixed "today" in the queries.** The queries use the fixed date of the sample data (2026-11-08) instead of `NOW()`, so their output does not change when they are run later. In the application, these dates come from the user.
+
 ---
  
-## 11. Next Sprint Goals
-
 ### 11.1 Final Submission
 
 | Goal | From | Limitation it fixes | Competency | Success criterion (measurable) |
 |---|---|---|---|---|
-| **F-G1.** Group writes that belong together into transactions | New | A new order, kitchen ticket, or campaign can be empty for a moment, because the parent row is inserted before its children (Section 10, item 2) | BE L1: ensures a database never enters an inconsistent state (ACID Transactions) | **3** transactions in `transactions.sql`: place an order with its items, fire a kitchen ticket, start a campaign with its items. For each one: the run with good data commits, and a run with one bad row is rolled back and leaves **0** new rows; the rule check still returns **0 0 0 0** |
-| **F-G2.** Give each type of user only the access they need | New | Every user can read and change every table; the restaurant filter is only in the application (Section 10, item 1) | BE: Basic Security | **3** MySQL users in `security.sql` (owner, manager, server) with GRANT on the tables and views they need. **100%** of the denied statements in the test fail (error 1142), and every allowed one runs. The queries the application sends use placeholders (`?`) instead of joining strings, so input like `' OR 1=1 --` is shown to return 0 rows |
-| **F-G3.** Make the most used queries faster with indexes | New | No indexes except the ones MySQL adds for keys and foreign keys; date filters (e.g., Q37) read the whole table | DA: Analysing Query Algorithms, Advanced SQL | `EXPLAIN` for at least **5** queries before and after adding indexes (e.g., on CustomerOrder(restaurant_id, created_at) and Shift(start_at)). For each one, the access type goes from `ALL` (full scan) to `ref` or `range`, and the rows examined go down; shown in `index_output.txt` |
-| **F-G4.** Test how NULLs change the query results | New | The queries are only tested on rows without NULLs in the columns they compare; NOT IN, COUNT, AVG, and outer joins act differently when a NULL appears | DA: SQL Queries (NULLs and outer joins) | For **100%** of the queries that use NOT IN, COUNT/AVG on a nullable column, or an outer join, one test row with a NULL is added and the result before and after is compared; every query whose result changes is fixed or explained |
-| **F-G5.** Answer the last two Kickoff questions | S2-G8 (not met) | Kickoff questions 3 and 4 are still open (Section 11.2) | DM L2: identifies dependencies and keys; eliminates data anomalies | At least 1 FD that does **not** hold for every relation with a composite or second key, with the reason; update, insertion, and deletion anomalies for at least **3** original models (e.g., D1, D5, D7); **4/4** Kickoff questions answered |
-| **F-G6.** Fix the ERD gaps found by the Batini check | S2-G7 (Section 4.7) | The (min, max) values are only in tables, and the figure has many line crossings | DM L1: documents relationships with correct ERDs | Every relationship in the figure shows its (min, max); Self-explanation and Readability rated Met in Section 4.7 |
+| **F-G1.** Use transactions for writes that go together | New | When I add a new order, kitchen ticket, or campaign, the parent row goes in first and the items come after, so for a short time it has no items (Section 10, item 2) | BE L1: ensures a database never enters an inconsistent state (ACID Transactions) | I will write **3** transactions in `transactions.sql`: placing an order with its items, firing a kitchen ticket, and starting a campaign with its items. I will run each one twice. With good data it should commit. With one bad row it should roll back and add no new rows. After that, the rule check should still find no broken rules |
+| **F-G2.** Give each user only the access they need | New | Right now any user can read and change any table, and only the app filters by restaurant (Section 10, item 1) | BE: Basic Security | I will make **3** MySQL users in `security.sql` (owner, manager, server) and GRANT each one only the tables and views it needs. In the test, **all** of the statements they should not be able to run must fail with an access denied error, and all the allowed ones must work. I will also show that a query using placeholders (`?`) returns nothing when the input is `' OR 1=1 --` |
+| **F-G3.** Add indexes to speed up the queries I use most | New | The only indexes are the ones MySQL makes for keys and foreign keys, so a query that filters by date (like Q37) has to read the whole table | DA: Analysing Query Algorithms, Advanced SQL | I will run `EXPLAIN` on at least **5** queries before and after adding indexes (for example on CustomerOrder(restaurant_id, created_at) and Shift(start_at)). For each query, the type should change from `ALL` (reads the whole table) to `ref` or `range`, and fewer rows should be read. The results go in `index_output.txt` |
+| **F-G4.** Check what NULLs do to my query results | New | My queries were only tested on rows with no NULLs in the columns they compare, but NOT IN, COUNT, AVG, and outer joins give different results when there is a NULL | DA: SQL Queries (NULLs and outer joins) | For **every** query that uses NOT IN, COUNT/AVG on a column that can be NULL, or an outer join, I will add one test row with a NULL and compare the result before and after. If a result changes, I will either fix the query or explain why |
+| **F-G5.** Answer the last two Kickoff questions | S2-G8 (not met) | Kickoff questions 3 and 4 are still open (Section 11.2) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, I will give at least 1 FD that does **not** hold and say why. I will show update, insertion, and deletion anomalies for at least **3** of the original models (for example D1, D5, D7). All **4/4** Kickoff questions will be answered |
+| **F-G6.** Fix the ERD problems from the Batini check | S2-G7 (Section 4.7) | The (min, max) values are only in tables, and the ERD has a lot of lines crossing each other | DM L1: documents relationships with correct ERDs | Every relationship in the ERD shows its (min, max), and Self-explanation and Readability are Met in Section 4.7 |
 
-**Note:** Sprint goals are subject to change; about 80% of them are aimed to be met in the Final submission.
+**Note:** These goals may change. I am aiming to meet about 80% of them in the Final submission.
 
-**Module coverage.** Every new module has at least one goal, and the Sprint 2 modules are developed further:
+**Module coverage.** Each new module has at least one goal, and I also build more on the Sprint 2 modules:
 
 | Module | Final goal | How it is measured |
 |---|---|---|
-| SQL Queries (remaining lessons) | F-G4 | Every NOT IN query (Q12, Q14, Q21, Q28, Q30, Q44) and every COUNT/AVG on a nullable column (e.g., Q33, Q34) tested with a NULL row |
-| Advanced SQL | F-G3, F-G2 | Indexes added and checked with `EXPLAIN`; the 4 views used to give each user only the rows and columns they need |
-| ACID Transactions | F-G1 | 3 transactions; commit with good data, rollback with bad data leaves 0 new rows |
-| Basic Security | F-G2 | 3 users with GRANT; 100% of denied statements fail; placeholders stop the injection input |
-| Analysing Query Algorithms | F-G3 | At least 5 queries go from a full scan (`ALL`) to an index (`ref`/`range`); rows examined before and after |
-| FDs and Keys, BCNF | F-G5 | At least 1 FD that does not hold per relation with a composite or second key; anomalies for 3 original models |
-| Improving Conceptual Designs | F-G6 | (min, max) on every relationship in the figure; Section 4.7 updated |
+| SQL Queries (remaining lessons) | F-G4 | Each NOT IN query (Q12, Q14, Q21, Q28, Q30, Q44) and each COUNT/AVG on a column that can be NULL (like Q33, Q34) is tested with a NULL row |
+| Advanced SQL | F-G3, F-G2 | Add indexes and check them with `EXPLAIN`; use the 4 views so each user only sees the rows and columns they need |
+| ACID Transactions | F-G1 | 3 transactions; they commit with good data, and roll back with bad data so no new rows are added |
+| Basic Security | F-G2 | 3 users with GRANT; all statements they are not allowed to run fail; placeholders stop the injection input |
+| Analysing Query Algorithms | F-G3 | At least 5 queries change from reading the whole table (`ALL`) to using an index (`ref`/`range`); rows read are compared before and after |
+| FDs and Keys, BCNF | F-G5 | At least 1 FD that does not hold for each relation with a composite or second key; anomalies for 3 original models |
+| Improving Conceptual Designs | F-G6 | (min, max) on every relationship in the ERD; Section 4.7 updated |
  
 ## 12. Use of Generative AI and Prior Work
  
