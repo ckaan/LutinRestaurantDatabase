@@ -50,7 +50,7 @@ Canerkaanbalseven csc370 design · MD
 |---|---|---|---|---|
 | 1.0 | Project Kickoff | October 4, 2026 | [3e80d50](https://github.com/ckaan/LutinRestaurantDatabase/tree/3e80d5078ac2d8ac66e3346d299b412badb4e019) | Requirements, first ERD (16 entity sets, 21 relationships), relational schema (18 relations), keys, FDs, BCNF decompositions D1–D2, `schema.sql` |
 | 2.0 | Sprint 1 | October 18, 2026 | see Brightspace submission | Complete ERD (29 entity sets, 35 relationships, (min, max)), inheritance and weak entity sets, 31 relations, decompositions D1–D8, 3NF/4NF checks, projected FDs and minimal bases, schema.sql with foreign keys and NOT NULL |
-| 3.0 | Sprint 2 | November 8, 2026 | *[commit hash]* | 51 query requirements with RA and SQL (4 query files); `seed.sql` for two restaurants with a rule check and 62 constraint tests; 34 CHECK constraints, 6 triggers, 4 views; every key, foreign key, CHECK, and trigger rule in RA (124 rules); isa styles and Batini check; ERD fixed to match the DDL |
+| 3.0 | Sprint 2 | November 8, 2026 | *[commit hash]* | 51 query requirements with RA and SQL; `seed.sql` for two restaurants with a rule check and 62 constraint tests; 34 CHECK constraints, 6 triggers, 4 views; every key, foreign key, CHECK, and trigger rule in RA (124 rules); isa styles and Batini check; ERD fixed to match the DDL |
 | 4.0 | Final Submission | November 29, 2026 | | |
  
 <div style="page-break-after: always;"></div>
@@ -129,15 +129,13 @@ These goals were planned at the end of Sprint 1 (version 2.0, Section 11). They 
  
 **Note:** Sprint goals are subject to change; about 80% of them are aimed to be met in this sprint.
  
-**Result:** **7 of 8** goals met (88%). S2-G8 is the only goal not met, because it waits for the TA-client's answer.
- 
 ### 2.2 Missed Goals and Past Goals
  
 **Missed goals (Sprint 2)**
  
 | Goal | What was not finished | Why | Impact | Plan |
 |---|---|---|---|---|
-| S2-G8 | FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are still waiting for the TA-client | Small: every decomposition D1–D8 already names the FD that causes the problem | Final submission (F-G2) |
+| S2-G8 | FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are still waiting for the TA-client | Small | Final submission  |
  
 **Past goals and feedback (Sprint 1, version 2.0, 92.5%)**
  
@@ -145,31 +143,31 @@ These goals were planned at the end of Sprint 1 (version 2.0, Section 11). They 
 |---|---|---|---|
 | G6 (not met) | The cross-restaurant check | S2-G6 | **Done:** triggers T1–T4; 5 tests that break them are rejected |
 | G8 (partially met) | CHECK constraints for the business rules | S2-G6 | **Done:** 34 named CHECK constraints, each in RA and each with a test |
-| G9 (partially met) | Kickoff questions 3 and 4 | S2-G8 | Moved to Final (F-G2), waiting for the TA-client |
+| G9 (partially met) | Kickoff questions 3 and 4 | S2-G8 | Moved to Final, waiting for the TA-client |
 | G5 (met, with a follow-up) | A test file for all constraints | S2-G6 | **Done:** test section of `seed.sql` (62 bad statements, 17 valid statements) |
-| Feedback: "Did not demonstrate the original sample-data NULL-reduction success criterion" (G3: 6 → 0) | No demo on sample data | S2-G3 | **Done:** `null_check.sql` counts the rows that would need NULL in the old one-table design (2, 7, 14, 20; N1–N4) and shows 0 NULLs in the new subclass tables (N5–N8), `null_output.txt` |
-| Feedback: "Did not keep the submitted ERD image consistent with the revised relational schema and SQL DDL" | The figure was older than the DDL | S2-G7 | **Done:** figure redrawn to match `schema.sql`: *Posts* and `fulfillment` removed, DecidesTimeOff added, ServedBy moved to DineInOrder, OrderItem's partial key is `line_no`; the ERD and the DDL both have 35 relationships and 41 foreign keys |
-| Feedback: "Did not complete cross-restaurant enforcement or the planned business-rule CHECK constraints" | Same as G6 and G8 | S2-G6 | **Done** (see G6 and G8 above) |
+| Feedback: "Did not demonstrate the original sample-data NULL-reduction success criterion" (G3: 6 → 0) | No demo on sample data | S2-G3 | **Done:** `null_check.sql` |
+| Feedback: "Did not keep the submitted ERD image consistent with the revised relational schema and SQL DDL" | The figure was older than the DDL | S2-G7 | **Done:**
+| Feedback: "Did not complete cross-restaurant enforcement or the planned business-rule CHECK constraints" | Same as G6 and G8 | S2-G6 | **Done** (see G6) |
  
 ### 2.3 Competency Mapping
  
-**Sprint 2 (new)**
+**Sprint 2**
  
 | Competency bullet | Covered by |
 |---|---|
-| DA: Translates requirements into queries | S2-G1, Section 8.1 (51 query requirements, each linked to a feature in Section 3) |
-| DA: Writes queries in relational algebra and SQL | S2-G2, Section 8.1, `staff_query.sql`, `menu_query.sql`, `foh_query.sql`, `marketing_query.sql` |
+| DA: Translates requirements into queries | S2-G1, Section 8.1 |
+| DA: Writes queries in relational algebra and SQL | S2-G2, Section 8.1 |
 | DA: Uses joins, aggregation, subqueries, and set operations where a requirement needs them | S2-G4, Section 8.2 |
 | DA: Tests queries on realistic data | S2-G3, `seed.sql`, `*_output.txt` |
-| DM L1: Writes SQL code that implements a relational design | S2-G5, S2-G6 (`schema.sql`: 31 tables, 41 foreign keys, 34 CHECKs, 4 views, 6 triggers) |
+| DM L1: Writes SQL code that implements a relational design | S2-G5, S2-G6 (`schema.sql`) |
 | DM L1: Documents relationships with correct ERDs | Section 4 figure, now matching the DDL (Section 2.2, past goals) |
 | DM L2: Identifies dependencies among attributes and appropriate keys | S2-G7, Section 7.5 (FDs read from the ERD) |
 | DM L3: Uses inheritance and considers the impact of NULL values | S2-G7, Section 4.6 (three isa styles), `null_check.sql` |
-| DM L3: Writes constraints in relational algebra | S2-G6, Section 8.3 (124 rules as "query = ∅") |
-| DM L3: Systematically evaluates strengths and weaknesses of a schema | S2-G7, Section 4.7 (Batini criteria) |
-| BE L1: Ensures a database never enters an inconsistent state | S2-G6 (CHECKs, triggers, 62 tests), S2-G3 (rule check returns 0 0 0 0) |
+| DM L3: Writes constraints in relational algebra | S2-G6, Section 8.3 |
+| DM L3: Systematically evaluates strengths and weaknesses of a schema | S2-G7, Section 4.7 |
+| BE L1: Ensures a database never enters an inconsistent state | S2-G6, S2-G3 |
  
-**Sprint 1 (kept)**
+**Sprint 1**
  
 | Competency bullet | Covered by |
 |---|---|
@@ -529,33 +527,37 @@ Every data requirement in Section 3 is matched to the ERD, and every entity set 
 **Result:** 30/30 data requirements matched; 29/29 entity sets and 35/35 relationships used by at least one requirement.
  
 ---
+
 ### 4.6 Inheritance: Three Styles Compared (S2-G7)
- 
-The Inheritance lecture gives three ways to turn an isa hierarchy into relations. Both hierarchies are compared below. The subclasses are **disjoint**: a staff member is hourly *or* salaried, and an order is dine-in *or* delivery *or* neither (pickup).
- 
+
 **Staff → HourlyStaff, SalariedStaff**
- 
+
+A = staff_id, B = restaurant_id, C = role_name, D = name, E = email, F = phone, G = hire_date, H = is_active, I = hourly_rate, J = monthly_salary
+
 | Style | Relations | NULLs | Foreign keys to Staff (10 in the schema) | "List all staff with their pay" |
 |---|---|---|---|---|
-| **E/R** (chosen) | Staff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active), HourlyStaff(staff_id, hourly_rate), SalariedStaff(staff_id, monthly_salary) | 0 | All 10 point to one table, Staff | 2 LEFT JOINs |
-| **Object-oriented** | HourlyStaff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, hourly_rate), SalariedStaff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, monthly_salary) | 0 | Cannot be declared: a foreign key can only point to one table, but a staff member is in one of two | UNION of 2 tables |
-| **NULLs** | Staff(staff_id, restaurant_id, role_name, name, email, phone, hire_date, is_active, hourly_rate, monthly_salary) | 1 per row (9 in `seed.sql`) | All 10 point to Staff | No join |
- 
+| **E/R** (chosen) | Staff(A, B, C, D, E, F, G, H), HourlyStaff(A, I), SalariedStaff(A, J) | 0 | All 10 point to one table, Staff | 2 LEFT JOINs |
+| **Object-oriented** | HourlyStaff(A, B, C, D, E, F, G, H, I), SalariedStaff(A, B, C, D, E, F, G, H, J) | 0 | Cannot be declared: a foreign key can only point to one table, but a staff member is in one of two | UNION of 2 tables |
+| **NULLs** | Staff(A, B, C, D, E, F, G, H, I, J) | 1 per row (I or J; 9 in `seed.sql`) | All 10 point to Staff | No join |
+
 **CustomerOrder → DineInOrder, DeliveryOrder**
- 
+
+A = order_id, B = restaurant_id, C = customer_id, D = channel, E = status, F = payment_type, G = tip, H = created_at, I = started_at, J = finished_at, K = table_id, L = server_id, M = party_size, N = delivery_address, O = delivery_notes, P = courier, Q = external_order_ref
+
 | Style | Relations | NULLs | Foreign keys to CustomerOrder (OrderItem, KitchenTicket, Review) | "List all orders of a restaurant" |
 |---|---|---|---|---|
-| **E/R** (chosen) | CustomerOrder(order_id, restaurant_id, customer_id, channel, status, payment_type, tip, created_at, started_at, finished_at), DineInOrder(order_id, table_id, server_id, party_size), DeliveryOrder(order_id, delivery_address, delivery_notes, courier, external_order_ref) | 0 | All 3 point to one table | One table |
-| **Object-oriented** | PickupOrder(all CustomerOrder attributes), DineInOrder(all CustomerOrder attributes + table_id, server_id, party_size), DeliveryOrder(all CustomerOrder attributes + delivery_address, delivery_notes, courier, external_order_ref) | 0 | Cannot be declared (an order is in one of three tables) | UNION of 3 tables |
-| **NULLs** | CustomerOrder(all attributes + table_id, server_id, party_size, delivery_address, delivery_notes, courier, external_order_ref) | 4 per dine-in, 3 per delivery, 7 per pickup | All 3 point to CustomerOrder | One table |
- 
+| **E/R** (chosen) | CustomerOrder(A, B, C, D, E, F, G, H, I, J), DineInOrder(A, K, L, M), DeliveryOrder(A, N, O, P, Q) | 0 | All 3 point to one table | One table |
+| **Object-oriented** | PickupOrder(A, B, C, D, E, F, G, H, I, J), DineInOrder(A, B, C, D, E, F, G, H, I, J, K, L, M), DeliveryOrder(A, B, C, D, E, F, G, H, I, J, N, O, P, Q) | 0 | Cannot be declared (an order is in one of three tables) | UNION of 3 tables |
+| **NULLs** | CustomerOrder(A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q) | 4 per dine-in (N–Q), 3 per delivery (K–M), 7 per pickup (K–Q) | All 3 point to CustomerOrder | One table |
+
 **Decision: E/R style for both.**
 - The object-oriented style breaks 13 foreign keys (10 to Staff, 3 to CustomerOrder), so `schema.sql` could no longer stop, for example, a shift for a staff member that does not exist.
-- The NULL style is easier to query, but it brings back the NULL attributes removed in Sprint 1 (G3). It would also need extra CHECKs, for example "exactly one of hourly_rate and monthly_salary is NOT NULL".
+- The NULL style is easier to query, but it brings back the NULL attributes removed in Sprint 1 (G3). It would also need extra CHECKs, for example "exactly one of I (hourly_rate) and J (monthly_salary) is NOT NULL".
 - The E/R style keeps every foreign key and has no NULLs. Its cost is one join when the subclass attributes are needed (Q6, Q13).
+  
 ### 4.7 ERD Quality: Batini Criteria (S2-G7)
  
-The ERD is rated on the 8 design criteria from the Improving Conceptual Designs lecture (Batini et al., 1992, §6.1).
+The ERD is rated on the 8 design criteria from the Improving Conceptual Designs lecture.
  
 | Criterion | What it asks | Rating | Evidence |
 |---|---|---|---|
@@ -567,8 +569,6 @@ The ERD is rated on the 8 design criteria from the Improving Conceptual Designs 
 | Self-explanation | The diagram explains itself without extra text | Partly met | Keys, weak entities, isa and arrowheads are in the figure. The (min, max) values and the CHECK rules (S2-G6) are only in tables and `schema.sql`, not in the figure |
 | Extensibility | Easy to change for new requirements | Met | Every module hangs off Restaurant, so a new restaurant needs only new rows. A new kind of order or staff is a new subclass. A new courier or channel needs an ENUM change |
 | Normality | The relations fit BCNF, 3NF or 4NF | Met | 29/31 relations in BCNF and 2 in 3NF on purpose (N1, N2), no 4NF violations (Sections 7.3–7.6) |
- 
-**Result:** 5 of 8 met, 3 partly met. The gaps are known: the (min, max) values and a cleaner layout can be added to the figure in the Final submission (F-G3).
  
 ---
  
@@ -1379,7 +1379,7 @@ Every constraint is written as a query that must return no rows (= ∅). t1 ≠ 
  
 ## 9. Implementation
  
-All files are in the `sql/` folder of the repository and were run on MySQL 8.4. To rebuild the database and run every file:
+To rebuild the database and run every file:
  
 ```
 mysql -u root -t -e "source schema.sql"
@@ -1414,28 +1414,31 @@ mysql -u root -t < null_check.sql > null_output.txt
 ---
  
 ## 11. Next Sprint Goals
- 
-### 11.1 Final Submission (November 29)
- 
-Sprint 2 met 7 of 8 goals. The Final submission goes deeper into this sprint's query modules, finishes the goal that waits for the TA-client, and fixes the ERD gaps found by the Batini check.
- 
+
+### 11.1 Final Submission
+
 | Goal | From | Limitation it fixes | Competency | Success criterion (measurable) |
 |---|---|---|---|---|
-| **F-G1.** Test how NULLs change the query results | New | The queries are only tested on rows without NULLs in the columns they compare; NOT IN, COUNT, AVG, and outer joins behave differently when a NULL appears | DA: SELECT-FROM-WHERE, grouping and aggregation, subqueries | For **100%** of the queries that use NOT IN, COUNT/AVG on a nullable column, or an outer join, one test row with a NULL is added and the result before and after is compared; every query whose result changes is fixed or explained |
-| **F-G2.** Answer the last two Kickoff questions | S2-G8 (not met) | Kickoff questions 3 and 4 are still open (Section 11.2) | DM L2: identifies dependencies and keys; eliminates data anomalies | At least 1 FD that does **not** hold for every relation with a composite or second key, with the reason; update, insertion, and deletion anomalies for at least **3** original models (e.g., D1, D5, D7); **4/4** Kickoff questions answered |
-| **F-G3.** Fix the ERD gaps found by the Batini check | S2-G7 (Section 4.7) | The (min, max) values are only in tables, and the figure has many line crossings | DM L1: documents relationships with correct ERDs | Every relationship in the figure shows its (min, max); Self-explanation and Readability rated Met in Section 4.7 |
- 
-**Module coverage.** Every module from Sprint 2 is developed further in the Final submission:
- 
-| Module (Sprint 2) | Final goal | How it is measured |
-|---|---|---|
-| SELECT-FROM-WHERE | F-G1 | WHERE conditions on nullable columns (e.g., Q11, Q50) tested with a NULL row; result compared before and after |
-| Grouping and Aggregation | F-G1 | COUNT and AVG on nullable columns (e.g., Q33, Q34) tested with a NULL row |
-| Subqueries 1 and 2 | F-G1 | Every NOT IN query (Q12, Q14, Q21, Q28, Q30, Q44) tested with a NULL in the subquery result |
-| Constraints in Relational Algebra | F-G1 | Each NULL test row is also checked against the 124 rules in Section 8.3; 0 rules broken |
-| FDs and Keys, BCNF | F-G2 | At least 1 FD that does not hold per relation with a composite or second key; anomalies for 3 original models |
-| Improving Conceptual Designs | F-G3 | (min, max) on every relationship in the figure; Section 4.7 updated |
+| **F-G1.** Group writes that belong together into transactions | New | A new order, kitchen ticket, or campaign can be empty for a moment, because the parent row is inserted before its children (Section 10, item 2) | BE L1: ensures a database never enters an inconsistent state (ACID Transactions) | **3** transactions in `transactions.sql`: place an order with its items, fire a kitchen ticket, start a campaign with its items. For each one: the run with good data commits, and a run with one bad row is rolled back and leaves **0** new rows; the rule check still returns **0 0 0 0** |
+| **F-G2.** Give each type of user only the access they need | New | Every user can read and change every table; the restaurant filter is only in the application (Section 10, item 1) | BE: Basic Security | **3** MySQL users in `security.sql` (owner, manager, server) with GRANT on the tables and views they need. **100%** of the denied statements in the test fail (error 1142), and every allowed one runs. The queries the application sends use placeholders (`?`) instead of joining strings, so input like `' OR 1=1 --` is shown to return 0 rows |
+| **F-G3.** Make the most used queries faster with indexes | New | No indexes except the ones MySQL adds for keys and foreign keys; date filters (e.g., Q37) read the whole table | DA: Analysing Query Algorithms, Advanced SQL | `EXPLAIN` for at least **5** queries before and after adding indexes (e.g., on CustomerOrder(restaurant_id, created_at) and Shift(start_at)). For each one, the access type goes from `ALL` (full scan) to `ref` or `range`, and the rows examined go down; shown in `index_output.txt` |
+| **F-G4.** Test how NULLs change the query results | New | The queries are only tested on rows without NULLs in the columns they compare; NOT IN, COUNT, AVG, and outer joins act differently when a NULL appears | DA: SQL Queries (NULLs and outer joins) | For **100%** of the queries that use NOT IN, COUNT/AVG on a nullable column, or an outer join, one test row with a NULL is added and the result before and after is compared; every query whose result changes is fixed or explained |
+| **F-G5.** Answer the last two Kickoff questions | S2-G8 (not met) | Kickoff questions 3 and 4 are still open (Section 11.2) | DM L2: identifies dependencies and keys; eliminates data anomalies | At least 1 FD that does **not** hold for every relation with a composite or second key, with the reason; update, insertion, and deletion anomalies for at least **3** original models (e.g., D1, D5, D7); **4/4** Kickoff questions answered |
+| **F-G6.** Fix the ERD gaps found by the Batini check | S2-G7 (Section 4.7) | The (min, max) values are only in tables, and the figure has many line crossings | DM L1: documents relationships with correct ERDs | Every relationship in the figure shows its (min, max); Self-explanation and Readability rated Met in Section 4.7 |
 
+**Note:** Sprint goals are subject to change; about 80% of them are aimed to be met in the Final submission.
+
+**Module coverage.** Every new module has at least one goal, and the Sprint 2 modules are developed further:
+
+| Module | Final goal | How it is measured |
+|---|---|---|
+| SQL Queries (remaining lessons) | F-G4 | Every NOT IN query (Q12, Q14, Q21, Q28, Q30, Q44) and every COUNT/AVG on a nullable column (e.g., Q33, Q34) tested with a NULL row |
+| Advanced SQL | F-G3, F-G2 | Indexes added and checked with `EXPLAIN`; the 4 views used to give each user only the rows and columns they need |
+| ACID Transactions | F-G1 | 3 transactions; commit with good data, rollback with bad data leaves 0 new rows |
+| Basic Security | F-G2 | 3 users with GRANT; 100% of denied statements fail; placeholders stop the injection input |
+| Analysing Query Algorithms | F-G3 | At least 5 queries go from a full scan (`ALL`) to an index (`ref`/`range`); rows examined before and after |
+| FDs and Keys, BCNF | F-G5 | At least 1 FD that does not hold per relation with a composite or second key; anomalies for 3 original models |
+| Improving Conceptual Designs | F-G6 | (min, max) on every relationship in the figure; Section 4.7 updated |
  
 ## 12. Use of Generative AI and Prior Work
  
