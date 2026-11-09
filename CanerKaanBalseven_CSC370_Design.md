@@ -8,7 +8,7 @@
 </p>
 
 <h1 align="center">Restaurant Management Database</h1>
-<h3 align="center">Design Document: Sprint 1 (Advanced Relational Design)</h3>
+<h3 align="center">Design Document: Sprint 2 </h3>
 
 <p align="center">
   <br><br>
@@ -18,7 +18,7 @@
   <b>TA-Client:</b> Nikhil Partap Singh Dhillon <br>
   <b>Instructor:</b> Sean Chester
   <br><br>
-  <b>Current version:</b> 2.0 · Sprint 1 · October 20, 2026
+  <b>Current version:</b> 2.0 · Sprint 2 · November 8, 2026
   <br><br>
 </p>
 
@@ -36,39 +36,31 @@
 ---
 
 ## Table of Contents
-
 - [1. Project Background]
-- [2. Sprint 1 Goals]
+- [2. Sprint 2 Goals]
   - [2.1 Goals and Success Criteria]
-  - [2.2 Missed or Partially Met Goals]
+  - [2.2 Missed, Partially Met, and Removed Goals]
   - [2.3 Competency Mapping]
-  - [2.4 Previous Sprint (Kickoff) Recap]
-  - [2.5 Kickoff Feedback and Fixes]
+  - [2.4 Previous Sprint (Sprint 1) Recap]
+  - [2.5 Sprint 1 Feedback and Fixes]
   - [2.6 Kickoff Questions]
 - [3. Requirements]
 - [4. Entity-Relationship Diagram]
-  - [4.1 Staff and Labour]
-  - [4.2 Menu and Inventory]
-  - [4.3 Front of House]
-  - [4.4 Marketing and Analytics]
-  - [4.5 Requirement ↔ ERD Checklist]
+  - [4.1 Staff and Labour] … [4.5 Requirement ↔ ERD Checklist]
+  - [4.6 Inheritance: Three Styles Compared]
+  - [4.7 ERD Quality: Batini Criteria]
 - [5. Relational Schema]
 - [6. Keys]
-- [7. Functional Dependencies and BCNF]
-  - [7.1 Functional Dependencies]
-  - [7.2 BCNF Decompositions]
-  - [7.3 BCNF Verification]
-  - [7.5 Third Normal Form and Dependency Preservation]
-  - [7.6 Fourth Normal Form and Multivalued Dependencies]
-  - [7.7 Projecting FDs and Minimal Bases]
+- [7. Functional Dependencies and BCNF] (7.1–7.7)
 - [8. SQL Queries as Requirements]
+  - [8.1 Query Requirements]
+  - [8.2 SQL Features Used]
+  - [8.3 Constraints in Relational Algebra]
 - [9. Implementation]
 - [10. Known Limitations]
 - [11. Next Sprint Goals]
 - [12. Use of Generative AI and Prior Work]
 - [13. References]
-
----
 
 ---
 
@@ -108,8 +100,8 @@ These goals were planned at the end of Sprint 1 (version 2.0, Section 11). They 
 | **S2-G3.** Create `seed.sql` with realistic data for two restaurants | New (Sprint 1 plan) | I cannot test queries on an empty database | DA; BE L1 | `seed.sql` loads with **0** errors, every query returns at least 1 row, and the expected output of each query is written in the document and matches what the query really returns | **Met** | `seed.sql` has data for two restaurants (Harbour Grill, Kebab Corner) in all four parts and loads with **0** unexpected errors (the 54 errors all come from the test section). **51/51** queries return at least 1 row. The output of every query is saved in `staff_output.txt`, `menu_output.txt`, `foh_output.txt`, and `marketing_output.txt` |
 | **S2-G4.** Use advanced SQL where a requirement needs it | New (Sprint 1 plan) | Right now I can only show simple SELECTs | DA: joins, aggregation, subqueries, set operations | Each of these is used in at least one query, with a short reason why it is needed: inner join, outer join, GROUP BY + HAVING, a subquery (IN / EXISTS / NOT EXISTS), a set operation (UNION / set difference), and ORDER BY + LIMIT; every part has at least one aggregate | **Met** | **6/6** features used, each with a reason (Section 8.2): inner join (Q1), outer join (Q4, Q7, Q18), GROUP BY + HAVING (Q7, Q17, Q19, Q38, Q41), subqueries (Q2, Q12, Q14, Q21, Q26, Q28, Q35, Q44), set operations (Q13, Q40 UNION), ORDER BY + LIMIT (Q25, Q37, Q48). Aggregates in **4/4** parts |
 | **S2-G5.** Add views for the four dashboards (Owner, Employee, Order-system, Kitchen Display) | New (Sprint 1 plan) | Without views, the app would repeat the same long queries in many places | DA; BE L1 | `schema.sql` has at least **4** views, one for each dashboard, and each one is built from an S2-G1 query | **Met** | **4** views at the end of `schema.sql`, one per dashboard, each built from an S2-G1 query and written in RA: `OwnerSales` (Owner, from Q32), `EmployeeSchedule` (Employee, from Q3), `OpenOrders` (Order-system, from Q31), `KitchenStock` (Kitchen Display, from Q18 and Q19). `view_query.sql` reads each view with the same filter as its query, and **4/4** return the same rows (`view_output.txt`) |
-| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" triggers (Section 4), and the RA version of each rule | **Sprint 1, G6** (not met), **Sprint 1, G8** (partially met: CHECK constraints), Sprint 1, G5 (test file planned) | The business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced yet (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written in RA as "query = ∅"; each CHECK and trigger has a test that breaks it, and `tests.sql` shows **0** unexpected results | **Partially met** | **34** CHECK constraints in `schema.sql`. **118/118** keys, foreign keys and CHECKs written in RA as "query = ∅" (Section 8.3: 43 keys, 41 foreign keys, 34 CHECKs). The tests are in the test section of `seed.sql`: **54/54** bad statements rejected (6 foreign key, 2 NOT NULL, 34 CHECK, 6 edge CHECK, 5 duplicate key, 1 ENUM), **13/13** valid edge cases accepted, **0** unexpected results. Not done: the triggers (see 2.2) |
-| **S2-G7.** Finish the design checks from this sprint's lectures | New (Sprint 1 plan) | I have not checked the FDs implied by every ERD relationship, compared isa styles, or rated the ERD's quality formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | All **35/35** relationships are matched to the FD they imply; both isa hierarchies are compared in 3 styles; the ERD is rated on all 8 Batini criteria with evidence; any new relation added in Sprint 2 is checked for BCNF/3NF | **Met** | The FDs from all **35** relationships are covered by the multiplicities in Sections 4.1–4.4 and the "FDs read from the ERD" check in Section 7.5 (3 hidden FDs found: N1–N3). **2/2** isa hierarchies compared in **3** styles (Section 4.6). **8/8** Batini criteria rated with evidence (Section 4.7). **0** new relations in Sprint 2 (only CHECKs were added), so no new BCNF/3NF check was needed |
+| **S2-G6.** Finish the constraints: CHECK constraints, the cross-restaurant trigger (G6), the "at least one" triggers (Section 4), and the RA version of each rule | **Sprint 1, G6** (not met), **Sprint 1, G8** (partially met: CHECK constraints), Sprint 1, G5 (test file planned) | The business rules, the cross-restaurant rule, and three (1,n) minimums are not enforced yet (Sections 2.2, 4, 9) | DM L3: constraints in RA; BE L1: database never enters an inconsistent state | At least **20** CHECK constraints for the business rules in Section 3; every key, foreign key, CHECK, and trigger rule written in RA as "query = ∅"; each CHECK and trigger has a test that breaks it, and `tests.sql` shows **0** unexpected results | **Met** | **33** CHECK constraints and **6** triggers in `schema.sql` (T1–T4: cross-restaurant rule, T5–T6: the three "at least one" rules). **122/122** rules written in RA as "query = ∅" (Section 8.3: 43 keys, 40 foreign keys, 33 CHECKs, 6 trigger rules). The tests are in the test section of `seed.sql` (`test_output.txt`): **61/61** bad statements rejected (6 foreign key, 2 NOT NULL, 33 CHECK, 6 edge CHECK, 5 duplicate key, 1 ENUM, 8 trigger), **17/17** valid statements accepted, **0** unexpected results; the rule check on the sample data returns **0 0 0 0** |
+| **S2-G7.** Finish the design checks from this sprint's lectures | New (Sprint 1 plan) | I have not checked the FDs implied by every ERD relationship, compared isa styles, or rated the ERD's quality formally | DM L2, DM L3: ERDs to FDs, inheritance, improving conceptual designs | All **34/34** relationships are matched to the FD they imply; both isa hierarchies are compared in 3 styles; the ERD is rated on all 8 Batini criteria with evidence; any new relation added in Sprint 2 is checked for BCNF/3NF | **Met** | The FDs from all **35** relationships are covered by the multiplicities in Sections 4.1–4.4 and the "FDs read from the ERD" check in Section 7.5 (3 hidden FDs found: N1–N3). **2/2** isa hierarchies compared in **3** styles (Section 4.6). **8/8** Batini criteria rated with evidence (Section 4.7). **0** new relations in Sprint 2 (only CHECKs were added), so no new BCNF/3NF check was needed |
 | **S2-G8.** Answer the last two Kickoff questions: FDs that do not hold, and anomalies of the original schema | **Sprint 1, G9** (partially met: Kickoff questions 3 and 4) | Kickoff questions 3 and 4 are still open (Section 2.6) | DM L2: identifies dependencies and keys; eliminates data anomalies | For every relation with a composite or second key, at least 1 FD that does **not** hold is listed with the reason; update, insertion, and deletion anomalies are shown for at least **3** original models (e.g., D1, D5, D7); all **4/4** Kickoff questions are answered | **Not met** | Kickoff questions 3 and 4 are still waiting for the TA-client's answer (Section 2.6), so this goal was moved to the Final submission (see 2.2) |
 
 *DM = Data Modelling, BE = Back-end Engineering.*
@@ -123,6 +115,7 @@ These goals were planned at the end of Sprint 1 (version 2.0, Section 11). They 
 | S2-G6 (part) | The triggers for the cross-restaurant rule (Sprint 1, G6) and the three "at least one" minimums (Section 4) | Triggers are not covered in this sprint's lectures | Small: the rules are known (Sections 4, 10), and the application only shows each restaurant its own menu items, tables, and staff, so cross-restaurant rows cannot be created from the app | Planned for the Final submission, if triggers are covered (F-G3) |
 | S2-G8 | FDs that do not hold, and anomalies of the original schema | Kickoff questions 3 and 4 are still waiting for the TA-client | Small: every decomposition D1–D8 already names the FD that causes the problem | Final submission (F-G4) |
 
+### Past Goals
 
 | Sprint 1 goal | What was not finished | Sprint 2 goal | Status now |
 |---|---|---|---|
