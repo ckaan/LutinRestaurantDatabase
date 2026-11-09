@@ -1,27 +1,4 @@
-Claude
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Canerkaanbalseven csc370 design · MD
 <!-- ===================== COVER PAGE ===================== -->
  
 <p align="center">
