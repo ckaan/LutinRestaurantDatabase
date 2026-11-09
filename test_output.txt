@@ -1,0 +1,82 @@
++--------------+---------------+-----------------+------------------------+
+| empty_orders | empty_tickets | empty_campaigns | cross_restaurant_lines |
++--------------+---------------+-----------------+------------------------+
+|            0 |             0 |               0 |                      0 |
++--------------+---------------+-----------------+------------------------+
+ERROR 1452 (23000) at line 491: Cannot add or update a child row: a foreign key constraint fails (`restaurant_ops`.`orderitem`, CONSTRAINT `orderitem_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `customerorder` (`order_id`))
+ERROR 1452 (23000) at line 493: Cannot add or update a child row: a foreign key constraint fails (`restaurant_ops`.`orderitem`, CONSTRAINT `orderitem_ibfk_2` FOREIGN KEY (`menu_item_id`) REFERENCES `menuitem` (`menu_item_id`))
+ERROR 1452 (23000) at line 495: Cannot add or update a child row: a foreign key constraint fails (`restaurant_ops`.`staff`, CONSTRAINT `staff_ibfk_1` FOREIGN KEY (`restaurant_id`, `role_name`) REFERENCES `role` (`restaurant_id`, `role_name`))
+ERROR 1452 (23000) at line 497: Cannot add or update a child row: a foreign key constraint fails (`restaurant_ops`.`shift`, CONSTRAINT `shift_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`))
+ERROR 1452 (23000) at line 499: Cannot add or update a child row: a foreign key constraint fails (`restaurant_ops`.`hourlystaff`, CONSTRAINT `hourlystaff_ibfk_1` FOREIGN KEY (`staff_id`) REFERENCES `staff` (`staff_id`))
+ERROR 1451 (23000) at line 501: Cannot delete or update a parent row: a foreign key constraint fails (`restaurant_ops`.`campaign`, CONSTRAINT `campaign_ibfk_1` FOREIGN KEY (`restaurant_id`) REFERENCES `restaurant` (`restaurant_id`))
+ERROR 1048 (23000) at line 508: Column 'name' cannot be null
+ERROR 1048 (23000) at line 510: Column 'price' cannot be null
+ERROR 3819 (HY000) at line 517: Check constraint 'chk_hourly_rate' is violated.
+ERROR 3819 (HY000) at line 519: Check constraint 'chk_monthly_salary' is violated.
+ERROR 3819 (HY000) at line 521: Check constraint 'chk_shift_time' is violated.
+ERROR 3819 (HY000) at line 523: Check constraint 'chk_swap_decided' is violated.
+ERROR 3819 (HY000) at line 525: Check constraint 'chk_swap_cover' is violated.
+ERROR 3819 (HY000) at line 527: Check constraint 'chk_timeoff_dates' is violated.
+ERROR 3819 (HY000) at line 529: Check constraint 'chk_timeoff_hours' is violated.
+ERROR 3819 (HY000) at line 531: Check constraint 'chk_timeoff_decided' is violated.
+ERROR 3819 (HY000) at line 533: Check constraint 'chk_pay_period' is violated.
+ERROR 3819 (HY000) at line 535: Check constraint 'chk_pay_amounts' is violated.
+ERROR 3819 (HY000) at line 537: Check constraint 'chk_staffing_time' is violated.
+ERROR 3819 (HY000) at line 539: Check constraint 'chk_staffing_count' is violated.
+ERROR 3819 (HY000) at line 541: Check constraint 'chk_menu_price' is violated.
+ERROR 3819 (HY000) at line 543: Check constraint 'chk_inventory_levels' is violated.
+ERROR 3819 (HY000) at line 545: Check constraint 'chk_recipe_qty' is violated.
+ERROR 3819 (HY000) at line 547: Check constraint 'chk_movement_sign' is violated.
+ERROR 3819 (HY000) at line 549: Check constraint 'chk_movement_cost' is violated.
+ERROR 3819 (HY000) at line 551: Check constraint 'chk_table_seats' is violated.
+ERROR 3819 (HY000) at line 553: Check constraint 'chk_reservation_party' is violated.
+ERROR 3819 (HY000) at line 555: Check constraint 'chk_order_tip' is violated.
+ERROR 3819 (HY000) at line 557: Check constraint 'chk_order_times' is violated.
+ERROR 3819 (HY000) at line 559: Check constraint 'chk_dinein_party' is violated.
+ERROR 3819 (HY000) at line 561: Check constraint 'chk_delivery_ref' is violated.
+ERROR 3819 (HY000) at line 563: Check constraint 'chk_ticket_batch' is violated.
+ERROR 3819 (HY000) at line 565: Check constraint 'chk_ticket_times' is violated.
+ERROR 3819 (HY000) at line 567: Check constraint 'chk_item_line' is violated.
+ERROR 3819 (HY000) at line 569: Check constraint 'chk_item_quantity' is violated.
+ERROR 3819 (HY000) at line 571: Check constraint 'chk_item_price' is violated.
+ERROR 3819 (HY000) at line 573: Check constraint 'chk_review_rating' is violated.
+ERROR 3819 (HY000) at line 575: Check constraint 'chk_campaign_dates' is violated.
+ERROR 3819 (HY000) at line 577: Check constraint 'chk_campaign_budget' is violated.
+ERROR 3819 (HY000) at line 579: Check constraint 'chk_weather_temp' is violated.
+ERROR 3819 (HY000) at line 581: Check constraint 'chk_weather_precip' is violated.
+ERROR 3819 (HY000) at line 583: Check constraint 'chk_insight_expiry' is violated.
++-------------+-------+--------+-------+-------------+------------+--------------+------------+------------+------------+---------------+
+| restaurants | staff | shifts | swaps | test_orders | test_items | test_reviews | test_deliv | test_moves | test_camps | test_insights |
++-------------+-------+--------+-------+-------------+------------+--------------+------------+------------+------------+---------------+
+|           2 |     9 |     10 |     3 |           3 |          1 |            1 |          1 |          1 |          0 |             0 |
++-------------+-------+--------+-------+-------------+------------+--------------+------------+------------+------------+---------------+
+ERROR 3819 (HY000) at line 620: Check constraint 'chk_review_rating' is violated.
+ERROR 3819 (HY000) at line 622: Check constraint 'chk_menu_price' is violated.
+ERROR 3819 (HY000) at line 624: Check constraint 'chk_shift_time' is violated.
+ERROR 3819 (HY000) at line 626: Check constraint 'chk_movement_sign' is violated.
+ERROR 3819 (HY000) at line 628: Check constraint 'chk_movement_sign' is violated.
+ERROR 3819 (HY000) at line 630: Check constraint 'chk_insight_expiry' is violated.
+ERROR 1062 (23000) at line 632: Duplicate entry '901-1' for key 'orderitem.PRIMARY'
+ERROR 1062 (23000) at line 634: Duplicate entry '250-555-9901' for key 'customer.phone'
+ERROR 1062 (23000) at line 636: Duplicate entry 'alice' for key 'staffcredential.username'
+ERROR 1062 (23000) at line 638: Duplicate entry '2-2026-11-02 11:02:00' for key 'timeclockevent.staff_id'
+ERROR 1062 (23000) at line 640: Duplicate entry '901' for key 'review.order_id'
+ERROR 1265 (01000) at line 642: Data truncated for column 'channel' at row 1
++--------------+------------+----------+-------------+------------+------------+---------------+---------+---------+-------------+------------+-------+------------+--------------+
+| test_reviews | test_items | timeoffs | pay_records | test_moves | test_camps | test_insights | weather | tickets | test_orders | test_deliv | swaps | test_custs | reservations |
++--------------+------------+----------+-------------+------------+------------+---------------+---------+---------+-------------+------------+-------+------------+--------------+
+|            2 |          2 |        4 |           8 |          2 |          1 |             1 |       1 |       1 |           4 |          2 |     4 |          1 |            1 |
++--------------+------------+----------+-------------+------------+------------+---------------+---------+---------+-------------+------------+-------+------------+--------------+
+ERROR 1644 (45000) at line 707: You cannot add a menu item from another restaurant to this order
+ERROR 1644 (45000) at line 709: You cannot add a menu item from another restaurant to this order
+ERROR 1644 (45000) at line 711: This table is in a different restaurant
+ERROR 1644 (45000) at line 713: This server works at a different restaurant
+ERROR 1644 (45000) at line 715: This table is in a different restaurant
+ERROR 1644 (45000) at line 717: You cannot delete the last item of an order
+ERROR 1644 (45000) at line 719: You cannot delete the last item on a kitchen ticket
+ERROR 1644 (45000) at line 721: You cannot remove the last menu item from a campaign
++------------+----------+-------------+------------+----------+----------+
+| o905_items | o1_items | o905_dinein | c905_items | o1_table | o3_items |
++------------+----------+-------------+------------+----------+----------+
+|          1 |        1 |           1 |          1 |        3 |        3 |
++------------+----------+-------------+------------+----------+----------+

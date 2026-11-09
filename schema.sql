@@ -1,6 +1,5 @@
-
--- CSC 370 Group 47 | Caner Kaan Balseven V01074078 - Restaurant Management Database (Sprint 1)
--- schema.sql: DDL for the 31 relations in Section 5
+-- CSC 370 Group 47 | Caner Kaan Balseven V01074078 - Restaurant Management Database (Sprint 2)
+-- schema.sql
 -- =====================================================================
 
 DROP DATABASE IF EXISTS restaurant_ops;
@@ -45,14 +44,16 @@ CREATE TABLE HourlyStaff (
     staff_id     INT,
     hourly_rate  DECIMAL(10,2) NOT NULL,
     PRIMARY KEY (staff_id),
-    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id)
+    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_hourly_rate CHECK (hourly_rate > 0)
 );
 
 CREATE TABLE SalariedStaff (
     staff_id        INT,
     monthly_salary  DECIMAL(10,2) NOT NULL,
     PRIMARY KEY (staff_id),
-    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id)
+    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_monthly_salary CHECK (monthly_salary > 0)
 );
 
 CREATE TABLE StaffCredential (
@@ -73,7 +74,8 @@ CREATE TABLE Shift (
     end_at    DATETIME NOT NULL,
     notes     VARCHAR(255) NULL,
     PRIMARY KEY (shift_id),
-    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id)
+    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_shift_time CHECK (end_at > start_at)
 );
 
 CREATE TABLE SwapRequest (
@@ -86,7 +88,9 @@ CREATE TABLE SwapRequest (
     PRIMARY KEY (swap_id),
     FOREIGN KEY (shift_id) REFERENCES Shift (shift_id),
     FOREIGN KEY (cover_staff_id) REFERENCES Staff (staff_id),
-    FOREIGN KEY (decided_by) REFERENCES Staff (staff_id)
+    FOREIGN KEY (decided_by) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_swap_decided CHECK (status = 'PENDING' OR decided_by IS NOT NULL),
+    CONSTRAINT chk_swap_cover CHECK (status <> 'APPROVED' OR cover_staff_id IS NOT NULL)
 );
 
 CREATE TABLE TimeClockEvent (
@@ -114,9 +118,11 @@ CREATE TABLE TimeOffRequest (
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (request_id),
     FOREIGN KEY (staff_id) REFERENCES Staff (staff_id),
-    FOREIGN KEY (decided_by) REFERENCES Staff (staff_id)
+    FOREIGN KEY (decided_by) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_timeoff_dates CHECK (end_date >= start_date),
+    CONSTRAINT chk_timeoff_hours CHECK (hours > 0),
+    CONSTRAINT chk_timeoff_decided CHECK (status = 'PENDING' OR decided_by IS NOT NULL)
 );
-
 CREATE TABLE PayRecord (
     pay_record_id  INT AUTO_INCREMENT,
     staff_id       INT NOT NULL,
@@ -128,7 +134,9 @@ CREATE TABLE PayRecord (
     deductions     DECIMAL(10,2) NOT NULL DEFAULT 0,
     PRIMARY KEY (pay_record_id),
     UNIQUE (staff_id, period_start),
-    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id)
+    FOREIGN KEY (staff_id) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_pay_period CHECK (period_end >= period_start),
+    CONSTRAINT chk_pay_amounts CHECK (hours_worked >= 0 AND rate_snapshot >= 0 AND bonus >= 0 AND deductions >= 0)
 );
 
 CREATE TABLE StaffingRequirement (
@@ -141,7 +149,9 @@ CREATE TABLE StaffingRequirement (
     required_count  INT NOT NULL,
     PRIMARY KEY (requirement_id),
     UNIQUE (restaurant_id, work_date, department, start_time),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_staffing_time CHECK (end_time > start_time),
+    CONSTRAINT chk_staffing_count CHECK (required_count > 0)
 );
 
 -- ---------------------------------------------------------------------
@@ -166,7 +176,8 @@ CREATE TABLE MenuItem (
     is_available  BOOLEAN NOT NULL DEFAULT TRUE,
     PRIMARY KEY (menu_item_id),
     UNIQUE (category_id, name),
-    FOREIGN KEY (category_id) REFERENCES MenuCategory (category_id)
+    FOREIGN KEY (category_id) REFERENCES MenuCategory (category_id),
+    CONSTRAINT chk_menu_price CHECK (price >= 0)
 );
 
 CREATE TABLE InventoryItem (
@@ -178,7 +189,8 @@ CREATE TABLE InventoryItem (
     lead_time_days     INT NULL,
     PRIMARY KEY (inventory_item_id),
     UNIQUE (restaurant_id, name),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_inventory_levels CHECK (par_level >= 0 AND lead_time_days >= 0)
 );
 
 CREATE TABLE RecipeLine (
@@ -187,7 +199,8 @@ CREATE TABLE RecipeLine (
     qty_per_serving    DECIMAL(10,2) NOT NULL,
     PRIMARY KEY (menu_item_id, inventory_item_id),
     FOREIGN KEY (menu_item_id) REFERENCES MenuItem (menu_item_id),
-    FOREIGN KEY (inventory_item_id) REFERENCES InventoryItem (inventory_item_id)
+    FOREIGN KEY (inventory_item_id) REFERENCES InventoryItem (inventory_item_id),
+    CONSTRAINT chk_recipe_qty CHECK (qty_per_serving > 0)
 );
 
 CREATE TABLE StockMovement (
@@ -199,7 +212,9 @@ CREATE TABLE StockMovement (
     reason             VARCHAR(255) NULL,
     occurred_at        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (movement_id),
-    FOREIGN KEY (inventory_item_id) REFERENCES InventoryItem (inventory_item_id)
+    FOREIGN KEY (inventory_item_id) REFERENCES InventoryItem (inventory_item_id),
+    CONSTRAINT chk_movement_sign CHECK ((movement_type = 'RECEIVE' AND quantity_delta > 0) OR (movement_type IN ('CONSUME', 'WASTE') AND quantity_delta < 0) OR (movement_type = 'ADJUST' AND quantity_delta <> 0)),
+    CONSTRAINT chk_movement_cost CHECK (unit_cost >= 0)
 );
 
 -- ---------------------------------------------------------------------
@@ -214,7 +229,8 @@ CREATE TABLE DiningTable (
     section        VARCHAR(30) NULL,
     PRIMARY KEY (table_id),
     UNIQUE (restaurant_id, label),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_table_seats CHECK (seats > 0)
 );
 
 CREATE TABLE Customer (
@@ -236,7 +252,8 @@ CREATE TABLE Reservation (
     PRIMARY KEY (reservation_id),
     UNIQUE (table_id, reserved_for),
     FOREIGN KEY (table_id) REFERENCES DiningTable (table_id),
-    FOREIGN KEY (customer_id) REFERENCES Customer (customer_id)
+    FOREIGN KEY (customer_id) REFERENCES Customer (customer_id),
+    CONSTRAINT chk_reservation_party CHECK (party_size > 0)
 );
 
 CREATE TABLE CustomerOrder (
@@ -252,7 +269,9 @@ CREATE TABLE CustomerOrder (
     finished_at    DATETIME NULL,
     PRIMARY KEY (order_id),
     FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
-    FOREIGN KEY (customer_id) REFERENCES Customer (customer_id)
+    FOREIGN KEY (customer_id) REFERENCES Customer (customer_id),
+    CONSTRAINT chk_order_tip CHECK (tip >= 0),
+    CONSTRAINT chk_order_times CHECK (started_at >= created_at AND finished_at >= started_at)
 );
 
 CREATE TABLE DineInOrder (
@@ -263,7 +282,8 @@ CREATE TABLE DineInOrder (
     PRIMARY KEY (order_id),
     FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id),
     FOREIGN KEY (table_id) REFERENCES DiningTable (table_id),
-    FOREIGN KEY (server_id) REFERENCES Staff (staff_id)
+    FOREIGN KEY (server_id) REFERENCES Staff (staff_id),
+    CONSTRAINT chk_dinein_party CHECK (party_size > 0)
 );
 
 CREATE TABLE DeliveryOrder (
@@ -273,7 +293,8 @@ CREATE TABLE DeliveryOrder (
     courier             ENUM('IN_HOUSE', 'UBER_EATS') NOT NULL,
     external_order_ref  VARCHAR(64) NULL,
     PRIMARY KEY (order_id),
-    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id)
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id),
+    CONSTRAINT chk_delivery_ref CHECK (courier <> 'UBER_EATS' OR external_order_ref IS NOT NULL)
 );
 
 CREATE TABLE KitchenTicket (
@@ -286,7 +307,9 @@ CREATE TABLE KitchenTicket (
     completed_at  DATETIME NULL,
     PRIMARY KEY (ticket_id),
     UNIQUE (order_id, batch_no),
-    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id)
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id),
+    CONSTRAINT chk_ticket_batch CHECK (batch_no >= 1),
+    CONSTRAINT chk_ticket_times CHECK (completed_at >= created_at)
 );
 
 CREATE TABLE OrderItem (
@@ -300,7 +323,10 @@ CREATE TABLE OrderItem (
     PRIMARY KEY (order_id, line_no),
     FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id),
     FOREIGN KEY (menu_item_id) REFERENCES MenuItem (menu_item_id),
-    FOREIGN KEY (ticket_id) REFERENCES KitchenTicket (ticket_id)
+    FOREIGN KEY (ticket_id) REFERENCES KitchenTicket (ticket_id),
+    CONSTRAINT chk_item_line CHECK (line_no >= 1),
+    CONSTRAINT chk_item_quantity CHECK (quantity > 0),
+    CONSTRAINT chk_item_price CHECK (unit_price >= 0)
 );
 
 CREATE TABLE Review (
@@ -311,7 +337,8 @@ CREATE TABLE Review (
     created_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (review_id),
     UNIQUE (order_id),
-    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id)
+    FOREIGN KEY (order_id) REFERENCES CustomerOrder (order_id),
+    CONSTRAINT chk_review_rating CHECK (rating BETWEEN 1 AND 5)
 );
 
 -- ---------------------------------------------------------------------
@@ -326,7 +353,9 @@ CREATE TABLE Campaign (
     end_date       DATE NULL,
     budget         DECIMAL(10,2) NULL,
     PRIMARY KEY (campaign_id),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_campaign_dates CHECK (end_date >= start_date),
+    CONSTRAINT chk_campaign_budget CHECK (budget >= 0)
 );
 
 CREATE TABLE CampaignItem (
@@ -356,7 +385,9 @@ CREATE TABLE WeatherObservation (
     `condition`       ENUM('SUNNY', 'CLOUDY', 'RAIN', 'SNOW') NOT NULL,
     precipitation_mm  DECIMAL(10,2) NULL,
     PRIMARY KEY (restaurant_id, observed_date),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_weather_temp CHECK (temp_max >= temp_min),
+    CONSTRAINT chk_weather_precip CHECK (precipitation_mm >= 0)
 );
 
 CREATE TABLE Insight (
@@ -368,5 +399,198 @@ CREATE TABLE Insight (
     created_at     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at     DATETIME NULL,
     PRIMARY KEY (insight_id),
-    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id)
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant (restaurant_id),
+    CONSTRAINT chk_insight_expiry CHECK (expires_at > created_at)
 );
+
+
+-- ---------------------------------------------------------------------
+-- Views for the four dashboards (S2-G5)
+-- ---------------------------------------------------------------------
+
+-- Owner dashboard: orders and revenue per restaurant, day, and channel 
+-- RA: OwnerSales ← γ[restaurant_id, DATE(created_at) → day, channel, COUNT(DISTINCT order_id) → orders, SUM(quantity × unit_price) → revenue](CustomerOrder ⋈ OrderItem)
+CREATE VIEW OwnerSales AS
+SELECT o.restaurant_id, DATE(o.created_at) AS day, o.channel,
+       COUNT(DISTINCT o.order_id) AS orders, SUM(oi.quantity * oi.unit_price) AS revenue
+FROM CustomerOrder AS o
+JOIN OrderItem AS oi ON (o.order_id = oi.order_id)
+GROUP BY o.restaurant_id, DATE(o.created_at), o.channel;
+
+-- Employee dashboard: every staff member's shifts
+-- RA: EmployeeSchedule ← π[restaurant_id, staff_id, name, shift_id, start_at, end_at, notes](Staff ⋈ Shift)
+CREATE VIEW EmployeeSchedule AS
+SELECT s.restaurant_id, s.staff_id, s.name, sh.shift_id, sh.start_at, sh.end_at, sh.notes
+FROM Staff AS s
+JOIN Shift AS sh ON (s.staff_id = sh.staff_id);
+
+-- Order-system dashboard: orders that are not fulfilled or cancelled yet 
+-- RA: OpenOrders ← π[restaurant_id, order_id, channel, status, created_at](σ[status ∉ {'FULFILLED', 'CANCELLED'}](CustomerOrder))
+CREATE VIEW OpenOrders AS
+SELECT restaurant_id, order_id, channel, status, created_at
+FROM CustomerOrder
+WHERE status NOT IN ('FULFILLED', 'CANCELLED');
+
+-- Kitchen Display: current stock of every ingredient with its par level 
+-- RA: KitchenStock ← γ[restaurant_id, inventory_item_id, name, unit, par_level, COALESCE(SUM(quantity_delta), 0) → current_stock](InventoryItem ⟕ StockMovement)
+CREATE VIEW KitchenStock AS
+SELECT i.restaurant_id, i.inventory_item_id, i.name, i.unit, i.par_level,
+       COALESCE(SUM(s.quantity_delta), 0) AS current_stock
+FROM InventoryItem AS i
+LEFT JOIN StockMovement AS s ON (i.inventory_item_id = s.inventory_item_id)
+GROUP BY i.restaurant_id, i.inventory_item_id, i.name, i.unit, i.par_level;
+
+
+
+-- ---------------------------------------------------------------------
+-- Triggers (S2-G6)
+-- ---------------------------------------------------------------------
+
+DELIMITER //
+
+-- T1: when an order line is added, its menu item must be from the order's restaurant
+CREATE TRIGGER check_orderitem_insert
+BEFORE INSERT ON OrderItem
+FOR EACH ROW
+BEGIN
+    DECLARE order_restaurant INT;
+    DECLARE item_restaurant INT;
+
+    SELECT restaurant_id INTO order_restaurant
+    FROM CustomerOrder
+    WHERE order_id = NEW.order_id;
+
+    SELECT c.restaurant_id INTO item_restaurant
+    FROM MenuItem AS m
+    JOIN MenuCategory AS c ON (m.category_id = c.category_id)
+    WHERE m.menu_item_id = NEW.menu_item_id;
+
+    IF order_restaurant <> item_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You cannot add a menu item from another restaurant to this order';
+    END IF;
+END//
+
+-- T2: the same check when an order line is changed
+CREATE TRIGGER check_orderitem_update
+BEFORE UPDATE ON OrderItem
+FOR EACH ROW
+BEGIN
+    DECLARE order_restaurant INT;
+    DECLARE item_restaurant INT;
+
+    SELECT restaurant_id INTO order_restaurant
+    FROM CustomerOrder
+    WHERE order_id = NEW.order_id;
+
+    SELECT c.restaurant_id INTO item_restaurant
+    FROM MenuItem AS m
+    JOIN MenuCategory AS c ON (m.category_id = c.category_id)
+    WHERE m.menu_item_id = NEW.menu_item_id;
+
+    IF order_restaurant <> item_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You cannot add a menu item from another restaurant to this order';
+    END IF;
+END//
+
+-- T3: when a dine-in order is added, its table and server must be from the order's restaurant
+CREATE TRIGGER check_dinein_insert
+BEFORE INSERT ON DineInOrder
+FOR EACH ROW
+BEGIN
+    DECLARE order_restaurant INT;
+    DECLARE table_restaurant INT;
+    DECLARE server_restaurant INT;
+
+    SELECT restaurant_id INTO order_restaurant
+    FROM CustomerOrder
+    WHERE order_id = NEW.order_id;
+
+    SELECT restaurant_id INTO table_restaurant
+    FROM DiningTable
+    WHERE table_id = NEW.table_id;
+
+    SELECT restaurant_id INTO server_restaurant
+    FROM Staff
+    WHERE staff_id = NEW.server_id;
+
+    IF order_restaurant <> table_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'This table is in a different restaurant';
+    END IF;
+
+    IF order_restaurant <> server_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'This server works at a different restaurant';
+    END IF;
+END//
+
+-- T4: the same checks when a dine-in order is changed
+CREATE TRIGGER check_dinein_update
+BEFORE UPDATE ON DineInOrder
+FOR EACH ROW
+BEGIN
+    DECLARE order_restaurant INT;
+    DECLARE table_restaurant INT;
+    DECLARE server_restaurant INT;
+
+    SELECT restaurant_id INTO order_restaurant
+    FROM CustomerOrder
+    WHERE order_id = NEW.order_id;
+
+    SELECT restaurant_id INTO table_restaurant
+    FROM DiningTable
+    WHERE table_id = NEW.table_id;
+
+    SELECT restaurant_id INTO server_restaurant
+    FROM Staff
+    WHERE staff_id = NEW.server_id;
+
+    IF order_restaurant <> table_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'This table is in a different restaurant';
+    END IF;
+
+    IF order_restaurant <> server_restaurant THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'This server works at a different restaurant';
+    END IF;
+END//
+
+-- T5: Contains and OnTicket: the last line of an order, or of a kitchen ticket, cannot be deleted
+CREATE TRIGGER check_orderitem_delete
+BEFORE DELETE ON OrderItem
+FOR EACH ROW
+BEGIN
+    DECLARE lines_in_order INT;
+    DECLARE lines_on_ticket INT;
+
+    SELECT COUNT(*) INTO lines_in_order
+    FROM OrderItem
+    WHERE order_id = OLD.order_id;
+
+    SELECT COUNT(*) INTO lines_on_ticket
+    FROM OrderItem
+    WHERE ticket_id = OLD.ticket_id;
+
+    IF lines_in_order = 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You cannot delete the last item of an order';
+    END IF;
+
+    IF OLD.ticket_id IS NOT NULL AND lines_on_ticket = 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You cannot delete the last item on a kitchen ticket';
+    END IF;
+END//
+
+-- T6: Promotes: the last menu item of a campaign cannot be deleted
+CREATE TRIGGER check_campaignitem_delete
+BEFORE DELETE ON CampaignItem
+FOR EACH ROW
+BEGIN
+    DECLARE items_in_campaign INT;
+
+    SELECT COUNT(*) INTO items_in_campaign
+    FROM CampaignItem
+    WHERE campaign_id = OLD.campaign_id;
+
+    IF items_in_campaign = 1 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'You cannot remove the last menu item from a campaign';
+    END IF;
+END//
+
+DELIMITER ;
