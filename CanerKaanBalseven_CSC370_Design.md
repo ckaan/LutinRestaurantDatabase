@@ -1252,6 +1252,141 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 | ORDER BY + LIMIT | Q25, Q37, Q48 | Only the top rows are needed (5 best sellers, 10 best customers, 3 busiest hours), so the rows are sorted and LIMIT keeps the first ones |
 | Aggregate in every part | Staff and Labour: Q7, Q8, Q13, Q17; Menu and Inventory: Q18, Q19, Q20, Q24, Q25, Q27; Front of House: Q29, Q32, Q33, Q34, Q37, Q38, Q40, Q41; Marketing and Analytics: Q43, Q46, Q47, Q48, Q49, Q51 | Every part has questions about totals, counts, or averages per group (SUM, COUNT, AVG, MAX) |
 
+### 8.3 Constraints in Relational Algebra (S2-G6)
+
+#### Keys (43)
+
+| Relation | Constraint | RA |
+|---|---|---|
+| Restaurant | Primary key (restaurant_id) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1 ≠ t2](ρ[t1](Restaurant) × ρ[t2](Restaurant)) = ∅ |
+| Role | Primary key (restaurant_id, role_name) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.role_name = t2.role_name ∧ t1 ≠ t2](ρ[t1](Role) × ρ[t2](Role)) = ∅ |
+| Staff | Primary key (staff_id) | σ[t1.staff_id = t2.staff_id ∧ t1 ≠ t2](ρ[t1](Staff) × ρ[t2](Staff)) = ∅ |
+| HourlyStaff | Primary key (staff_id) | σ[t1.staff_id = t2.staff_id ∧ t1 ≠ t2](ρ[t1](HourlyStaff) × ρ[t2](HourlyStaff)) = ∅ |
+| SalariedStaff | Primary key (staff_id) | σ[t1.staff_id = t2.staff_id ∧ t1 ≠ t2](ρ[t1](SalariedStaff) × ρ[t2](SalariedStaff)) = ∅ |
+| StaffCredential | Primary key (staff_id) | σ[t1.staff_id = t2.staff_id ∧ t1 ≠ t2](ρ[t1](StaffCredential) × ρ[t2](StaffCredential)) = ∅ |
+| StaffCredential | UNIQUE (username) | σ[t1.username = t2.username ∧ t1.staff_id ≠ t2.staff_id](ρ[t1](StaffCredential) × ρ[t2](StaffCredential)) = ∅ |
+| Shift | Primary key (shift_id) | σ[t1.shift_id = t2.shift_id ∧ t1 ≠ t2](ρ[t1](Shift) × ρ[t2](Shift)) = ∅ |
+| SwapRequest | Primary key (swap_id) | σ[t1.swap_id = t2.swap_id ∧ t1 ≠ t2](ρ[t1](SwapRequest) × ρ[t2](SwapRequest)) = ∅ |
+| TimeClockEvent | Primary key (event_id) | σ[t1.event_id = t2.event_id ∧ t1 ≠ t2](ρ[t1](TimeClockEvent) × ρ[t2](TimeClockEvent)) = ∅ |
+| TimeClockEvent | UNIQUE (staff_id, occurred_at) | σ[t1.staff_id = t2.staff_id ∧ t1.occurred_at = t2.occurred_at ∧ t1.event_id ≠ t2.event_id](ρ[t1](TimeClockEvent) × ρ[t2](TimeClockEvent)) = ∅ |
+| TimeOffRequest | Primary key (request_id) | σ[t1.request_id = t2.request_id ∧ t1 ≠ t2](ρ[t1](TimeOffRequest) × ρ[t2](TimeOffRequest)) = ∅ |
+| PayRecord | Primary key (pay_record_id) | σ[t1.pay_record_id = t2.pay_record_id ∧ t1 ≠ t2](ρ[t1](PayRecord) × ρ[t2](PayRecord)) = ∅ |
+| PayRecord | UNIQUE (staff_id, period_start) | σ[t1.staff_id = t2.staff_id ∧ t1.period_start = t2.period_start ∧ t1.pay_record_id ≠ t2.pay_record_id](ρ[t1](PayRecord) × ρ[t2](PayRecord)) = ∅ |
+| StaffingRequirement | Primary key (requirement_id) | σ[t1.requirement_id = t2.requirement_id ∧ t1 ≠ t2](ρ[t1](StaffingRequirement) × ρ[t2](StaffingRequirement)) = ∅ |
+| StaffingRequirement | UNIQUE (restaurant_id, work_date, department, start_time) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.work_date = t2.work_date ∧ t1.department = t2.department ∧ t1.start_time = t2.start_time ∧ t1.requirement_id ≠ t2.requirement_id](ρ[t1](StaffingRequirement) × ρ[t2](StaffingRequirement)) = ∅ |
+| MenuCategory | Primary key (category_id) | σ[t1.category_id = t2.category_id ∧ t1 ≠ t2](ρ[t1](MenuCategory) × ρ[t2](MenuCategory)) = ∅ |
+| MenuCategory | UNIQUE (restaurant_id, name) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.name = t2.name ∧ t1.category_id ≠ t2.category_id](ρ[t1](MenuCategory) × ρ[t2](MenuCategory)) = ∅ |
+| MenuItem | Primary key (menu_item_id) | σ[t1.menu_item_id = t2.menu_item_id ∧ t1 ≠ t2](ρ[t1](MenuItem) × ρ[t2](MenuItem)) = ∅ |
+| MenuItem | UNIQUE (category_id, name) | σ[t1.category_id = t2.category_id ∧ t1.name = t2.name ∧ t1.menu_item_id ≠ t2.menu_item_id](ρ[t1](MenuItem) × ρ[t2](MenuItem)) = ∅ |
+| InventoryItem | Primary key (inventory_item_id) | σ[t1.inventory_item_id = t2.inventory_item_id ∧ t1 ≠ t2](ρ[t1](InventoryItem) × ρ[t2](InventoryItem)) = ∅ |
+| InventoryItem | UNIQUE (restaurant_id, name) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.name = t2.name ∧ t1.inventory_item_id ≠ t2.inventory_item_id](ρ[t1](InventoryItem) × ρ[t2](InventoryItem)) = ∅ |
+| RecipeLine | Primary key (menu_item_id, inventory_item_id) | σ[t1.menu_item_id = t2.menu_item_id ∧ t1.inventory_item_id = t2.inventory_item_id ∧ t1 ≠ t2](ρ[t1](RecipeLine) × ρ[t2](RecipeLine)) = ∅ |
+| StockMovement | Primary key (movement_id) | σ[t1.movement_id = t2.movement_id ∧ t1 ≠ t2](ρ[t1](StockMovement) × ρ[t2](StockMovement)) = ∅ |
+| DiningTable | Primary key (table_id) | σ[t1.table_id = t2.table_id ∧ t1 ≠ t2](ρ[t1](DiningTable) × ρ[t2](DiningTable)) = ∅ |
+| DiningTable | UNIQUE (restaurant_id, label) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.label = t2.label ∧ t1.table_id ≠ t2.table_id](ρ[t1](DiningTable) × ρ[t2](DiningTable)) = ∅ |
+| Customer | Primary key (customer_id) | σ[t1.customer_id = t2.customer_id ∧ t1 ≠ t2](ρ[t1](Customer) × ρ[t2](Customer)) = ∅ |
+| Customer | UNIQUE (phone) | σ[t1.phone = t2.phone ∧ t1.customer_id ≠ t2.customer_id](ρ[t1](Customer) × ρ[t2](Customer)) = ∅ |
+| Reservation | Primary key (reservation_id) | σ[t1.reservation_id = t2.reservation_id ∧ t1 ≠ t2](ρ[t1](Reservation) × ρ[t2](Reservation)) = ∅ |
+| Reservation | UNIQUE (table_id, reserved_for) | σ[t1.table_id = t2.table_id ∧ t1.reserved_for = t2.reserved_for ∧ t1.reservation_id ≠ t2.reservation_id](ρ[t1](Reservation) × ρ[t2](Reservation)) = ∅ |
+| CustomerOrder | Primary key (order_id) | σ[t1.order_id = t2.order_id ∧ t1 ≠ t2](ρ[t1](CustomerOrder) × ρ[t2](CustomerOrder)) = ∅ |
+| DineInOrder | Primary key (order_id) | σ[t1.order_id = t2.order_id ∧ t1 ≠ t2](ρ[t1](DineInOrder) × ρ[t2](DineInOrder)) = ∅ |
+| DeliveryOrder | Primary key (order_id) | σ[t1.order_id = t2.order_id ∧ t1 ≠ t2](ρ[t1](DeliveryOrder) × ρ[t2](DeliveryOrder)) = ∅ |
+| KitchenTicket | Primary key (ticket_id) | σ[t1.ticket_id = t2.ticket_id ∧ t1 ≠ t2](ρ[t1](KitchenTicket) × ρ[t2](KitchenTicket)) = ∅ |
+| KitchenTicket | UNIQUE (order_id, batch_no) | σ[t1.order_id = t2.order_id ∧ t1.batch_no = t2.batch_no ∧ t1.ticket_id ≠ t2.ticket_id](ρ[t1](KitchenTicket) × ρ[t2](KitchenTicket)) = ∅ |
+| OrderItem | Primary key (order_id, line_no) | σ[t1.order_id = t2.order_id ∧ t1.line_no = t2.line_no ∧ t1 ≠ t2](ρ[t1](OrderItem) × ρ[t2](OrderItem)) = ∅ |
+| Review | Primary key (review_id) | σ[t1.review_id = t2.review_id ∧ t1 ≠ t2](ρ[t1](Review) × ρ[t2](Review)) = ∅ |
+| Review | UNIQUE (order_id) | σ[t1.order_id = t2.order_id ∧ t1.review_id ≠ t2.review_id](ρ[t1](Review) × ρ[t2](Review)) = ∅ |
+| Campaign | Primary key (campaign_id) | σ[t1.campaign_id = t2.campaign_id ∧ t1 ≠ t2](ρ[t1](Campaign) × ρ[t2](Campaign)) = ∅ |
+| CampaignItem | Primary key (campaign_id, menu_item_id) | σ[t1.campaign_id = t2.campaign_id ∧ t1.menu_item_id = t2.menu_item_id ∧ t1 ≠ t2](ρ[t1](CampaignItem) × ρ[t2](CampaignItem)) = ∅ |
+| Announcement | Primary key (announcement_id) | σ[t1.announcement_id = t2.announcement_id ∧ t1 ≠ t2](ρ[t1](Announcement) × ρ[t2](Announcement)) = ∅ |
+| WeatherObservation | Primary key (restaurant_id, observed_date) | σ[t1.restaurant_id = t2.restaurant_id ∧ t1.observed_date = t2.observed_date ∧ t1 ≠ t2](ρ[t1](WeatherObservation) × ρ[t2](WeatherObservation)) = ∅ |
+| Insight | Primary key (insight_id) | σ[t1.insight_id = t2.insight_id ∧ t1 ≠ t2](ρ[t1](Insight) × ρ[t2](Insight)) = ∅ |
+
+#### Foreign keys (40)
+
+| Relation | Constraint | RA |
+|---|---|---|
+| Role | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](Role) ∖ π[restaurant_id](Restaurant) = ∅ |
+| Staff | (restaurant_id, role_name) → Role(restaurant_id, role_name) | π[restaurant_id, role_name](Staff) ∖ π[restaurant_id, role_name](Role) = ∅ |
+| HourlyStaff | (staff_id) → Staff(staff_id) | π[staff_id](HourlyStaff) ∖ π[staff_id](Staff) = ∅ |
+| SalariedStaff | (staff_id) → Staff(staff_id) | π[staff_id](SalariedStaff) ∖ π[staff_id](Staff) = ∅ |
+| StaffCredential | (staff_id) → Staff(staff_id) | π[staff_id](StaffCredential) ∖ π[staff_id](Staff) = ∅ |
+| Shift | (staff_id) → Staff(staff_id) | π[staff_id](Shift) ∖ π[staff_id](Staff) = ∅ |
+| SwapRequest | (shift_id) → Shift(shift_id) | π[shift_id](SwapRequest) ∖ π[shift_id](Shift) = ∅ |
+| SwapRequest | (cover_staff_id) → Staff(staff_id) | π[cover_staff_id](σ[cover_staff_id IS NOT NULL](SwapRequest)) ∖ π[staff_id](Staff) = ∅ |
+| SwapRequest | (decided_by) → Staff(staff_id) | π[decided_by](σ[decided_by IS NOT NULL](SwapRequest)) ∖ π[staff_id](Staff) = ∅ |
+| TimeClockEvent | (staff_id) → Staff(staff_id) | π[staff_id](TimeClockEvent) ∖ π[staff_id](Staff) = ∅ |
+| TimeClockEvent | (shift_id) → Shift(shift_id) | π[shift_id](σ[shift_id IS NOT NULL](TimeClockEvent)) ∖ π[shift_id](Shift) = ∅ |
+| TimeOffRequest | (staff_id) → Staff(staff_id) | π[staff_id](TimeOffRequest) ∖ π[staff_id](Staff) = ∅ |
+| PayRecord | (staff_id) → Staff(staff_id) | π[staff_id](PayRecord) ∖ π[staff_id](Staff) = ∅ |
+| StaffingRequirement | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](StaffingRequirement) ∖ π[restaurant_id](Restaurant) = ∅ |
+| MenuCategory | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](MenuCategory) ∖ π[restaurant_id](Restaurant) = ∅ |
+| MenuItem | (category_id) → MenuCategory(category_id) | π[category_id](MenuItem) ∖ π[category_id](MenuCategory) = ∅ |
+| InventoryItem | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](InventoryItem) ∖ π[restaurant_id](Restaurant) = ∅ |
+| RecipeLine | (menu_item_id) → MenuItem(menu_item_id) | π[menu_item_id](RecipeLine) ∖ π[menu_item_id](MenuItem) = ∅ |
+| RecipeLine | (inventory_item_id) → InventoryItem(inventory_item_id) | π[inventory_item_id](RecipeLine) ∖ π[inventory_item_id](InventoryItem) = ∅ |
+| StockMovement | (inventory_item_id) → InventoryItem(inventory_item_id) | π[inventory_item_id](StockMovement) ∖ π[inventory_item_id](InventoryItem) = ∅ |
+| DiningTable | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](DiningTable) ∖ π[restaurant_id](Restaurant) = ∅ |
+| Reservation | (table_id) → DiningTable(table_id) | π[table_id](Reservation) ∖ π[table_id](DiningTable) = ∅ |
+| Reservation | (customer_id) → Customer(customer_id) | π[customer_id](Reservation) ∖ π[customer_id](Customer) = ∅ |
+| CustomerOrder | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](CustomerOrder) ∖ π[restaurant_id](Restaurant) = ∅ |
+| CustomerOrder | (customer_id) → Customer(customer_id) | π[customer_id](σ[customer_id IS NOT NULL](CustomerOrder)) ∖ π[customer_id](Customer) = ∅ |
+| DineInOrder | (order_id) → CustomerOrder(order_id) | π[order_id](DineInOrder) ∖ π[order_id](CustomerOrder) = ∅ |
+| DineInOrder | (table_id) → DiningTable(table_id) | π[table_id](DineInOrder) ∖ π[table_id](DiningTable) = ∅ |
+| DineInOrder | (server_id) → Staff(staff_id) | π[server_id](σ[server_id IS NOT NULL](DineInOrder)) ∖ π[staff_id](Staff) = ∅ |
+| DeliveryOrder | (order_id) → CustomerOrder(order_id) | π[order_id](DeliveryOrder) ∖ π[order_id](CustomerOrder) = ∅ |
+| KitchenTicket | (order_id) → CustomerOrder(order_id) | π[order_id](KitchenTicket) ∖ π[order_id](CustomerOrder) = ∅ |
+| OrderItem | (order_id) → CustomerOrder(order_id) | π[order_id](OrderItem) ∖ π[order_id](CustomerOrder) = ∅ |
+| OrderItem | (menu_item_id) → MenuItem(menu_item_id) | π[menu_item_id](OrderItem) ∖ π[menu_item_id](MenuItem) = ∅ |
+| OrderItem | (ticket_id) → KitchenTicket(ticket_id) | π[ticket_id](σ[ticket_id IS NOT NULL](OrderItem)) ∖ π[ticket_id](KitchenTicket) = ∅ |
+| Review | (order_id) → CustomerOrder(order_id) | π[order_id](Review) ∖ π[order_id](CustomerOrder) = ∅ |
+| Campaign | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](Campaign) ∖ π[restaurant_id](Restaurant) = ∅ |
+| CampaignItem | (campaign_id) → Campaign(campaign_id) | π[campaign_id](CampaignItem) ∖ π[campaign_id](Campaign) = ∅ |
+| CampaignItem | (menu_item_id) → MenuItem(menu_item_id) | π[menu_item_id](CampaignItem) ∖ π[menu_item_id](MenuItem) = ∅ |
+| Announcement | (author_id) → Staff(staff_id) | π[author_id](Announcement) ∖ π[staff_id](Staff) = ∅ |
+| WeatherObservation | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](WeatherObservation) ∖ π[restaurant_id](Restaurant) = ∅ |
+| Insight | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](Insight) ∖ π[restaurant_id](Restaurant) = ∅ |
+
+#### CHECK constraints (33)
+
+| Relation | Constraint | RA |
+|---|---|---|
+| HourlyStaff | chk_hourly_rate | σ[¬(hourly_rate > 0)](HourlyStaff) = ∅ |
+| SalariedStaff | chk_monthly_salary | σ[¬(monthly_salary > 0)](SalariedStaff) = ∅ |
+| Shift | chk_shift_time | σ[¬(end_at > start_at)](Shift) = ∅ |
+| SwapRequest | chk_swap_decided | σ[¬(status = 'PENDING' ∨ decided_by IS NOT NULL)](SwapRequest) = ∅ |
+| SwapRequest | chk_swap_cover | σ[¬(status ≠ 'APPROVED' ∨ cover_staff_id IS NOT NULL)](SwapRequest) = ∅ |
+| TimeOffRequest | chk_timeoff_dates | σ[¬(end_date ≥ start_date)](TimeOffRequest) = ∅ |
+| TimeOffRequest | chk_timeoff_hours | σ[¬(hours > 0)](TimeOffRequest) = ∅ |
+| PayRecord | chk_pay_period | σ[¬(period_end ≥ period_start)](PayRecord) = ∅ |
+| PayRecord | chk_pay_amounts | σ[¬(hours_worked ≥ 0 ∧ rate_snapshot ≥ 0 ∧ bonus ≥ 0 ∧ deductions ≥ 0)](PayRecord) = ∅ |
+| StaffingRequirement | chk_staffing_time | σ[¬(end_time > start_time)](StaffingRequirement) = ∅ |
+| StaffingRequirement | chk_staffing_count | σ[¬(required_count > 0)](StaffingRequirement) = ∅ |
+| MenuItem | chk_menu_price | σ[¬(price ≥ 0)](MenuItem) = ∅ |
+| InventoryItem | chk_inventory_levels | σ[¬(par_level ≥ 0 ∧ lead_time_days ≥ 0)](InventoryItem) = ∅ |
+| RecipeLine | chk_recipe_qty | σ[¬(qty_per_serving > 0)](RecipeLine) = ∅ |
+| StockMovement | chk_movement_sign | σ[¬((movement_type = 'RECEIVE' ∧ quantity_delta > 0) ∨ (movement_type ∈ {'CONSUME', 'WASTE'} ∧ quantity_delta < 0) ∨ (movement_type = 'ADJUST' ∧ quantity_delta ≠ 0))](StockMovement) = ∅ |
+| StockMovement | chk_movement_cost | σ[¬(unit_cost ≥ 0)](StockMovement) = ∅ |
+| DiningTable | chk_table_seats | σ[¬(seats > 0)](DiningTable) = ∅ |
+| Reservation | chk_reservation_party | σ[¬(party_size > 0)](Reservation) = ∅ |
+| CustomerOrder | chk_order_tip | σ[¬(tip ≥ 0)](CustomerOrder) = ∅ |
+| CustomerOrder | chk_order_times | σ[¬(started_at ≥ created_at ∧ finished_at ≥ started_at)](CustomerOrder) = ∅ |
+| DineInOrder | chk_dinein_party | σ[¬(party_size > 0)](DineInOrder) = ∅ |
+| DeliveryOrder | chk_delivery_ref | σ[¬(courier ≠ 'UBER_EATS' ∨ external_order_ref IS NOT NULL)](DeliveryOrder) = ∅ |
+| KitchenTicket | chk_ticket_batch | σ[¬(batch_no ≥ 1)](KitchenTicket) = ∅ |
+| KitchenTicket | chk_ticket_times | σ[¬(completed_at ≥ created_at)](KitchenTicket) = ∅ |
+| OrderItem | chk_item_line | σ[¬(line_no ≥ 1)](OrderItem) = ∅ |
+| OrderItem | chk_item_quantity | σ[¬(quantity > 0)](OrderItem) = ∅ |
+| OrderItem | chk_item_price | σ[¬(unit_price ≥ 0)](OrderItem) = ∅ |
+| Review | chk_review_rating | σ[¬(1 ≤ rating ∧ rating ≤ 5)](Review) = ∅ |
+| Campaign | chk_campaign_dates | σ[¬(end_date ≥ start_date)](Campaign) = ∅ |
+| Campaign | chk_campaign_budget | σ[¬(budget ≥ 0)](Campaign) = ∅ |
+| WeatherObservation | chk_weather_temp | σ[¬(temp_max ≥ temp_min)](WeatherObservation) = ∅ |
+| WeatherObservation | chk_weather_precip | σ[¬(precipitation_mm ≥ 0)](WeatherObservation) = ∅ |
+| Insight | chk_insight_expiry | σ[¬(expires_at > created_at)](Insight) = ∅ |
+
+---
+
 ## 9. Implementation
 
 Note: Might get revised!
