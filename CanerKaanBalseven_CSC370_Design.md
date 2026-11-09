@@ -1311,6 +1311,7 @@ Each query requirement is written as a sentence and linked to the feature in Sec
 | TimeClockEvent | (staff_id) → Staff(staff_id) | π[staff_id](TimeClockEvent) ∖ π[staff_id](Staff) = ∅ |
 | TimeClockEvent | (shift_id) → Shift(shift_id) | π[shift_id](σ[shift_id IS NOT NULL](TimeClockEvent)) ∖ π[shift_id](Shift) = ∅ |
 | TimeOffRequest | (staff_id) → Staff(staff_id) | π[staff_id](TimeOffRequest) ∖ π[staff_id](Staff) = ∅ |
+| TimeOffRequest | (decided_by) → Staff(staff_id) | π[decided_by](σ[decided_by IS NOT NULL](TimeOffRequest)) ∖ π[staff_id](Staff) = ∅ |
 | PayRecord | (staff_id) → Staff(staff_id) | π[staff_id](PayRecord) ∖ π[staff_id](Staff) = ∅ |
 | StaffingRequirement | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](StaffingRequirement) ∖ π[restaurant_id](Restaurant) = ∅ |
 | MenuCategory | (restaurant_id) → Restaurant(restaurant_id) | π[restaurant_id](MenuCategory) ∖ π[restaurant_id](Restaurant) = ∅ |
